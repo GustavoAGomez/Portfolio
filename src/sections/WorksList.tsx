@@ -206,7 +206,7 @@ export function WorksList() {
       <div className="relative z-10 flex min-h-screen flex-col px-6 md:px-16 py-16">
         <header className="flex items-baseline justify-between">
           <p className="text-xs tracking-[0.35em] uppercase text-white/60">Selected Work</p>
-          <p className="text-xs tracking-[0.35em] uppercase text-white/35">{String(PROJECTS.length).padStart(3, "0")} —</p>
+          {/* <p className="text-xs tracking-[0.35em] uppercase text-white/35">{String(PROJECTS.length).padStart(3, "0")} —</p> */}
         </header>
 
         <ol
@@ -267,7 +267,6 @@ function WorkRow({ project, active, dimmed, reducedMotion, refCb, onActivate }: 
       >
         <div className="flex min-w-0 items-baseline">
           <h3
-            data-scramble
             className={[
               "font-display uppercase leading-none tracking-tight text-5xl md:text-8xl transition-colors duration-300",
               active ? "neon-b" : "text-white group-hover:text-white"
