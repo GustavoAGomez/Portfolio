@@ -1,0 +1,119 @@
+@import "tailwindcss";
+
+/* ------------------------------------------------------------------ *
+ * Brand tokens — single source of truth for the DOM side.
+ * Mirrored (for WebGL uniforms) in src/config/tokens.ts.
+ * Change the brand here + there and the whole thing re-skins.
+ * ------------------------------------------------------------------ */
+@theme {
+  --color-bg: #0e0e0f;
+  --color-accent-a: #d40749;
+  --color-accent-b: #2fe8c3;
+  --color-number-dim: #1a1e2a;
+
+  --font-display: "Anton", "Arial Narrow", "Helvetica Neue", Impact, sans-serif;
+}
+
+@font-face {
+  font-family: "Anton";
+  src: url("/fonts/Anton-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Lenis — the wrapper controls smooth scroll; disable native smoothing. */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--color-bg);
+  color: #f5f5f5;
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+.font-display {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: -0.02em;
+  line-height: 0.86;
+}
+
+/* Neon glow for the statement / accents. */
+.neon-b {
+  color: var(--color-accent-b);
+  text-shadow:
+    0 0 0.03em rgba(47, 232, 195, 0.55),
+    0 0 0.35em rgba(47, 232, 195, 0.35),
+    0 0 1.1em rgba(47, 232, 195, 0.18);
+}
+.neon-a {
+  color: var(--color-accent-a);
+  text-shadow:
+    0 0 0.03em rgba(212, 7, 73, 0.55),
+    0 0 0.4em rgba(212, 7, 73, 0.3);
+}
+
+/* Recurring diagonal stripe (~PI/8 ≈ 22.5deg). */
+.diagonal-stripe {
+  background: repeating-linear-gradient(
+    112.5deg,
+    transparent 0 22px,
+    rgba(255, 255, 255, 0.04) 22px 24px
+  );
+}
+
+/* Grain + vignette overlay — replaces the postprocessing composer, which is
+ * incompatible with the diamond's manual multipass render. Sits above the canvas
+ * (z:5), below the DOM text (z:10). pointer-events:none so it never blocks. */
+.fx-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+}
+.fx-overlay::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, transparent 52%, rgba(0, 0, 0, 0.6) 100%);
+}
+.fx-overlay::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: 0.06;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 180px 180px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .neon-b,
+  .neon-a {
+    text-shadow: none;
+  }
+  .fx-overlay::after {
+    opacity: 0.025;
+  }
+}
