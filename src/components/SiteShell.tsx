@@ -7,6 +7,7 @@ import { activeSectionsFor, isValidProject } from "../routes/activeSections"
 import { useLenis, lenisRef } from "../scroll/useLenis"
 import { useHomeSnap } from "../scroll/useHomeSnap"
 import { useStore } from "../scroll/store"
+import { TransitionProvider, RouteBackButton } from "../transition/TransitionProvider"
 
 /** Route logic only: an invalid `/work/:id` redirects home. Renders no content
  *  (the section content is owned by the shell's <main>, driven by the URL). */
@@ -44,7 +45,7 @@ export function SiteShell() {
   }, [pathname])
 
   return (
-    <>
+    <TransitionProvider>
       {/* Single fixed WebGL canvas (z:0). Degrades to DOM-only if WebGL fails. */}
       <CanvasErrorBoundary>
         <Scene sections={active} />
@@ -64,12 +65,15 @@ export function SiteShell() {
         </Suspense>
       </main>
 
+      {/* Back-to-home control on detail routes (navigates with the iris). */}
+      <RouteBackButton />
+
       {/* Route logic (validation / redirects) — no visible content of its own. */}
       <Routes>
         <Route path="/" element={null} />
         <Route path="/work/:id" element={<DetailGuard />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
-    </>
+    </TransitionProvider>
   )
 }

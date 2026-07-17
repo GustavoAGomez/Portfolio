@@ -1,9 +1,10 @@
-import { useCallback, useEffect, useLayoutEffect, useRef, useState, type FocusEvent } from "react"
+import { useCallback, useEffect, useLayoutEffect, useRef, useState, type FocusEvent, type MouseEvent } from "react"
 import { Link } from "react-router-dom"
 import gsap from "gsap"
 import { ScrambleTextPlugin } from "gsap/ScrambleTextPlugin"
 import { PROJECTS, type Project } from "../config/projects"
 import { useStore } from "../scroll/store"
+import { useTransition } from "../transition/TransitionProvider"
 
 gsap.registerPlugin(ScrambleTextPlugin)
 
@@ -251,13 +252,24 @@ interface WorkRowProps {
 }
 
 function WorkRow({ project, active, dimmed, reducedMotion, refCb, onActivate }: WorkRowProps) {
+  const { go } = useTransition()
+  const to = `/work/${project.id}`
+
+  const onClick = (e: MouseEvent<HTMLAnchorElement>) => {
+    // Let modified clicks (new tab / middle button) behave natively.
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return
+    e.preventDefault()
+    go(to)
+  }
+
   return (
     <li>
       <Link
         ref={refCb}
-        to={`/work/${project.id}`}
+        to={to}
         aria-label={`${project.title} — ${project.role}, ${project.year}`}
         onFocus={onActivate}
+        onClick={onClick}
         className={[
           "group flex flex-col gap-2 py-5 md:flex-row md:items-baseline md:justify-between md:gap-8 md:py-6",
           "transition-opacity duration-300 outline-none",

@@ -25,7 +25,7 @@ interface DiamondDef {
 }
 
 const DIAMONDS: DiamondDef[] = [
-  { section: "hero", x: 0, scale: 20, factor: 0.6, spin: 0.6 },
+  { section: "hero", x: 0, scale: 20, factor: 0.6, spin: 0.2 },
   { section: "statement", x: 3.4, scale: 1.8, factor: 1.3, spin: 0.4, mobileHidden: true },
   { section: "about", x: 3.0, scale: 2.0, factor: 0.9, spin: 0.5, mobileHidden: true }
 ]

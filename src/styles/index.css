@@ -108,6 +108,57 @@ body {
   background-size: 180px 180px;
 }
 
+/* Circular iris route transition — a "glass" dissolve adapted to an overlay mask
+ * (z:100, above <main> and .fx-overlay). `--r` is animated by TransitionProvider.
+ * -webkit-mask is required for Safari. */
+.iris-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  --r: 0px;
+}
+.iris-idle {
+  opacity: 0;
+}
+
+/* Brand-color fill, radial-masked into a growing circle (cover) or hole (reveal),
+ * with a soft ~6px feather (smoothstep br±3 of the original → no hard cut). */
+.iris-plane {
+  position: absolute;
+  inset: 0;
+  background: var(--color-bg);
+}
+.iris-cover .iris-plane {
+  -webkit-mask: radial-gradient(circle at 50% 50%, #000 var(--r), transparent calc(var(--r) + 6px));
+  mask: radial-gradient(circle at 50% 50%, #000 var(--r), transparent calc(var(--r) + 6px));
+}
+.iris-reveal .iris-plane {
+  -webkit-mask: radial-gradient(circle at 50% 50%, transparent var(--r), #000 calc(var(--r) + 6px));
+  mask: radial-gradient(circle at 50% 50%, transparent var(--r), #000 calc(var(--r) + 6px));
+}
+
+/* Glass rim: a thin blurred ring that tracks the radius, with a subtle cyan↔red
+ * chromatic split (evokes the shader's ca≈0.02 / ro≈0.08). Fades out in idle. */
+.iris-edge {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  filter: blur(4px);
+  background: radial-gradient(
+    circle at 50% 50%,
+    transparent calc(var(--r) - 5px),
+    rgba(47, 232, 195, 0.45) calc(var(--r) - 1.5px),
+    rgba(255, 255, 255, 0.55) var(--r),
+    rgba(212, 7, 73, 0.45) calc(var(--r) + 2px),
+    transparent calc(var(--r) + 6px)
+  );
+}
+.iris-cover .iris-edge,
+.iris-reveal .iris-edge {
+  opacity: 1;
+}
+
 /* Hero scroll cue — a small dot drifting down the thin guide line. */
 .scroll-cue-dot {
   animation: scroll-cue 1.8s ease-in-out infinite;
