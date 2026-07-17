@@ -1,14 +1,13 @@
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react"
+import { useCallback, useEffect, useLayoutEffect, useRef, useState, type FocusEvent } from "react"
 import { Link } from "react-router-dom"
 import gsap from "gsap"
 import { ScrambleTextPlugin } from "gsap/ScrambleTextPlugin"
 import { PROJECTS, type Project } from "../config/projects"
 import { useStore } from "../scroll/store"
-import { lenisRef } from "../scroll/useLenis"
 
 gsap.registerPlugin(ScrambleTextPlugin)
 
-const SCRAMBLE_CHARS = "01<>/\\[]#*+="
+const SCRAMBLE_CHARS = "01"
 
 interface RowRect {
   id: string
@@ -64,9 +63,9 @@ function formatMadrid(): string {
  *
  * Selection is DETERMINISTIC BY POSITION (not mouseenter/leave): a single move
  * handler maps clientY → the row whose cached [top,bottom) contains it, so the
- * 1px border between rows never oscillates. The hovered image + veil PERSIST
- * after the pointer leaves; they reset only on selecting another row, clicking
- * (navigation), or scrolling back up to the hero.
+ * 1px border between rows never oscillates. The hovered image + veil show ONLY
+ * while a row is under the pointer/focus; leaving the list clears them (back to
+ * the transparent web background).
  */
 export function WorksList() {
   const reducedMotion = useStore((s) => s.reducedMotion)
@@ -124,27 +123,10 @@ export function WorksList() {
     }
   }
 
-  // Persist otherwise; reset only when the user scrolls back up toward the hero.
-  useEffect(() => {
-    let raf = 0
-    let detach: (() => void) | null = null
-    const attach = () => {
-      const lenis = lenisRef.current
-      if (!lenis) {
-        raf = requestAnimationFrame(attach)
-        return
-      }
-      detach = lenis.on("scroll", () => {
-        const worksTop = useStore.getState().sections.works?.top
-        if (worksTop != null && lenis.scroll < worksTop * 0.5) setActiveId(null)
-      })
-    }
-    raf = requestAnimationFrame(attach)
-    return () => {
-      cancelAnimationFrame(raf)
-      detach?.()
-    }
-  }, [])
+  // Clear when the pointer leaves the list (mouse) or focus exits it (keyboard).
+  const handleListBlur = (e: FocusEvent<HTMLOListElement>) => {
+    if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setActiveId(null)
+  }
 
   // Scramble on activate + idle opacity loop when nothing is active.
   useEffect(() => {
@@ -235,6 +217,8 @@ export function WorksList() {
           onPointerMove={(e) => {
             if (e.pointerType !== "touch") selectAt(e.clientY)
           }}
+          onMouseLeave={() => setActiveId(null)}
+          onBlur={handleListBlur}
         >
           {PROJECTS.map((project) => (
             <WorkRow
@@ -267,7 +251,6 @@ interface WorkRowProps {
 }
 
 function WorkRow({ project, active, dimmed, reducedMotion, refCb, onActivate }: WorkRowProps) {
-  const num = String(project.index).padStart(2, "0")
   return (
     <li>
       <Link
@@ -282,9 +265,9 @@ function WorkRow({ project, active, dimmed, reducedMotion, refCb, onActivate }: 
           !reducedMotion && dimmed ? "opacity-40" : "opacity-100"
         ].join(" ")}
       >
-        <div className="flex min-w-0 items-baseline gap-4 md:gap-8">
-          <span className="font-display text-white/30 text-base md:text-2xl">{num}</span>
+        <div className="flex min-w-0 items-baseline">
           <h3
+            data-scramble
             className={[
               "font-display uppercase leading-none tracking-tight text-5xl md:text-8xl transition-colors duration-300",
               active ? "neon-b" : "text-white group-hover:text-white"
