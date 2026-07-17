@@ -3,7 +3,8 @@ import type { SectionId } from "../scroll/store"
 
 import { Hero } from "../sections/Hero"
 import { Statement } from "../sections/Statement"
-import { Works } from "../sections/Works"
+import { WorksList } from "../sections/WorksList"
+import { Gallery } from "../sections/Gallery"
 import { About } from "../sections/About"
 import { Footer } from "../sections/Footer"
 
@@ -38,9 +39,13 @@ export interface SectionConfig {
 export const SECTIONS: SectionConfig[] = [
   { id: "hero", enabled: true, anchor: true, Dom: Hero, Scene: HeroScene },
   { id: "statement", enabled: true, Dom: Statement, Scene: StatementScene },
-  { id: "works", enabled: true, Dom: Works, Scene: WorksScene },
+  // Home `works` slot: the interactive DOM works list (no 3D behind it).
+  { id: "works", enabled: true, Dom: WorksList },
   { id: "about", enabled: true, Dom: About, Scene: AboutScene },
-  { id: "footer", enabled: true, Dom: Footer }
+  { id: "footer", enabled: true, Dom: Footer },
+  // Defined but OFF the Home for now (enabled:false → excluded everywhere).
+  // The 3D chromatic-plane gallery; reused later for per-project detail pages.
+  { id: "gallery", enabled: false, Dom: Gallery, Scene: WorksScene }
 ]
 
 export const ENABLED_SECTIONS = (): SectionConfig[] => SECTIONS.filter((s) => s.enabled)

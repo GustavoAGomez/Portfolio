@@ -1,11 +1,16 @@
 import { PROJECTS } from "../config/projects"
 
 /**
- * Semantic list of projects. Each item is ~one viewport tall so the section
- * height matches the WebGL slots in WorksScene (one slot per project). The
- * chromatic image planes + giant numbers render behind this text.
+ * Semantic list of projects for the 3D chromatic-plane GALLERY. Each item is
+ * ~one viewport tall so the section height matches the WebGL slots in WorksScene
+ * (one slot per project). The chromatic image planes + giant numbers render
+ * behind this text.
+ *
+ * NOTE: kept off the Home for now (sections.ts → `gallery` is enabled:false).
+ * Reused later for per-project detail pages. The interactive DOM works list on
+ * the Home lives in sections/WorksList.tsx instead.
  */
-export function Works() {
+export function Gallery() {
   return (
     <div className="pointer-events-none">
       <div className="px-6 md:px-16 pt-24">

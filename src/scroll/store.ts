@@ -1,7 +1,7 @@
 import { create } from "zustand"
 import { clamp01 } from "../lib/math"
 
-export type SectionId = "hero" | "statement" | "works" | "about" | "footer"
+export type SectionId = "hero" | "statement" | "works" | "gallery" | "about" | "footer"
 
 export interface SectionBounds {
   /** Document-space top (px), independent of current scroll. */
