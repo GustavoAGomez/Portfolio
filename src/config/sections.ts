@@ -3,21 +3,33 @@ import type { SectionId } from "../scroll/store"
 
 import { Hero } from "../sections/Hero"
 import { Statement } from "../sections/Statement"
+import { Story } from "../sections/Story"
 import { WorksList } from "../sections/WorksList"
 import { About } from "../sections/About"
 import { Footer } from "../sections/Footer"
 
 import { HeroScene } from "../canvas/modules/HeroScene"
 import { StatementScene } from "../canvas/modules/StatementScene"
-import { AboutScene } from "../canvas/modules/AboutScene"
+import { StoryScene } from "../canvas/modules/StoryScene"
 
 // Detail-only heavy modules — code-split so the Home bundle skips them.
 // (`as unknown as ComponentType` bridges React.lazy's LazyExoticComponent to the
 // plain ComponentType the config uses; keeps JSX rendering uniform, no `any`.)
-const Gallery = lazy(() => import("../sections/Gallery").then((m) => ({ default: m.Gallery }))) as unknown as ComponentType
-const WorksScene = lazy(() => import("../canvas/modules/WorksScene").then((m) => ({ default: m.WorksScene }))) as unknown as ComponentType<{
+const loadGallery = () => import("../sections/Gallery")
+const loadWorksScene = () => import("../canvas/modules/WorksScene")
+const Gallery = lazy(() => loadGallery().then((m) => ({ default: m.Gallery }))) as unknown as ComponentType
+const WorksScene = lazy(() => loadWorksScene().then((m) => ({ default: m.WorksScene }))) as unknown as ComponentType<{
   id: SectionId
 }>
+
+/**
+ * Warm the detail-only chunks so a route transition captures a painted
+ * destination (not the <Suspense> fallback). Call once early (SiteShell mount).
+ */
+export function preloadDetailModules(): void {
+  void loadGallery()
+  void loadWorksScene()
+}
 
 export interface SectionConfig {
   id: SectionId
@@ -37,9 +49,10 @@ export interface SectionConfig {
 const REGISTRY: Record<SectionId, SectionConfig> = {
   hero: { id: "hero", anchor: true, Dom: Hero, Scene: HeroScene },
   statement: { id: "statement", anchor: true, Dom: Statement, Scene: StatementScene },
+  story: { id: "story", Dom: Story, Scene: StoryScene }, // case-study blocks: DOM heading/copy + WebGL chromatic image planes
   works: { id: "works", Dom: WorksList },
   gallery: { id: "gallery", Dom: Gallery, Scene: WorksScene },
-  about: { id: "about", Dom: About, Scene: AboutScene },
+  about: { id: "about", Dom: About },
   footer: { id: "footer", Dom: Footer }
 }
 
@@ -56,4 +69,7 @@ const REGISTRY: Record<SectionId, SectionConfig> = {
  * ───────────────────────────────────────────────────────────────────────────
  */
 export const HOME_SECTIONS: SectionConfig[] = [REGISTRY.hero, REGISTRY.works]
+/** Generic detail (placeholder projects with no case-study content). */
 export const DETAIL_SECTIONS: SectionConfig[] = [REGISTRY.statement, REGISTRY.gallery, REGISTRY.about, REGISTRY.footer]
+/** Case-study detail (projects with content): `story` replaces the generic gallery. */
+export const CASE_STUDY_SECTIONS: SectionConfig[] = [REGISTRY.statement, REGISTRY.story, REGISTRY.about, REGISTRY.footer]

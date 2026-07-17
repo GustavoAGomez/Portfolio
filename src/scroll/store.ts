@@ -1,7 +1,7 @@
 import { create } from "zustand"
 import { clamp01 } from "../lib/math"
 
-export type SectionId = "hero" | "statement" | "works" | "gallery" | "about" | "footer"
+export type SectionId = "hero" | "statement" | "story" | "works" | "gallery" | "about" | "footer"
 
 export interface SectionBounds {
   /** Document-space top (px), independent of current scroll. */
@@ -32,15 +32,24 @@ interface AppState {
   sections: Partial<Record<SectionId, SectionBounds>>
   /** Reactive: honored across parallax, velocity and reveals. */
   reducedMotion: boolean
+  /**
+   * Reactive: the active case-study project id (null off a case-study route).
+   * Set by SiteShell from the URL — the bridge that lets the WebGL StoryScene
+   * (which has NO React Router context inside the Canvas) know which project's
+   * block images to render. Changes only on navigation.
+   */
+  caseStudyId: string | null
   registerSection: (id: SectionId, bounds: SectionBounds) => void
   unregisterSection: (id: SectionId) => void
   setReducedMotion: (v: boolean) => void
+  setCaseStudyId: (id: string | null) => void
 }
 
 export const useStore = create<AppState>((set) => ({
   scroll: { scrollY: 0, limit: 0, progress: 0, rawVelocity: 0, velocity: 0 },
   sections: {},
   reducedMotion: false,
+  caseStudyId: null,
   registerSection: (id, bounds) => set((s) => ({ sections: { ...s.sections, [id]: bounds } })),
   unregisterSection: (id) =>
     set((s) => {
@@ -48,7 +57,8 @@ export const useStore = create<AppState>((set) => ({
       delete next[id]
       return { sections: next }
     }),
-  setReducedMotion: (v) => set({ reducedMotion: v })
+  setReducedMotion: (v) => set({ reducedMotion: v }),
+  setCaseStudyId: (id) => set((s) => (s.caseStudyId === id ? s : { caseStudyId: id }))
 }))
 
 /**

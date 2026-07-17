@@ -3,7 +3,9 @@ import { Navigate, Route, Routes, useLocation, useParams } from "react-router-do
 import { Scene } from "../canvas/Scene"
 import { Section } from "./Section"
 import { CanvasErrorBoundary } from "./CanvasErrorBoundary"
-import { activeSectionsFor, isValidProject } from "../routes/activeSections"
+import { activeSectionsFor, isValidProject, workIdFromPath } from "../routes/activeSections"
+import { getProjectContent } from "../config/projectContent"
+import { preloadDetailModules } from "../config/sections"
 import { useLenis, lenisRef } from "../scroll/useLenis"
 import { useHomeSnap } from "../scroll/useHomeSnap"
 import { useStore } from "../scroll/store"
@@ -31,8 +33,17 @@ export function SiteShell() {
   // Anchor snap hero↔list, Home only (detail scrolls normally).
   useHomeSnap(pathname === "/")
 
-  // Reset scroll to top on navigation + recompute Lenis limit for the new height.
+  // Warm detail chunks so the route transition captures a painted destination.
   useEffect(() => {
+    preloadDetailModules()
+  }, [])
+
+  // Reset scroll to top on navigation + recompute Lenis limit for the new height.
+  // Also bridge the active case-study id into the store so the WebGL StoryScene
+  // (no Router context inside the Canvas) knows which project's images to render.
+  useEffect(() => {
+    const workId = workIdFromPath(pathname)
+    useStore.getState().setCaseStudyId(workId && getProjectContent(workId) ? workId : null)
     useStore.getState().scroll.scrollY = 0
     const lenis = lenisRef.current
     if (lenis) {
@@ -46,16 +57,23 @@ export function SiteShell() {
 
   return (
     <TransitionProvider>
-      {/* Single fixed WebGL canvas (z:0). Degrades to DOM-only if WebGL fails. */}
-      <CanvasErrorBoundary>
-        <Scene sections={active} />
-      </CanvasErrorBoundary>
+      {/* Fixed, viewport-locked layer holding the canvas (z:0) + grain (z:5). Kept
+          a separate #warp-fixed so the warp filter can be applied to it during a
+          transition WITHOUT the filter's containing-block breaking the canvas's
+          position:fixed (idle: no filter/transform on it → fully normal). */}
+      <div id="warp-fixed" className="warp-fixed">
+        {/* Single fixed WebGL canvas (z:0). Degrades to DOM-only if WebGL fails. */}
+        <CanvasErrorBoundary>
+          <Scene sections={active} />
+        </CanvasErrorBoundary>
 
-      {/* Grain + vignette overlay (z:5) — replaces the postprocessing composer. */}
-      <div className="fx-overlay" aria-hidden="true" />
+        {/* Grain + vignette overlay (z:5) — replaces the postprocessing composer. */}
+        <div className="fx-overlay" aria-hidden="true" />
+      </div>
 
-      {/* Scrollable, semantic DOM above the canvas (z:10). */}
-      <main className="relative z-10" style={{ pointerEvents: "none" }}>
+      {/* Scrollable, semantic DOM above the canvas (z:10). #warp-main gets the warp
+          filter directly during a transition (it's not fixed → no reposition). */}
+      <main id="warp-main" className="relative z-10" style={{ pointerEvents: "none" }}>
         <Suspense fallback={<div style={{ minHeight: "100vh", background: "var(--color-bg)" }} />}>
           {active.map(({ id, anchor, Dom }) => (
             <Section key={id} id={id} anchor={anchor}>

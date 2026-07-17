@@ -108,55 +108,85 @@ body {
   background-size: 180px 180px;
 }
 
-/* Circular iris route transition — a "glass" dissolve adapted to an overlay mask
- * (z:100, above <main> and .fx-overlay). `--r` is animated by TransitionProvider.
- * -webkit-mask is required for Safari. */
-.iris-overlay {
+/* Warp / liquify route transition. The real content is deformed by an SVG
+ * feDisplacementMap applied to #warp-fixed (canvas layer) + #warp-main (DOM) only
+ * during a transition; a cover overlay (z:100) hides the swap. Toggled by
+ * TransitionProvider. */
+.warp-defs {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+/* Fixed viewport layer for the canvas + grain, so the warp filter can wrap it
+ * without breaking the canvas's position:fixed (idle: no filter → normal). */
+.warp-fixed {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+}
+.warp-overlay {
   position: fixed;
   inset: 0;
   z-index: 100;
-  --r: 0px;
+  overflow: hidden;
+  display: none;
+  pointer-events: none;
 }
-.iris-idle {
-  opacity: 0;
+.warp-overlay.active {
+  display: block;
+  pointer-events: auto;
 }
-
-/* Brand-color fill, radial-masked into a growing circle (cover) or hole (reveal),
- * with a soft ~6px feather (smoothstep br±3 of the original → no hard cut). */
-.iris-plane {
+/* Opaque cover (opacity animated by GSAP). */
+.warp-panel {
   position: absolute;
   inset: 0;
   background: var(--color-bg);
+  opacity: 0;
 }
-.iris-cover .iris-plane {
-  -webkit-mask: radial-gradient(circle at 50% 50%, #000 var(--r), transparent calc(var(--r) + 6px));
-  mask: radial-gradient(circle at 50% 50%, #000 var(--r), transparent calc(var(--r) + 6px));
+/* RGB-split flash tints — offset ±X (set by GSAP), screen blend, brief. */
+.warp-tint {
+  position: absolute;
+  inset: -2%;
+  opacity: 0;
+  mix-blend-mode: screen;
+  will-change: transform, opacity;
 }
-.iris-reveal .iris-plane {
-  -webkit-mask: radial-gradient(circle at 50% 50%, transparent var(--r), #000 calc(var(--r) + 6px));
-  mask: radial-gradient(circle at 50% 50%, transparent var(--r), #000 calc(var(--r) + 6px));
+.warp-tint-a {
+  background: var(--color-accent-a);
 }
-
-/* Glass rim: a thin blurred ring that tracks the radius, with a subtle cyan↔red
- * chromatic split (evokes the shader's ca≈0.02 / ro≈0.08). Fades out in idle. */
-.iris-edge {
+.warp-tint-b {
+  background: var(--color-accent-b);
+}
+/* Flickering grain (same SVG as .fx-overlay). */
+.warp-grain {
   position: absolute;
   inset: 0;
-  pointer-events: none;
   opacity: 0;
-  filter: blur(4px);
-  background: radial-gradient(
-    circle at 50% 50%,
-    transparent calc(var(--r) - 5px),
-    rgba(47, 232, 195, 0.45) calc(var(--r) - 1.5px),
-    rgba(255, 255, 255, 0.55) var(--r),
-    rgba(212, 7, 73, 0.45) calc(var(--r) + 2px),
-    transparent calc(var(--r) + 6px)
-  );
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 180px 180px;
 }
-.iris-cover .iris-edge,
-.iris-reveal .iris-edge {
-  opacity: 1;
+.warp-overlay.active .warp-grain {
+  animation: warp-flicker 0.1s steps(2, end) infinite;
+}
+@keyframes warp-flicker {
+  0% {
+    opacity: 0.03;
+  }
+  50% {
+    opacity: 0.09;
+  }
+  100% {
+    opacity: 0.04;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .warp-overlay.active .warp-grain {
+    animation: none;
+    opacity: 0;
+  }
 }
 
 /* Hero scroll cue — a small dot drifting down the thin guide line. */

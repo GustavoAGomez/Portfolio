@@ -1,5 +1,6 @@
-import { HOME_SECTIONS, DETAIL_SECTIONS, type SectionConfig } from "../config/sections"
+import { HOME_SECTIONS, DETAIL_SECTIONS, CASE_STUDY_SECTIONS, type SectionConfig } from "../config/sections"
 import { PROJECTS } from "../config/projects"
+import { getProjectContent } from "../config/projectContent"
 
 const WORK_RE = /^\/work\/([^/]+)\/?$/
 
@@ -21,5 +22,7 @@ export function isValidProject(id: string | null | undefined): boolean {
  */
 export function activeSectionsFor(pathname: string): SectionConfig[] {
   const id = workIdFromPath(pathname)
-  return id && isValidProject(id) ? DETAIL_SECTIONS : HOME_SECTIONS
+  if (!id || !isValidProject(id)) return HOME_SECTIONS
+  // Projects with case-study content get the story layout; the rest stay generic.
+  return getProjectContent(id) ? CASE_STUDY_SECTIONS : DETAIL_SECTIONS
 }

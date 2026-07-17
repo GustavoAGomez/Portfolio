@@ -23,10 +23,15 @@ export interface Project {
   nextId?: string
 }
 
-/** Placeholder work — swap freely, the scene lays out however many exist. */
+/**
+ * Real projects first, then placeholders (kept until replaced with real work).
+ * A project with an entry in config/projectContent.ts renders the case-study
+ * detail; the rest fall back to the generic detail layout.
+ */
 export const PROJECTS: Project[] = [
-  { id: "district-4", index: 1, title: "District 4", year: "2024", role: "Art Direction · WebGL", image: "/images/work-01.jpg", aspect: 1.5, category: "Interactive" },
-  { id: "diamond-road", index: 2, title: "Diamond Road", year: "2024", role: "Creative Dev", image: "/images/work-02.jpg", aspect: 0.67, category: "Installation" },
-  { id: "sector-8", index: 3, title: "Sector 8", year: "2025", role: "Design · Motion", image: "/images/work-03.jpg", aspect: 1.55, category: "Identity" },
-  { id: "the-factory", index: 4, title: "The Factory", year: "2025", role: "Full-stack 3D", image: "/images/work-04.jpg", aspect: 1.77, category: "Platform" }
+  { id: "tagorodive", index: 1, title: "Tagorodive", year: "2024", role: "Desarrollo · Web Full-stack", image: "/images/tagoro/01-home.jpg", aspect: 1.6, category: "Web · Headless CMS" },
+  { id: "district-4", index: 2, title: "District 4", year: "2024", role: "Creative Dev · WebGL", image: "/images/work-01.jpg", aspect: 1.5, category: "Interactive" },
+  { id: "diamond-road", index: 3, title: "Diamond Road", year: "2024", role: "Creative Dev", image: "/images/work-02.jpg", aspect: 0.67, category: "Installation" },
+  { id: "sector-8", index: 4, title: "Sector 8", year: "2025", role: "Front-end · Motion", image: "/images/work-03.jpg", aspect: 1.55, category: "Interactive" },
+  { id: "the-factory", index: 5, title: "The Factory", year: "2025", role: "Full-stack 3D", image: "/images/work-04.jpg", aspect: 1.77, category: "Platform" }
 ]
