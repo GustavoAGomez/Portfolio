@@ -95,6 +95,17 @@ export function Diamonds() {
     model.current?.layers.set(1)
   }, [])
 
+  // CRITICAL for routing: the frame loop below flips gl.autoClear off and moves
+  // the camera to layer 1 every frame and never restores them. On unmount (e.g.
+  // navigating Home → detail, where no diamond exists) R3F resumes its own
+  // auto-render — restore both here or the detail route renders black.
+  useEffect(() => {
+    return () => {
+      gl.autoClear = true
+      camera.layers.set(0)
+    }
+  }, [gl, camera])
+
   useFrame(() => {
     const mesh = model.current
     if (!mesh) return
@@ -109,7 +120,10 @@ export function Diamonds() {
       const cur = lerp(yLerp.current[i] ?? 0, targetY, 0.1)
       yLerp.current[i] = cur
 
-      const hidden = mobile && d.mobileHidden
+      // Hide instances whose section isn't in the active route set (no bounds),
+      // so on the Home only the hero gem shows (works gem sits behind the opaque
+      // list). mobile also drops the decorative ones.
+      const hidden = !bounds || (mobile && d.mobileHidden)
       const s = (contentMaxWidth / 35) * d.scale * (hidden ? 0.0001 : 1)
       const spin = t * d.spin
 

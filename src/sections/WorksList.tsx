@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react"
+import { Link } from "react-router-dom"
 import gsap from "gsap"
 import { ScrambleTextPlugin } from "gsap/ScrambleTextPlugin"
 import { PROJECTS, type Project } from "../config/projects"
@@ -190,9 +191,9 @@ function WorkRow({ project, active, dimmed, reducedMotion, refCb, onActivate, on
   const num = String(project.index).padStart(2, "0")
   return (
     <li>
-      <a
+      <Link
         ref={refCb}
-        href={`/work/${project.id}`}
+        to={`/work/${project.id}`}
         aria-label={`${project.title} — ${project.role}, ${project.year}`}
         onMouseEnter={onActivate}
         onMouseLeave={onDeactivate}
@@ -229,7 +230,7 @@ function WorkRow({ project, active, dimmed, reducedMotion, refCb, onActivate, on
             {project.year}
           </span>
         </div>
-      </a>
+      </Link>
     </li>
   )
 }

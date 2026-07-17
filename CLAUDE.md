@@ -59,18 +59,50 @@ Lenis drives everything; the DOM only provides scroll height + accessible text.
     gem to refract it; the DOM keeps only an `sr-only` `<h1>`. `@react-three/postprocessing` +
     `postprocessing` are now unused deps.
 
-## Sections — the enable/disable contract
+## Routing & section sets (ONE persistent canvas)
 
-`src/config/sections.ts` is the registry: `{ id, enabled, anchor?, Dom, Scene? }[]`.
-- Only `enabled` entries render (DOM **and** WebGL) and register scroll bounds.
-- **To turn a section off: flip `enabled` to false (or delete the entry). Nothing else.**
-  It stops contributing scroll height, its module unmounts, and the remaining sections'
-  parallax anchors / local progress re-measure automatically (bounds are read live).
-- Keep exactly one `anchor: true` section (hero) enabled. Reordering entries reorders the page.
+The app is a single-canvas SPA on `react-router-dom` v6. The **canvas is never torn
+down across routes** — only which sections are active changes.
 
-`<Section>` (`src/components/`) measures its rect and registers document-space bounds;
-`useSection(id)` exposes live `getProgress()` / `getCenter()` that scene modules read in `useFrame`.
-Each `canvas/modules/<Id>Scene.tsx` is self-contained and consumes only its own section.
+- **`SiteShell`** (`src/components/`) is mounted ONCE above the router (`main.tsx`:
+  `<BrowserRouter><SiteShell/></BrowserRouter>`). It owns the fixed `<Canvas>` (Scene),
+  the `.fx-overlay`, the scrollable `<main>`, and the single Lenis instance (`useLenis`,
+  called here — not per page). App.tsx is gone; SiteShell replaced it.
+- **The URL is the single source of truth for the active section set.**
+  `routes/activeSections.ts#activeSectionsFor(pathname)` returns `HOME_SECTIONS` or
+  `DETAIL_SECTIONS`; SiteShell feeds that set to BOTH `<main>` (DOM) and `<Scene sections>`
+  (WebGL). No global `enabled` flag anymore.
+- **`src/config/sections.ts`** holds the section REGISTRY and composes two disjoint sets:
+  - `HOME_SECTIONS = [hero, works]` — landing: name + diamond lens + interactive works list.
+  - `DETAIL_SECTIONS = [statement, gallery, about, footer]` — `/work/:id`, a clone of the
+    Home minus hero/diamond (same fixed copy for every id). `gallery` = the 3D chromatic-plane
+    module (`Gallery` DOM + `WorksScene`), reused here.
+  - **To move a section between routes, move it between those two arrays.** Sets are disjoint,
+    so navigation unmounts one set and mounts the other cleanly (see below).
+- **Routes** (`SiteShell`): `/` → Home set; `/work/:id` → Detail set (a `DetailGuard`
+  `<Navigate to="/"/>`s on an unknown id); `*` → redirect home. Rows in `WorksList` use
+  `<Link>` (client nav, no reload).
+- **On navigation**, SiteShell resets scroll (`lenisRef.current.scrollTo(0,{immediate:true})`
+  + `store.scroll.scrollY=0` + `lenis.resize()`). `<Section>` unregisters bounds on unmount,
+  so no orphan bounds survive a route change.
+
+### Two render modes — the diamond owns the loop only on Home
+- **HOME**: `<Diamonds>` runs a **priority-1 `useFrame`** → it OWNS the render loop (manual
+  double-FBO passes, R3F auto-render off).
+- **DETAIL**: no diamond → no priority frame → **R3F resumes its own auto-render**.
+- The bridge: `Diamonds` flips `gl.autoClear=false` + `camera.layers.set(1)` every frame and
+  **restores both on unmount** (`gl.autoClear=true`, `camera.layers.set(0)`). Without that
+  restore the detail route renders black. `Scene` mounts `<Diamonds>` only when the active set
+  contains `hero`; diamond instances whose section isn't active are scaled to 0.
+
+`<Section>` measures its rect and registers document-space bounds; `useSection(id)` exposes live
+`getProgress()` / `getCenter()` that scene modules read in `useFrame`. Each
+`canvas/modules/<Id>Scene.tsx` is self-contained and consumes only its own section.
+
+### Static hosting note (GitHub Pages)
+Client routing needs a rewrite fallback to `index.html` for deep links like `/work/:id`
+(otherwise a hard refresh 404s). On GitHub Pages, either add a `404.html` copy of `index.html`
+or switch `BrowserRouter` → `HashRouter`. Local Vite dev/preview already serves the fallback.
 
 ## Conventions specific to this repo
 

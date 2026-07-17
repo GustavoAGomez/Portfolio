@@ -4,28 +4,36 @@ import { Perf } from "r3f-perf"
 import { Leva } from "leva"
 import { ScrollBridge } from "./ScrollBridge"
 import { Diamonds } from "./Diamonds"
-import { SECTIONS } from "../config/sections"
+import type { SectionConfig } from "../config/sections"
 import { SCENE, BRAND } from "../config/tokens"
 
 /** Dev tooling behind a flag: append ?debug to the URL in a dev build. */
 const DEBUG = import.meta.env.DEV && new URLSearchParams(window.location.search).has("debug")
 
+interface SceneProps {
+  /** The active route's section set — its WebGL modules render here. */
+  sections: SectionConfig[]
+}
+
 /**
- * The single, fixed, full-screen orthographic canvas. Persistent scene: every
- * enabled section's WebGL module renders here in config order.
+ * The single, fixed, full-screen orthographic canvas. It is mounted ONCE in the
+ * persistent SiteShell and never torn down across routes — only its children
+ * (the active set's WebGL modules + the hero diamond) swap.
  *
- * frameloop="always" is deliberate — the scroll-velocity damping (ScrollBridge)
- * and the chromatic decay must keep advancing while React is idle.
+ * Two render modes, driven purely by whether the hero diamond is present:
+ *  - HOME  → <Diamonds> runs a priority-1 useFrame that OWNS the render loop
+ *            (manual double-FBO passes; R3F auto-render is off).
+ *  - DETAIL→ no diamond → no priority frame → R3F resumes its own auto-render.
+ *            (Diamonds restores gl.autoClear + camera.layers on unmount so the
+ *            detail route doesn't render black.)
  *
- * NO EffectComposer here: <Diamonds> runs the double-FBO refraction in a
- * priority-1 useFrame and owns the render loop (renders straight to screen). A
- * postprocessing composer would fight it and kill the lens effect. Grain +
- * vignette are a CSS overlay instead (see FxOverlay / index.css). The background
- * is a clear color (set here) rather than scene.background, which would repaint
- * on every pass and wipe the scene render.
+ * frameloop="always" is deliberate — scroll-velocity damping (ScrollBridge) and
+ * the chromatic decay must keep advancing while React is idle. NO EffectComposer:
+ * it would fight the manual multipass; grain/vignette are a CSS overlay.
  */
-export function Scene() {
-  const modules = SECTIONS.filter((s) => s.enabled && s.Scene)
+export function Scene({ sections }: SceneProps) {
+  const modules = sections.filter((s) => s.Scene)
+  const showDiamonds = sections.some((s) => s.id === "hero")
 
   return (
     <>
@@ -42,7 +50,7 @@ export function Scene() {
       >
         <ScrollBridge />
         <Suspense fallback={null}>
-          <Diamonds />
+          {showDiamonds && <Diamonds />}
           {modules.map(({ id, Scene: SceneModule }) => SceneModule && <SceneModule key={id} id={id} />)}
         </Suspense>
         {DEBUG && <Perf position="bottom-right" />}

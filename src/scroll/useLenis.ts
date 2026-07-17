@@ -5,12 +5,18 @@ import { SCENE } from "../config/tokens"
 import { clamp, debounce } from "../lib/math"
 
 /**
+ * Live Lenis instance, exposed so the router shell can reset scroll on navigation
+ * (`lenisRef.current?.scrollTo(0, { immediate: true })`). Null while unmounted.
+ */
+export const lenisRef: { current: Lenis | null } = { current: null }
+
+/**
  * Lenis is the single source of truth for scroll. On every scroll event it
  * pushes raw values straight into the store's live `scroll` object (mutated in
  * place — no React churn). Velocity is normalized here; damping to rest happens
  * in ScrollBridge inside the render loop.
  *
- * Mount once (in App).
+ * Mount once (in the persistent SiteShell).
  */
 export function useLenis(): void {
   const setReducedMotion = useStore((s) => s.setReducedMotion)
@@ -27,6 +33,7 @@ export function useLenis(): void {
       wheelMultiplier: 1,
       autoRaf: false
     })
+    lenisRef.current = lenis
 
     const scroll = useStore.getState().scroll
     lenis.on("scroll", (e: Lenis) => {
@@ -51,6 +58,7 @@ export function useLenis(): void {
       cancelAnimationFrame(raf)
       window.removeEventListener("resize", onResize)
       mq.removeEventListener("change", applyReduced)
+      lenisRef.current = null
       lenis.destroy()
     }
   }, [setReducedMotion])
