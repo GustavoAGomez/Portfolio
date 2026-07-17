@@ -1,13 +1,21 @@
-import { useEffect, useRef, useState, type FocusEvent } from "react"
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react"
 import { Link } from "react-router-dom"
 import gsap from "gsap"
 import { ScrambleTextPlugin } from "gsap/ScrambleTextPlugin"
 import { PROJECTS, type Project } from "../config/projects"
 import { useStore } from "../scroll/store"
+import { lenisRef } from "../scroll/useLenis"
 
 gsap.registerPlugin(ScrambleTextPlugin)
 
 const SCRAMBLE_CHARS = "01<>/\\[]#*+="
+
+interface RowRect {
+  id: string
+  /** Offsets relative to the <ol> top (stable across scroll; re-measured on resize). */
+  top: number
+  bottom: number
+}
 
 /** Live clock + location + links. Absolute inside the section (easy to promote to fixed later). */
 function CornerHud() {
@@ -51,25 +59,92 @@ function formatMadrid(): string {
 }
 
 /**
- * Interactive "music-portfolio"-style works list (functionality only; styled to
- * the repo tokens). Lives in the Home `works` slot — pure DOM, no 3D behind it.
- * Hover/focus a row → scramble its metadata + crossfade its treated background +
- * dim the rest. Idle → subtle opacity loop. reduced-motion → static & readable.
+ * Interactive works list (styled to the repo tokens). Lives in the Home `works`
+ * slot — transparent at idle so the 3D canvas shows through.
+ *
+ * Selection is DETERMINISTIC BY POSITION (not mouseenter/leave): a single move
+ * handler maps clientY → the row whose cached [top,bottom) contains it, so the
+ * 1px border between rows never oscillates. The hovered image + veil PERSIST
+ * after the pointer leaves; they reset only on selecting another row, clicking
+ * (navigation), or scrolling back up to the hero.
  */
 export function WorksList() {
   const reducedMotion = useStore((s) => s.reducedMotion)
   const [activeId, setActiveId] = useState<string | null>(null)
 
   const rowRefs = useRef<Record<string, HTMLAnchorElement | null>>({})
+  const olRef = useRef<HTMLOListElement>(null)
+  const rowRects = useRef<RowRect[]>([])
   const idle = useRef<gsap.core.Timeline | null>(null)
 
-  // Enter is per-row (on the <li>, which tile the list with no gaps → moving
-  // between rows only fires enter, never a leave); leave happens ONCE, when the
-  // pointer/focus exits the whole <ol>. No per-row debounce → no border flicker.
-  const deactivate = () => setActiveId(null)
-  const handleListBlur = (e: FocusEvent<HTMLOListElement>) => {
-    if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setActiveId(null)
+  // Cache row rects relative to the <ol> (measured on mount + resize, NOT per move).
+  const measure = useCallback(() => {
+    const ol = olRef.current
+    if (!ol) return
+    const olTop = ol.getBoundingClientRect().top
+    const rects: RowRect[] = []
+    for (const p of PROJECTS) {
+      const el = rowRefs.current[p.id]
+      if (!el) continue
+      const r = el.getBoundingClientRect()
+      rects.push({ id: p.id, top: r.top - olTop, bottom: r.bottom - olTop })
+    }
+    rects.sort((a, b) => a.top - b.top)
+    // Make intervals contiguous so the 1px divider is never a dead zone.
+    for (let i = 0; i < rects.length - 1; i++) {
+      const curr = rects[i]
+      const next = rects[i + 1]
+      if (curr && next) curr.bottom = next.top
+    }
+    rowRects.current = rects
+  }, [])
+
+  useLayoutEffect(() => {
+    measure()
+    const ol = olRef.current
+    const ro = new ResizeObserver(measure)
+    if (ol) ro.observe(ol)
+    window.addEventListener("resize", measure)
+    return () => {
+      ro.disconnect()
+      window.removeEventListener("resize", measure)
+    }
+  }, [measure])
+
+  // clientY → row under the pointer (only the <ol> rect is read live, per move).
+  const selectAt = (clientY: number) => {
+    const ol = olRef.current
+    if (!ol) return
+    const y = clientY - ol.getBoundingClientRect().top
+    for (const r of rowRects.current) {
+      if (y >= r.top && y < r.bottom) {
+        setActiveId(r.id)
+        return
+      }
+    }
   }
+
+  // Persist otherwise; reset only when the user scrolls back up toward the hero.
+  useEffect(() => {
+    let raf = 0
+    let detach: (() => void) | null = null
+    const attach = () => {
+      const lenis = lenisRef.current
+      if (!lenis) {
+        raf = requestAnimationFrame(attach)
+        return
+      }
+      detach = lenis.on("scroll", () => {
+        const worksTop = useStore.getState().sections.works?.top
+        if (worksTop != null && lenis.scroll < worksTop * 0.5) setActiveId(null)
+      })
+    }
+    raf = requestAnimationFrame(attach)
+    return () => {
+      cancelAnimationFrame(raf)
+      detach?.()
+    }
+  }, [])
 
   // Scramble on activate + idle opacity loop when nothing is active.
   useEffect(() => {
@@ -109,8 +184,8 @@ export function WorksList() {
 
   return (
     <div className="relative isolate min-h-screen w-full overflow-hidden pointer-events-auto">
-      {/* Background — transparent at idle (the 3D canvas shows through, like the hero);
-          the hovered project's image + a legibility veil fade in only while active. */}
+      {/* Background — transparent at idle; the active/persisted project's image
+          zooms IN + a legibility veil fades in, and both stay until reset. */}
       <div className="pointer-events-none absolute inset-0 z-0">
         {PROJECTS.map((p) => (
           <img
@@ -120,15 +195,14 @@ export function WorksList() {
             aria-hidden="true"
             className={[
               "absolute inset-0 h-full w-full object-cover",
-              reducedMotion ? "" : "transition-[opacity,transform] duration-700 ease-out",
+              reducedMotion ? "" : "transition-[opacity,transform] duration-[800ms] ease-out",
               activeId === p.id ? "opacity-100" : "opacity-0",
-              reducedMotion ? "" : activeId === p.id ? "scale-100" : "scale-105"
+              reducedMotion ? "" : activeId === p.id ? "scale-[1.14]" : "scale-100"
             ].join(" ")}
             style={{ filter: "grayscale(1) contrast(1.15) brightness(0.6)" }}
           />
         ))}
-        {/* palette tint + dark scrim — visible ONLY while a row is active, so the
-            title reads over the image; fully transparent (no veil) at idle. */}
+        {/* palette tint + dark scrim — visible while a row is active/persisted. */}
         <div
           className={[
             "absolute inset-0",
@@ -149,10 +223,13 @@ export function WorksList() {
         </header>
 
         <ol
+          ref={olRef}
           className="mt-auto mb-auto flex flex-col divide-y divide-white/10"
           data-active={activeId ? "true" : "false"}
-          onMouseLeave={deactivate}
-          onBlur={handleListBlur}
+          onMouseMove={(e) => selectAt(e.clientY)}
+          onPointerMove={(e) => {
+            if (e.pointerType !== "touch") selectAt(e.clientY)
+          }}
         >
           {PROJECTS.map((project) => (
             <WorkRow
@@ -187,7 +264,7 @@ interface WorkRowProps {
 function WorkRow({ project, active, dimmed, reducedMotion, refCb, onActivate }: WorkRowProps) {
   const num = String(project.index).padStart(2, "0")
   return (
-    <li onMouseEnter={onActivate}>
+    <li>
       <Link
         ref={refCb}
         to={`/work/${project.id}`}
