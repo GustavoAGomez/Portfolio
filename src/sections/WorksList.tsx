@@ -10,10 +10,6 @@ gsap.registerPlugin(ScrambleTextPlugin)
 const SCRAMBLE_CHARS = "01<>/\\[]#*+="
 const LEAVE_DEBOUNCE = 140
 
-// Subtle grain, replicated inside the section (it sits above .fx-overlay in z).
-const GRAIN =
-  "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")"
-
 /** Live clock + location + links. Absolute inside the section (easy to promote to fixed later). */
 function CornerHud() {
   const [time, setTime] = useState(() => formatMadrid())
@@ -91,20 +87,19 @@ export function WorksList() {
   useEffect(() => {
     if (reducedMotion) return
     const rows = Object.values(rowRefs.current).filter((el): el is HTMLAnchorElement => el !== null)
+    const activeEl = activeId ? rowRefs.current[activeId] ?? null : null
 
-    if (activeId) {
+    if (activeEl) {
       gsap.set(rows, { clearProps: "opacity" }) // hand opacity back to the CSS dim classes
-      const el = rowRefs.current[activeId]
-      if (el) {
-        const targets = el.querySelectorAll<HTMLElement>("[data-scramble]")
-        gsap.to(targets, {
-          duration: 0.7,
-          ease: "none",
-          stagger: 0.05,
-          scrambleText: { text: "{original}", chars: SCRAMBLE_CHARS, speed: 1, revealDelay: 0.1 }
-        })
-      }
-    } else {
+      const targets = activeEl.querySelectorAll<HTMLElement>("[data-scramble]")
+      gsap.to(targets, {
+        duration: 0.7,
+        ease: "none",
+        stagger: 0.05,
+        overwrite: true, // kill any prior tween on these same targets (rapid re-hover)
+        scrambleText: { text: "{original}", chars: SCRAMBLE_CHARS, speed: 1, revealDelay: 0.1 }
+      })
+    } else if (activeId === null) {
       const tl = gsap.timeline({ repeat: -1, yoyo: true })
       tl.to(rows, { opacity: 0.5, duration: 1.6, ease: "sine.inOut", stagger: 0.15 })
       idle.current = tl
@@ -113,13 +108,21 @@ export function WorksList() {
     return () => {
       idle.current?.kill()
       idle.current = null
+      // Cancel the in-flight scramble on the row we're leaving, snapping it to its
+      // final text (progress(1)) so switching rows fast never leaves one half-decoded.
+      if (activeEl) {
+        activeEl.querySelectorAll<HTMLElement>("[data-scramble]").forEach((s) => {
+          gsap.getTweensOf(s).forEach((t) => t.progress(1).kill())
+        })
+      }
       gsap.set(rows, { clearProps: "opacity" })
     }
   }, [activeId, reducedMotion])
 
   return (
-    <div className="relative isolate min-h-screen w-full overflow-hidden bg-[var(--color-bg)] pointer-events-auto">
-      {/* Background crossfade — images treated to the palette + dark scrim. */}
+    <div className="relative isolate min-h-screen w-full overflow-hidden pointer-events-auto">
+      {/* Background — transparent at idle (the 3D canvas shows through, like the hero);
+          the hovered project's image + a legibility veil fade in only while active. */}
       <div className="pointer-events-none absolute inset-0 z-0">
         {PROJECTS.map((p) => (
           <img
@@ -136,9 +139,18 @@ export function WorksList() {
             style={{ filter: "grayscale(1) contrast(1.15) brightness(0.6)" }}
           />
         ))}
-        {/* palette tint + dark scrim so the list stays legible */}
-        <div className="absolute inset-0 bg-[var(--color-accent-b)] opacity-[0.06] mix-blend-overlay" />
-        <div className="absolute inset-0 bg-[var(--color-bg)]/80" />
+        {/* palette tint + dark scrim — visible ONLY while a row is active, so the
+            title reads over the image; fully transparent (no veil) at idle. */}
+        <div
+          className={[
+            "absolute inset-0",
+            reducedMotion ? "" : "transition-opacity duration-700 ease-out",
+            activeId ? "opacity-100" : "opacity-0"
+          ].join(" ")}
+        >
+          <div className="absolute inset-0 bg-[var(--color-accent-b)] opacity-[0.06] mix-blend-overlay" />
+          <div className="absolute inset-0 bg-[var(--color-bg)]/80" />
+        </div>
       </div>
 
       {/* List */}
@@ -167,12 +179,6 @@ export function WorksList() {
       </div>
 
       <CornerHud />
-
-      {/* In-section grain (this section sits above .fx-overlay). */}
-      <div
-        className="pointer-events-none absolute inset-0 z-30 opacity-[0.05] mix-blend-overlay"
-        style={{ backgroundImage: GRAIN, backgroundSize: "180px 180px" }}
-      />
     </div>
   )
 }
