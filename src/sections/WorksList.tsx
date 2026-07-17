@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useRef, useState, type FocusEvent } from "react"
 import { Link } from "react-router-dom"
 import gsap from "gsap"
 import { ScrambleTextPlugin } from "gsap/ScrambleTextPlugin"
@@ -8,7 +8,6 @@ import { useStore } from "../scroll/store"
 gsap.registerPlugin(ScrambleTextPlugin)
 
 const SCRAMBLE_CHARS = "01<>/\\[]#*+="
-const LEAVE_DEBOUNCE = 140
 
 /** Live clock + location + links. Absolute inside the section (easy to promote to fixed later). */
 function CornerHud() {
@@ -63,25 +62,14 @@ export function WorksList() {
 
   const rowRefs = useRef<Record<string, HTMLAnchorElement | null>>({})
   const idle = useRef<gsap.core.Timeline | null>(null)
-  const leaveTimer = useRef<number | null>(null)
 
-  const activate = (id: string) => {
-    if (leaveTimer.current !== null) {
-      window.clearTimeout(leaveTimer.current)
-      leaveTimer.current = null
-    }
-    setActiveId(id)
+  // Enter is per-row (on the <li>, which tile the list with no gaps → moving
+  // between rows only fires enter, never a leave); leave happens ONCE, when the
+  // pointer/focus exits the whole <ol>. No per-row debounce → no border flicker.
+  const deactivate = () => setActiveId(null)
+  const handleListBlur = (e: FocusEvent<HTMLOListElement>) => {
+    if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setActiveId(null)
   }
-  const scheduleDeactivate = () => {
-    if (leaveTimer.current !== null) window.clearTimeout(leaveTimer.current)
-    leaveTimer.current = window.setTimeout(() => setActiveId(null), LEAVE_DEBOUNCE)
-  }
-
-  useEffect(() => {
-    return () => {
-      if (leaveTimer.current !== null) window.clearTimeout(leaveTimer.current)
-    }
-  }, [])
 
   // Scramble on activate + idle opacity loop when nothing is active.
   useEffect(() => {
@@ -160,7 +148,12 @@ export function WorksList() {
           <p className="text-xs tracking-[0.35em] uppercase text-white/35">{String(PROJECTS.length).padStart(3, "0")} —</p>
         </header>
 
-        <ol className="mt-auto mb-auto flex flex-col divide-y divide-white/10" data-active={activeId ? "true" : "false"}>
+        <ol
+          className="mt-auto mb-auto flex flex-col divide-y divide-white/10"
+          data-active={activeId ? "true" : "false"}
+          onMouseLeave={deactivate}
+          onBlur={handleListBlur}
+        >
           {PROJECTS.map((project) => (
             <WorkRow
               key={project.id}
@@ -171,8 +164,7 @@ export function WorksList() {
               refCb={(el) => {
                 rowRefs.current[project.id] = el
               }}
-              onActivate={() => activate(project.id)}
-              onDeactivate={scheduleDeactivate}
+              onActivate={() => setActiveId(project.id)}
             />
           ))}
         </ol>
@@ -190,21 +182,17 @@ interface WorkRowProps {
   reducedMotion: boolean
   refCb: (el: HTMLAnchorElement | null) => void
   onActivate: () => void
-  onDeactivate: () => void
 }
 
-function WorkRow({ project, active, dimmed, reducedMotion, refCb, onActivate, onDeactivate }: WorkRowProps) {
+function WorkRow({ project, active, dimmed, reducedMotion, refCb, onActivate }: WorkRowProps) {
   const num = String(project.index).padStart(2, "0")
   return (
-    <li>
+    <li onMouseEnter={onActivate}>
       <Link
         ref={refCb}
         to={`/work/${project.id}`}
         aria-label={`${project.title} — ${project.role}, ${project.year}`}
-        onMouseEnter={onActivate}
-        onMouseLeave={onDeactivate}
         onFocus={onActivate}
-        onBlur={onDeactivate}
         className={[
           "group flex flex-col gap-2 py-5 md:flex-row md:items-baseline md:justify-between md:gap-8 md:py-6",
           "transition-opacity duration-300 outline-none",

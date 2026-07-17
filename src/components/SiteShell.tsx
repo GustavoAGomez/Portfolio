@@ -5,6 +5,7 @@ import { Section } from "./Section"
 import { CanvasErrorBoundary } from "./CanvasErrorBoundary"
 import { activeSectionsFor, isValidProject } from "../routes/activeSections"
 import { useLenis, lenisRef } from "../scroll/useLenis"
+import { useHomeSnap } from "../scroll/useHomeSnap"
 import { useStore } from "../scroll/store"
 
 /** Route logic only: an invalid `/work/:id` redirects home. Renders no content
@@ -26,12 +27,16 @@ export function SiteShell() {
   const { pathname } = useLocation()
   const active = activeSectionsFor(pathname)
 
+  // Anchor snap hero↔list, Home only (detail scrolls normally).
+  useHomeSnap(pathname === "/")
+
   // Reset scroll to top on navigation + recompute Lenis limit for the new height.
   useEffect(() => {
     useStore.getState().scroll.scrollY = 0
     const lenis = lenisRef.current
     if (lenis) {
-      lenis.scrollTo(0, { immediate: true })
+      // force:true so it works even while Lenis is stopped by the Home snap.
+      lenis.scrollTo(0, { immediate: true, force: true })
       lenis.resize()
     } else {
       window.scrollTo(0, 0)
