@@ -187,21 +187,26 @@ export function WorksList() {
       {/* Background — transparent at idle; the active/persisted project's image
           zooms IN + a legibility veil fades in, and both stay until reset. */}
       <div className="pointer-events-none absolute inset-0 z-0">
-        {PROJECTS.map((p) => (
-          <img
-            key={p.id}
-            src={p.image}
-            alt=""
-            aria-hidden="true"
-            className={[
-              "absolute inset-0 h-full w-full object-cover",
-              reducedMotion ? "" : "transition-[opacity,transform] duration-[800ms] ease-out",
-              activeId === p.id ? "opacity-100" : "opacity-0",
-              reducedMotion ? "" : activeId === p.id ? "scale-[1.14]" : "scale-100"
-            ].join(" ")}
-            style={{ filter: "grayscale(1) contrast(1.15) brightness(0.6)" }}
-          />
-        ))}
+        {PROJECTS.map((p) => {
+          const visible = activeId === p.id
+          return (
+            <img
+              key={p.id}
+              src={p.image}
+              alt=""
+              aria-hidden="true"
+              className="absolute inset-0 h-full w-full object-cover"
+              style={{
+                filter: "grayscale(1) contrast(1.15) brightness(0.6)",
+                opacity: visible ? 1 : 0,
+                // Zoom-IN on appear: 1.0 → 1.18, with the transform running MUCH longer
+                // than the fade so the growth keeps moving after the image is opaque.
+                transform: reducedMotion ? undefined : `scale(${visible ? 1.18 : 1})`,
+                transition: reducedMotion ? undefined : "opacity 600ms ease-out, transform 1400ms cubic-bezier(0.22, 0.61, 0.36, 1)"
+              }}
+            />
+          )
+        })}
         {/* palette tint + dark scrim — visible while a row is active/persisted. */}
         <div
           className={[
