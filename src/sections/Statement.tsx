@@ -1,6 +1,7 @@
 import { useRef } from "react"
 import { useDomParallax } from "../scroll/useDomParallax"
 import { useCurrentProject } from "../routes/useCurrentProject"
+import { Decode } from "../components/Decode"
 
 export function Statement() {
   const line = useRef<HTMLHeadingElement>(null)
@@ -12,9 +13,13 @@ export function Statement() {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center px-6 text-center pointer-events-none">
         <h2 ref={line} className="font-display uppercase leading-[0.9] tracking-tight text-white text-[14vw] md:text-[10vw]">
-          {content.title}
+          <Decode duration={0.6}>{content.title}</Decode>
         </h2>
-        <p className="mt-6 text-xs md:text-sm tracking-[0.35em] uppercase text-[var(--color-accent-b)]">{content.tagline}</p>
+        <p className="mt-6 text-xs md:text-sm tracking-[0.35em] uppercase text-[var(--color-accent-b)]">
+          <Decode delay={0.15} duration={1.0}>
+            {content.tagline}
+          </Decode>
+        </p>
       </div>
     )
   }

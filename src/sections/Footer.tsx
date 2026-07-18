@@ -3,6 +3,7 @@ import { type MouseEvent } from "react"
 import { useCurrentProject } from "../routes/useCurrentProject"
 import { useTransition } from "../transition/TransitionProvider"
 import { PROJECTS } from "../config/projects"
+import { Decode } from "../components/Decode"
 
 export function Footer() {
   const { content } = useCurrentProject()
@@ -22,11 +23,15 @@ export function Footer() {
       <div className="relative min-h-[70vh] flex flex-col justify-end">
         <div className="diagonal-stripe absolute inset-0" />
         <div className="relative px-6 md:px-16 pb-16">
-          <p className="text-xs tracking-[0.35em] uppercase text-white/60">Siguiente proyecto</p>
+          <p className="text-xs tracking-[0.35em] uppercase text-white/60">
+            <Decode>Siguiente proyecto</Decode>
+          </p>
           <Link to={to} onClick={onClick} className="pointer-events-auto mt-4 inline-block font-display uppercase text-white text-5xl md:text-8xl transition-all hover:text-[var(--color-accent-b)]">
-            {next.title} →
+            <Decode delay={0.06}>{next.title}</Decode> →
           </Link>
-          <p className="mt-8 text-xs text-white/40">© {new Date().getFullYear()} — Built with three.js, R3F &amp; Lenis.</p>
+          <p className="mt-8 text-xs text-white/40">
+            <Decode delay={0.12}>{`© ${new Date().getFullYear()} — Built with three.js, R3F & Lenis.`}</Decode>
+          </p>
         </div>
       </div>
     )

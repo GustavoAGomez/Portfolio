@@ -6,7 +6,7 @@ import { BackfaceMaterial } from "./materials/BackfaceMaterial"
 import { RefractionMaterial } from "./materials/RefractionMaterial"
 import { useBlock } from "./parallax/useBlock"
 import { useStore, type SectionId } from "../scroll/store"
-import { lerp } from "../lib/math"
+import { lerp, clamp01 } from "../lib/math"
 
 const DIAMOND_URL = "/models/diamond.glb"
 
@@ -22,12 +22,18 @@ interface DiamondDef {
   spin: number
   /** Hidden on mobile to keep the multipass affordable. */
   mobileHidden?: boolean
+  /** Fade the gem to nothing as this section scrolls into the viewport centre
+   *  (used to stop the case-study gem from bleeding into the media section). */
+  fadeOutAt?: SectionId
 }
 
 const DIAMONDS: DiamondDef[] = [
+  // Home hero lens — so large it reads as a glassy refraction background.
   { section: "hero", x: 0, scale: 20, factor: 0.6, spin: 0.2 },
-  { section: "statement", x: 3.4, scale: 1.8, factor: 1.3, spin: 0.4, mobileHidden: true },
-  { section: "about", x: 3.0, scale: 2.0, factor: 0.9, spin: 0.5, mobileHidden: true }
+  // Case-study hero (statement): the SAME oversized gem behind the project title,
+  // warping the dim "BEYOND" word for the same background effect. Fades out as the
+  // media section ("story") arrives so it never warps the case-study images.
+  { section: "statement", x: 0, scale: 20, factor: 0.6, spin: 0.2, fadeOutAt: "story" }
 ]
 
 const dummy = new Object3D()
@@ -123,7 +129,14 @@ export function Diamonds() {
       // so on the Home only the hero gem shows (works gem sits behind the opaque
       // list). mobile also drops the decorative ones.
       const hidden = !bounds || (mobile && d.mobileHidden)
-      const s = (contentMaxWidth / 35) * d.scale * (hidden ? 0.0001 : 1)
+      // Shrink the gem to nothing over the viewport-height BEFORE `fadeOutAt`'s
+      // section even starts to appear at the bottom of the screen (measured on the
+      // viewport BOTTOM, not centre) — so it is fully gone before the first media
+      // image can scroll into view and never warps it. Full through the statement.
+      const fadeBounds = d.fadeOutAt ? sections[d.fadeOutAt] : undefined
+      const fadeSpan = size.height
+      const fade = fadeBounds ? 1 - clamp01((scroll.scrollY + size.height - (fadeBounds.top - fadeSpan)) / fadeSpan) : 1
+      const s = (contentMaxWidth / 35) * d.scale * (hidden ? 0.0001 : fade)
       const spin = t * d.spin
 
       dummy.position.set(mobile ? 0 : d.x, cur, 0)

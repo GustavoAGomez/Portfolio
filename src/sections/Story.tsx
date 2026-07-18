@@ -1,4 +1,5 @@
 import { useCurrentProject } from "../routes/useCurrentProject"
+import { Decode } from "../components/Decode"
 
 /**
  * Case-study story: the project's blocks stacked down the page, one full-viewport
@@ -16,7 +17,9 @@ export function Story() {
   return (
     <div className="pointer-events-none">
       <div className="px-6 md:px-16 pt-24">
-        <p className="text-xs tracking-[0.35em] uppercase text-white/60">Caso de estudio</p>
+        <p className="text-xs tracking-[0.35em] uppercase text-white/60">
+          <Decode>Detalles</Decode>
+        </p>
       </div>
 
       {content.blocks.map((b, i) => {
@@ -27,9 +30,11 @@ export function Story() {
           <article key={b.video ?? b.image} className={`min-h-screen flex items-center px-6 md:px-16 ${planeLeft ? "justify-end" : "justify-start"}`}>
             <div className={`max-w-sm ${planeLeft ? "text-right" : "text-left"}`}>
               <h3 className="font-display uppercase tracking-tight text-white text-3xl md:text-5xl" style={{ lineHeight: 1.05 }}>
-                {b.heading}
+                <Decode>{b.heading}</Decode>
               </h3>
-              <p className="mt-5 text-sm md:text-base leading-relaxed text-white/70">{b.copy}</p>
+              <p className="mt-5 text-sm md:text-base leading-relaxed text-white/70">
+                <Decode delay={0.08}>{b.copy}</Decode>
+              </p>
             </div>
           </article>
         )

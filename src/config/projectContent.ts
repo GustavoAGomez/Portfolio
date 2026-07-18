@@ -29,10 +29,18 @@ export interface ProjectCredits {
   client?: string
 }
 
+/** Short brief shown right after the hero: the client need + what was asked. */
+export interface ProjectIntro {
+  heading: string
+  paragraphs: string[]
+}
+
 export interface ProjectContent {
   title: string
   /** Line under the title. */
   tagline: string
+  /** Concise brief (client need + development ask), rendered after the hero. */
+  intro?: ProjectIntro
   /** One block per real site page, rendered vertically in the story section. */
   blocks: StoryBlock[]
   credits: ProjectCredits
@@ -44,6 +52,13 @@ export const PROJECT_CONTENT: Record<string, ProjectContent> = {
   tagorodive: {
     title: "TAGORODIVE",
     tagline: "Web a medida para un centro de buceo en El Hierro",
+    intro: {
+      heading: "Nueva web para centro de buceo",
+      paragraphs: [
+        "Tagorodive es un centro de actividades marinas en El Hierro: buceo profesional —su actividad principal—, buceo recreativo y experiencias como el sunset tour. Necesitaban una web nueva para reposicionarse en el mercado.",
+        "Desarrollé el sitio sobre un CMS headless para que su equipo gestione el contenido por su cuenta, e implementé el SEO definido."
+      ]
+    },
     // Blocks describe the DEVELOPMENT work (what I built + how), not the site's
     // promotional copy. Images are captures of the features being described.
     blocks: [
@@ -81,7 +96,7 @@ export const PROJECT_CONTENT: Record<string, ProjectContent> = {
     credits: {
       role: "Desarrollo web completo — arquitectura front-end, CMS headless, CI/CD y SEO",
       summary:
-        "Desarrollo web completo con Nuxt (Vue): arquitectura de componentes con Atomic Design, animaciones e interacciones con GSAP, CMS headless con Storyblok para que el equipo gestione el contenido, CI/CD con Bitbucket Pipelines desplegando a Netlify, y optimización SEO.",
+        "Desarrollo web completo con Nuxt (Vue): arquitectura de componentes con Atomic Design, animaciones e interacciones con GSAP, CMS headless con Storyblok para gestion autónoma del contenido, CI/CD con Bitbucket Pipelines desplegando a Netlify, y optimización SEO.",
       stack: ["Nuxt / Vue", "GSAP", "Storyblok", "Netlify", "Bitbucket Pipelines", "Atomic Design"],
       year: "2024",
       client: "Tagoro Dive · El Hierro"
