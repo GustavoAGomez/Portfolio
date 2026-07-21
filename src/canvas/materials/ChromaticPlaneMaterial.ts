@@ -1,13 +1,17 @@
 import { shaderMaterial } from "@react-three/drei"
 import { extend, type Object3DNode } from "@react-three/fiber"
 import { Color, ShaderMaterial, type Texture } from "three"
+import { BRAND } from "../../config/tokens"
 
 /**
  * Ported from GUSGQ's CustomMaterial.js (components/CustomMaterial.js) into a
  * clean, typed drei shaderMaterial. Keeps the three original ideas:
  *   1. Sinusoidal vertex wobble driven by uShift (scroll delta).
- *   2. RGB-split / chromatic aberration in the fragment: r/g/b sampled at
- *      p ± offset, offset scaled by uShift along a fixed angle.
+ *   2. Chromatic split in the fragment: the ±offset samples (offset scaled by
+ *      uShift along a fixed angle) are tinted by the two PALETTE accents
+ *      (uSplitA / uSplitB) instead of the classic red/blue channel fringe — the
+ *      media decomposes into the brand's two colours on fast scroll. Reduces to
+ *      the plain image at rest (offset → 0).
  *   3. UV "zoom" by uScale (content pushes in/out with offset).
  *
  * uShift is a lerped scroll-velocity value set from the store by the consumer —
@@ -19,6 +23,9 @@ export interface ChromaticUniforms {
   uShift: number
   uScale: number
   uColor: Color
+  /** Split-fringe tints — the two palette accents (default accentA / accentB). */
+  uSplitA: Color
+  uSplitB: Color
   uOpacity: number
 }
 
@@ -29,6 +36,8 @@ export const ChromaticPlaneMaterial = shaderMaterial(
     uShift: 0,
     uScale: 0,
     uColor: new Color("#ffffff"),
+    uSplitA: new Color(BRAND.accentA),
+    uSplitB: new Color(BRAND.accentB),
     uOpacity: 1
   } satisfies ChromaticUniforms,
   /* glsl */ `
@@ -48,16 +57,29 @@ export const ChromaticPlaneMaterial = shaderMaterial(
     uniform float uScale;
     uniform float uOpacity;
     uniform vec3 uColor;
+    uniform vec3 uSplitA;
+    uniform vec3 uSplitB;
     varying vec2 vUv;
     void main() {
       float angle = 1.55;
       vec2 p = (vUv - 0.5) * (1.0 - uScale) + 0.5;
       vec2 offset = uShift / 4.0 * vec2(cos(angle), sin(angle));
-      vec4 cr = texture2D(uMap, p + offset);
-      vec4 cga = texture2D(uMap, p);
-      vec4 cb = texture2D(uMap, p - offset);
-      if (uHasMap > 0.5) gl_FragColor = vec4(cr.r, cga.g, cb.b, cga.a * uOpacity);
-      else gl_FragColor = vec4(uColor, uOpacity);
+      if (uHasMap > 0.5) {
+        // Chromatic split, but tinted by the two palette accents instead of the
+        // R/B channel fringe. The ±offset samples add coloured fringes weighted by
+        // how their luminance deviates from the centre — zero at rest (offset→0),
+        // so the plain image is untouched until you scroll.
+        vec3 W = vec3(0.299, 0.587, 0.114);
+        float S = 1.5; // fringe strength
+        vec4 base = texture2D(uMap, p);
+        float lb = dot(base.rgb, W);
+        float lp = dot(texture2D(uMap, p + offset).rgb, W);
+        float lm = dot(texture2D(uMap, p - offset).rgb, W);
+        vec3 col = base.rgb + (uSplitA * (lp - lb) + uSplitB * (lm - lb)) * S;
+        gl_FragColor = vec4(col, base.a * uOpacity);
+      } else {
+        gl_FragColor = vec4(uColor, uOpacity);
+      }
     }
   `
 )

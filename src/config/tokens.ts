@@ -1,14 +1,21 @@
 /**
- * WebGL-side mirror of the brand tokens declared in src/styles/index.css (@theme).
- * Keep these in sync with the CSS custom properties — this file is what feeds
- * shader uniforms, material colors and camera/scene setup.
+ * WebGL-side view of the palette. The colours are NOT declared here — they derive
+ * from the single source of truth (config/palette.ts → ACTIVE), the same object
+ * that `applyPalette` pushes into the DOM's CSS variables. This file feeds shader
+ * uniforms, material colours and the canvas clear colour; change the palette in
+ * palette.ts and both DOM + WebGL reskin together.
  */
 
+import { ACTIVE } from "./palette"
+
 export const BRAND = {
-  bg: "#0e0e0f",
-  accentA: "#d40749",
-  accentB: "#2fe8c3",
-  numberDim: "#1a1e2a"
+  bg: ACTIVE.bg,
+  surface: ACTIVE.surface,
+  text: ACTIVE.text,
+  textDim: ACTIVE.textDim,
+  numberDim: ACTIVE.numberDim,
+  accentA: ACTIVE.accentA,
+  accentB: ACTIVE.accentB
 } as const
 
 export const SCENE = {

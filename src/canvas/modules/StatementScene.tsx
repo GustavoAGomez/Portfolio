@@ -2,11 +2,12 @@ import { Text } from "@react-three/drei"
 import { Block } from "../parallax/Block"
 import { useSection } from "../../scroll/useSection"
 import { type SectionId } from "../../scroll/store"
+import { BRAND } from "../../config/tokens"
 
 const FONT = "/fonts/Anton-Regular.ttf"
-/** Lighter than BRAND.numberDim so the ambient word reads (it's its own colour —
- *  numberDim is still used by the works numbers / hero stripe). */
-const BEYOND_COLOR = "#3c4454"
+/** Muted ambient-word colour (palette `textDim`) — lighter than numberDim so the
+ *  word reads; numberDim stays for the works numbers / hero stripe. */
+const BEYOND_COLOR = BRAND.textDim
 
 /**
  * Statement WebGL layer: an oversized dim word for depth (parallaxes slowly

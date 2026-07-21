@@ -1,4 +1,5 @@
 import { type SectionId } from "../../scroll/store"
+import { BRAND } from "../../config/tokens"
 
 /**
  * Case-study background: a fixed, full-screen grey plane on layer 0, behind
@@ -13,7 +14,7 @@ export function DescriptionScene(_props: { id: SectionId }) {
   return (
     <mesh position={[0, 0, -30]} frustumCulled={false}>
       <planeGeometry args={[140, 140]} />
-      <meshBasicMaterial color="#0f0f0f" toneMapped={false} />
+      <meshBasicMaterial color={BRAND.surface} toneMapped={false} />
     </mesh>
   )
 }

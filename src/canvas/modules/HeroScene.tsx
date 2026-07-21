@@ -55,7 +55,7 @@ export function HeroScene({ id }: { id: SectionId }) {
         <Text
           font={FONT}
           fontSize={worldWidth * 0.16}
-          color="#f5f5f5"
+          color={BRAND.text}
           anchorX="center"
           anchorY="middle"
           letterSpacing={-0.02}

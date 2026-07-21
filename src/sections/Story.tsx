@@ -4,7 +4,7 @@ import { Decode } from "../components/Decode"
 /**
  * Case-study story: the project's blocks stacked down the page, one full-viewport
  * slot each. The REAL UI screenshot for every block is rendered as a WebGL
- * chromatic plane in StoryScene (red/blue RGB-split trail on scroll + parallax,
+ * chromatic plane in StoryScene (palette-tinted split trail on scroll + parallax,
  * the SAME treatment the works gallery gives its images) — this DOM layer keeps
  * only the accessible heading + copy, positioned opposite the plane so the text
  * never sits over the busy screenshot. The slot count here MUST match the block

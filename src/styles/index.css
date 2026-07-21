@@ -1,15 +1,24 @@
 @import "tailwindcss";
 
 /* ------------------------------------------------------------------ *
- * Brand tokens — single source of truth for the DOM side.
- * Mirrored (for WebGL uniforms) in src/config/tokens.ts.
- * Change the brand here + there and the whole thing re-skins.
+ * Brand tokens. The REAL source of truth for colour is src/config/palette.ts:
+ * `applyPalette()` (called in main.tsx before render) overrides every --color-*
+ * below on :root, and WebGL reads the same palette via config/tokens.ts. The
+ * values here are only Tailwind's required token declarations + a graceful
+ * fallback if JS never runs. To change the palette, edit palette.ts — NOT here.
  * ------------------------------------------------------------------ */
 @theme {
   --color-bg: #0e0e0f;
+  --color-surface: #0f0f0f;
+  --color-text: #f5f5f5;
+  --color-text-dim: #3c4454;
   --color-accent-a: #d40749;
   --color-accent-b: #2fe8c3;
   --color-number-dim: #1a1e2a;
+
+  /* Accent RGB triplets — for rgba(var(--accent-*-rgb), α) neon glows. */
+  --accent-a-rgb: 212, 7, 73;
+  --accent-b-rgb: 47, 232, 195;
 
   --font-display: "Anton", "Arial Narrow", "Helvetica Neue", Impact, sans-serif;
 }
@@ -46,7 +55,7 @@ body,
 body {
   margin: 0;
   background: var(--color-bg);
-  color: #f5f5f5;
+  color: var(--color-text);
   font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
@@ -59,19 +68,20 @@ body {
   line-height: 0.86;
 }
 
-/* Neon glow for the statement / accents. */
+/* Neon glow for the statement / accents. Glow colour tracks the palette via the
+ * accent RGB triplets (set by applyPalette). */
 .neon-b {
   color: var(--color-accent-b);
   text-shadow:
-    0 0 0.03em rgba(47, 232, 195, 0.55),
-    0 0 0.35em rgba(47, 232, 195, 0.35),
-    0 0 1.1em rgba(47, 232, 195, 0.18);
+    0 0 0.03em rgba(var(--accent-b-rgb), 0.55),
+    0 0 0.35em rgba(var(--accent-b-rgb), 0.35),
+    0 0 1.1em rgba(var(--accent-b-rgb), 0.18);
 }
 .neon-a {
   color: var(--color-accent-a);
   text-shadow:
-    0 0 0.03em rgba(212, 7, 73, 0.55),
-    0 0 0.4em rgba(212, 7, 73, 0.3);
+    0 0 0.03em rgba(var(--accent-a-rgb), 0.55),
+    0 0 0.4em rgba(var(--accent-a-rgb), 0.3);
 }
 
 /* Recurring diagonal stripe (~PI/8 ≈ 22.5deg). */
