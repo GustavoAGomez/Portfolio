@@ -149,7 +149,7 @@ export const PALETTES = {
   volt: {
     bg: "#090711",
     surface: "#141026",
-    text: "#f0ecff",
+    text: "#eef2f4",
     textDim: "#453a63",
     numberDim: "#160f2b",
     accentA: "#7c4dff",

@@ -17,7 +17,7 @@ export function Story() {
   return (
     <div className="pointer-events-none">
       <div className="px-6 md:px-16 pt-24">
-        <p className="text-xs tracking-[0.35em] uppercase text-white/60">
+        <p className="text-xs font-mono tracking-[0.35em] uppercase text-white/60">
           <Decode>Detalles</Decode>
         </p>
       </div>

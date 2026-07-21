@@ -53,7 +53,7 @@ export function Hero() {
   return (
     <div className="relative min-h-screen flex flex-col justify-between px-6 md:px-16 py-16 pointer-events-none">
       <div ref={meta} className="max-w-xl">
-        <p className="text-xs tracking-[0.35em] uppercase text-white/60">Creative Technologist — Portfolio</p>
+        <p className="text-xs font-mono tracking-[0.35em] uppercase text-white/60">Creative Technologist — Portfolio</p>
       </div>
 
       <h1 className="sr-only">GUSGQ</h1>
@@ -74,7 +74,7 @@ export function Hero() {
           hasScrolled ? "opacity-0" : "opacity-100"
         ].join(" ")}
       >
-        <span className="text-[10px] tracking-[0.35em] uppercase text-white/40">Scroll</span>
+        <span className="text-[10px] font-mono tracking-[0.35em] uppercase text-white/40">Scroll</span>
         <span className="relative block h-10 w-px bg-white/15">
           <span className="scroll-cue-dot absolute left-1/2 top-0 h-1.5 w-1.5 rounded-full bg-[var(--color-accent-b)]" />
         </span>

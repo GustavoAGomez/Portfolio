@@ -15,7 +15,7 @@ export function Description() {
   return (
     <div className="min-h-[78vh] flex items-center justify-end px-6 md:px-16 pointer-events-none">
       <div className="max-w-3xl text-right">
-        <p className="text-xs tracking-[0.35em] uppercase text-white/60">
+        <p className="text-xs font-mono tracking-[0.35em] uppercase text-white/60">
           <Decode>Encargo</Decode>
         </p>
         <h2 className="mt-8 font-display uppercase text-white text-3xl md:text-5xl" style={{ lineHeight: 1.05 }}>

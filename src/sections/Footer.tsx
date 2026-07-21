@@ -34,7 +34,7 @@ export function Footer() {
             not a list row, and its alignment opposes the LEFT-aligned next block. */}
         {content.url && (
           <section className="min-h-[45vh] flex flex-col items-end justify-center px-6 md:px-16 py-24 text-right pointer-events-none">
-            <p className="text-xs tracking-[0.35em] uppercase text-white/60">
+            <p className="text-xs font-mono tracking-[0.35em] uppercase text-white/60">
               <Decode>Sitio en vivo</Decode>
             </p>
             <h2 className="mt-6 font-display uppercase text-white text-3xl md:text-5xl" style={{ lineHeight: 1.05 }}>
@@ -44,7 +44,7 @@ export function Footer() {
               href={content.url}
               target="_blank"
               rel="noreferrer"
-              className="group pointer-events-auto mt-8 inline-flex items-center gap-3 rounded-full border border-white/20 px-6 py-3 text-xs tracking-[0.3em] uppercase text-white/80 transition-colors hover:border-[var(--color-accent-b)] hover:text-[var(--color-accent-b)]"
+              className="group pointer-events-auto mt-8 inline-flex items-center gap-3 rounded-full border border-white/20 px-6 py-3 text-xs font-mono tracking-[0.3em] uppercase text-white/80 transition-colors hover:border-[var(--color-accent-b)] hover:text-[var(--color-accent-b)]"
             >
               <Decode delay={0.12}>Visitar la web</Decode>
               <span aria-hidden="true" className="text-base transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5">
@@ -61,7 +61,7 @@ export function Footer() {
           <div className="relative px-6 md:px-16 pt-24 pb-10">
             {next && nextTo ? (
               <>
-                <p className="text-xs tracking-[0.35em] uppercase text-white/60">
+                <p className="text-xs font-mono tracking-[0.35em] uppercase text-white/60">
                   <Decode>Siguiente proyecto</Decode>
                 </p>
                 <Link to={nextTo} onClick={onNext} className="group pointer-events-auto mt-4 flex items-baseline gap-4 md:gap-6">
@@ -75,7 +75,7 @@ export function Footer() {
               </>
             ) : (
               <>
-                <p className="text-xs tracking-[0.35em] uppercase text-white/60">
+                <p className="text-xs font-mono tracking-[0.35em] uppercase text-white/60">
                   <Decode>Contacto</Decode>
                 </p>
                 <a href="mailto:stgustavo.gomez@gmail.com" className="group pointer-events-auto mt-4 flex items-baseline gap-4 md:gap-6">
@@ -102,7 +102,7 @@ export function Footer() {
     <div className="relative flex flex-col justify-end">
       <div className="diagonal-stripe absolute inset-0" />
       <div className="relative px-6 md:px-16 pt-24 pb-10">
-        <p className="text-xs tracking-[0.35em] uppercase text-white/60">Contact</p>
+        <p className="text-xs font-mono tracking-[0.35em] uppercase text-white/60">Contact</p>
         <a href="mailto:stgustavo.gomez@gmail.com" className="pointer-events-auto inline-block font-display text-white text-5xl md:text-8xl mt-4 hover:neon-b transition-all">
           SAY HELLO
         </a>

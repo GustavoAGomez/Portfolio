@@ -8,9 +8,10 @@ import { ChromaticPlane } from "../ChromaticPlane"
 import { useSection } from "../../scroll/useSection"
 import { useStore, type SectionId } from "../../scroll/store"
 import { SCENE, BRAND } from "../../config/tokens"
+import { ACTIVE_TYPO } from "../../config/typography"
 import { damp } from "../../lib/math"
 
-const FONT = "/fonts/Anton-Regular.ttf"
+const FONT = ACTIVE_TYPO.displayFontUrl
 
 /**
  * Hero WebGL layer. The GUSGQ headline is now a 3D <Text> on LAYER 0, sitting

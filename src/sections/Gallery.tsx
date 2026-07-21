@@ -14,7 +14,7 @@ export function Gallery() {
   return (
     <div className="pointer-events-none">
       <div className="px-6 md:px-16 pt-24">
-        <p className="text-xs tracking-[0.35em] uppercase text-white/60">Selected Work</p>
+        <p className="text-xs font-mono tracking-[0.35em] uppercase text-white/60">Selected Work</p>
       </div>
       {PROJECTS.map((project, i) => {
         const left = i % 2 === 0

@@ -3,8 +3,9 @@ import { Block } from "../parallax/Block"
 import { useSection } from "../../scroll/useSection"
 import { type SectionId } from "../../scroll/store"
 import { BRAND } from "../../config/tokens"
+import { ACTIVE_TYPO } from "../../config/typography"
 
-const FONT = "/fonts/Anton-Regular.ttf"
+const FONT = ACTIVE_TYPO.displayFontUrl
 /** Muted ambient-word colour (palette `textDim`) — lighter than numberDim so the
  *  word reads; numberDim stays for the works numbers / hero stripe. */
 const BEYOND_COLOR = BRAND.textDim

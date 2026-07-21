@@ -51,7 +51,7 @@ export function CornerHud({ links = SITE_LINKS, variant = "overlay" }: CornerHud
   const positional = variant === "overlay" ? "absolute inset-x-0 bottom-0 z-20 pb-8" : "relative z-20 pb-8 pt-4"
 
   return (
-    <div className={`pointer-events-none ${positional} flex items-end justify-between px-6 md:px-16 text-[10px] md:text-xs tracking-[0.25em] uppercase text-white/50`}>
+    <div className={`pointer-events-none ${positional} flex items-end justify-between px-6 md:px-16 text-[10px] md:text-xs font-mono tracking-[0.25em] uppercase text-white/50`}>
       <div>
         <p className="text-white/70">
           {time} <span className="text-white/35">Europe/Madrid</span>

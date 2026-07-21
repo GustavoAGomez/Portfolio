@@ -15,7 +15,7 @@ export function Statement() {
         <h2 ref={line} className="font-display uppercase leading-[0.9] tracking-tight text-white text-[14vw] md:text-[10vw]">
           <Decode duration={0.6}>{content.title}</Decode>
         </h2>
-        <p className="mt-6 text-xs md:text-sm tracking-[0.35em] uppercase text-[var(--color-accent-b)]">
+        <p className="mt-6 text-xs md:text-sm font-mono tracking-[0.35em] uppercase text-[var(--color-accent-b)]">
           <Decode delay={0.15} duration={1.0}>
             {content.tagline}
           </Decode>

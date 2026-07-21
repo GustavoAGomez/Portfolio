@@ -293,7 +293,7 @@ export function RouteBackButton() {
     <button
       type="button"
       onClick={() => go("/")}
-      className="fixed left-6 top-6 z-40 pointer-events-auto text-[10px] uppercase tracking-[0.35em] text-white/60 transition-colors hover:text-[var(--color-accent-b)] md:left-8 md:top-8 md:text-xs"
+      className="fixed left-6 top-6 z-40 pointer-events-auto text-[10px] font-mono uppercase tracking-[0.35em] text-white/60 transition-colors hover:text-[var(--color-accent-b)] md:left-8 md:top-8 md:text-xs"
     >
       ← Index
     </button>

@@ -166,8 +166,8 @@ export function WorksList() {
       {/* List */}
       <div className="relative z-10 flex min-h-screen flex-col px-6 md:px-16 py-16">
         <header className="flex items-baseline justify-between">
-          <p className="text-xs tracking-[0.35em] uppercase text-white/60">Selected Work</p>
-          {/* <p className="text-xs tracking-[0.35em] uppercase text-white/35">{String(PROJECTS.length).padStart(3, "0")} —</p> */}
+          <p className="text-xs font-mono tracking-[0.35em] uppercase text-white/60">Selected Work</p>
+          {/* <p className="text-xs font-mono tracking-[0.35em] uppercase text-white/35">{String(PROJECTS.length).padStart(3, "0")} —</p> */}
         </header>
 
         <ol
@@ -247,7 +247,7 @@ function WorkRow({ project, active, dimmed, reducedMotion, refCb, onActivate }: 
             {project.title}
           </h3>
         </div>
-        <div className="flex shrink-0 items-baseline gap-3 text-[10px] md:text-xs tracking-[0.3em] uppercase text-white/60">
+        <div className="flex shrink-0 items-baseline gap-3 text-[10px] md:text-xs font-mono tracking-[0.3em] uppercase text-white/60">
           <span data-scramble>{project.role}</span>
           {project.category && (
             <>
