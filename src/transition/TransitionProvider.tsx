@@ -16,6 +16,29 @@ const SPLIT = 4 // px RGB-split flash
 const SPLIT_OPACITY = 0.16
 const SAFETY_MS = 1800
 
+// ── First-load landing (recompose-only, bigger + more aggressive than a nav) ──
+const LANDING_HOLD_S = 0.35 // covered beat on first paint so the scene renders in
+const LANDING_IN_S = 0.8 // recompose duration on landing (> DEFORM_IN_S)
+const LANDING_DISP = 170 // start displacement peak (vs MAX_DISP 90) — heavier warp
+const LANDING_SCALE = 1.16 // start scale punch (vs SCALE_PEAK 1.06)
+const LANDING_SKEW = 5 // start skew deg (vs SKEW_PEAK 2)
+const LANDING_SPLIT = 12 // px RGB-split flash offset during recompose
+const LANDING_SPLIT_OPACITY = 0.3
+
+/** Per-run overrides — used by the landing to hit harder than a nav transition. */
+interface WarpOpts {
+  /** Reveal-only: seconds held fully covered before recomposing. */
+  hold?: number
+  /** Override the deform-in (recompose) duration. */
+  inDur?: number
+  /** Reveal-only start intensity: displacement peak / scale / skew. */
+  disp?: number
+  scale?: number
+  skew?: number
+  /** Reveal-only: play an RGB-split flash as it recomposes. */
+  flash?: boolean
+}
+
 interface TransitionCtx {
   /** Navigate with the warp / liquify transition. */
   go: (to: string) => void
@@ -83,7 +106,7 @@ export function TransitionProvider({ children }: { children: ReactNode }) {
 
   /** Build + play the warp timeline. `navigateFn === null` = recompose only. */
   const runWarp = useCallback(
-    (navigateFn: (() => void) | null) => {
+    (navigateFn: (() => void) | null, opts?: WarpOpts) => {
       const disp = dispRef.current
       const turb = turbRef.current
       const overlay = overlayRef.current
@@ -97,9 +120,14 @@ export function TransitionProvider({ children }: { children: ReactNode }) {
       }
       const fixed = document.getElementById("warp-fixed")
       const reveal = navigateFn === null
+      const inDur = opts?.inDur ?? DEFORM_IN_S
+      const revealHold = reveal ? opts?.hold ?? 0 : 0
+      const revealDisp = opts?.disp ?? MAX_DISP
+      const revealScale = opts?.scale ?? SCALE_PEAK
+      const revealSkew = opts?.skew ?? SKEW_PEAK
       tl.current?.kill()
 
-      const dp = { s: reveal ? MAX_DISP : 0 }
+      const dp = { s: reveal ? revealDisp : 0 }
       const sp = { v: 2 }
       const setDisp = () => disp.setAttribute("scale", dp.s.toFixed(2))
       const setSeed = () => turb.setAttribute("seed", String(Math.round(sp.v)))
@@ -111,7 +139,7 @@ export function TransitionProvider({ children }: { children: ReactNode }) {
       }
       setDisp()
       setSeed()
-      if (fixed) gsap.set(fixed, reveal ? { scale: SCALE_PEAK, skewX: SKEW_PEAK } : { scale: 1, skewX: 0 })
+      if (fixed) gsap.set(fixed, reveal ? { scale: revealScale, skewX: revealSkew } : { scale: 1, skewX: 0 })
       gsap.set(panel, { opacity: reveal ? 1 : 0 })
       gsap.set([tintA, tintB], { opacity: 0, x: 0 })
       overlay.classList.add("active")
@@ -134,11 +162,24 @@ export function TransitionProvider({ children }: { children: ReactNode }) {
       }
 
       // DEFORM-IN: uncover while the new view recomposes → exactly sharp (scale 0).
-      const outStart = reveal ? 0 : DEFORM_OUT_S + HOLD_S
-      t.to(panel, { opacity: 0, duration: DEFORM_IN_S, ease: "power2.out" }, outStart)
-      t.to(dp, { s: 0, duration: DEFORM_IN_S, ease: "power3.out", onUpdate: setDisp }, outStart)
-      t.to(sp, { v: reveal ? SEED_OUT : SEED_IN, duration: DEFORM_IN_S, ease: "none", onUpdate: setSeed }, outStart)
-      if (fixed) t.to(fixed, { scale: 1, skewX: 0, duration: DEFORM_IN_S, ease: "power3.out" }, outStart)
+      // On a landing (reveal + hold), the timeline idles fully covered for
+      // `revealHold` first, so the fresh scene can paint before it uncovers.
+      const outStart = reveal ? revealHold : DEFORM_OUT_S + HOLD_S
+      t.to(panel, { opacity: 0, duration: inDur, ease: "power2.out" }, outStart)
+      t.to(dp, { s: 0, duration: inDur, ease: "power3.out", onUpdate: setDisp }, outStart)
+      t.to(sp, { v: reveal ? SEED_OUT : SEED_IN, duration: inDur, ease: "none", onUpdate: setSeed }, outStart)
+      if (fixed) t.to(fixed, { scale: 1, skewX: 0, duration: inDur, ease: "power3.out" }, outStart)
+
+      // Reveal RGB-split flash (landing): a chromatic kick as the cover lifts and
+      // the deformed scene snaps back — the aggressive punch. Rides on top of the
+      // panel, so it's visible while uncovering.
+      if (reveal && opts?.flash) {
+        t.set(tintA, { x: LANDING_SPLIT }, outStart)
+        t.set(tintB, { x: -LANDING_SPLIT }, outStart)
+        t.to([tintA, tintB], { opacity: LANDING_SPLIT_OPACITY, duration: 0.06, ease: "power2.out" }, outStart)
+        t.to([tintA, tintB], { opacity: 0, duration: inDur * 0.7, ease: "power2.out" }, outStart + 0.06)
+        t.to([tintA, tintB], { x: 0, duration: inDur, ease: "power3.out" }, outStart)
+      }
 
       tl.current = t
     },
@@ -188,6 +229,28 @@ export function TransitionProvider({ children }: { children: ReactNode }) {
     }
     playReveal()
   }, [pathname, reducedMotion, playReveal])
+
+  // FIRST-LOAD LANDING: play the recompose ONCE on mount so the site doesn't pop
+  // in abruptly — same warp as a navigation's "content appears" half, but held
+  // covered briefly and recomposed a touch slower. Runs in a layout effect so the
+  // cover is applied before the first paint (no flash). reduced-motion skips it.
+  const didLanding = useRef(false)
+  useLayoutEffect(() => {
+    if (didLanding.current) return
+    didLanding.current = true
+    if (reducedMotion || !dispRef.current) return
+    busy.current = true
+    clearSafety()
+    safety.current = window.setTimeout(finish, SAFETY_MS)
+    runWarp(null, { hold: LANDING_HOLD_S, inDur: LANDING_IN_S, disp: LANDING_DISP, scale: LANDING_SCALE, skew: LANDING_SKEW, flash: true })
+    // Restore on unmount so StrictMode's dev mount→unmount→remount doesn't leave
+    // the cover stuck (kill-only cleanup would freeze it black); resetting the
+    // guard lets the remount replay it. In prod this never unmounts → plays once.
+    return () => {
+      finish()
+      didLanding.current = false
+    }
+  }, [reducedMotion, runWarp, clearSafety, finish])
 
   useEffect(() => {
     return () => {

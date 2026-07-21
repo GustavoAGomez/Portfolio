@@ -44,6 +44,8 @@ export interface ProjectContent {
   /** One block per real site page, rendered vertically in the story section. */
   blocks: StoryBlock[]
   credits: ProjectCredits
+  /** Live site URL — the footer's "visit the site" CTA (absent → no CTA). */
+  url?: string
   /** Next project id (footer navigation). */
   nextId?: string
 }
@@ -101,6 +103,7 @@ export const PROJECT_CONTENT: Record<string, ProjectContent> = {
       year: "2024",
       client: "Tagoro Dive · El Hierro"
     },
+    url: "https://tagorodive.com/",
     nextId: "district-4"
   }
 }

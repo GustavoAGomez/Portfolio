@@ -5,6 +5,7 @@ import { ScrambleTextPlugin } from "gsap/ScrambleTextPlugin"
 import { PROJECTS, type Project } from "../config/projects"
 import { useStore } from "../scroll/store"
 import { useTransition } from "../transition/TransitionProvider"
+import { CornerHud } from "../components/CornerHud"
 
 gsap.registerPlugin(ScrambleTextPlugin)
 
@@ -15,47 +16,6 @@ interface RowRect {
   /** Offsets relative to the <ol> top (stable across scroll; re-measured on resize). */
   top: number
   bottom: number
-}
-
-/** Live clock + location + links. Absolute inside the section (easy to promote to fixed later). */
-function CornerHud() {
-  const [time, setTime] = useState(() => formatMadrid())
-  useEffect(() => {
-    const id = window.setInterval(() => setTime(formatMadrid()), 1000)
-    return () => window.clearInterval(id)
-  }, [])
-
-  return (
-    <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 flex items-end justify-between px-6 md:px-16 pb-8 text-[10px] md:text-xs tracking-[0.25em] uppercase text-white/50">
-      <div>
-        <p className="text-white/70">
-          {time} <span className="text-white/35">Europe/Madrid</span>
-        </p>
-        <p className="mt-1">Madrid — 40.4168° N, 3.7038° W</p>
-      </div>
-      <nav className="pointer-events-auto flex gap-4 md:gap-6">
-        <a href="https://github.com/GustavoAGomez" target="_blank" rel="noreferrer" className="transition-colors hover:text-[var(--color-accent-b)]">
-          GitHub
-        </a>
-        <a href="#" className="transition-colors hover:text-[var(--color-accent-b)]">
-          Email
-        </a>
-        <a href="#" className="transition-colors hover:text-[var(--color-accent-b)]">
-          Instagram
-        </a>
-      </nav>
-    </div>
-  )
-}
-
-function formatMadrid(): string {
-  return new Intl.DateTimeFormat("en-GB", {
-    timeZone: "Europe/Madrid",
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-    hour12: false
-  }).format(new Date())
 }
 
 /**
