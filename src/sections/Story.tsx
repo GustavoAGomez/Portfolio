@@ -26,8 +26,15 @@ export function Story() {
         // The WebGL plane sits on the `left` side for even blocks → put the copy
         // on the opposite side (mirrored for odd blocks) so text stays readable.
         const planeLeft = i % 2 === 0
+        // `leadGap` (viewport heights) loosens the rhythm before a block; the same
+        // value drives the plane anchor in StoryScene, so the two stay aligned.
+        const lead = b.leadGap ?? 0
         return (
-          <article key={b.video ?? b.image} className={`min-h-screen flex items-center px-6 md:px-16 ${planeLeft ? "justify-end" : "justify-start"}`}>
+          <article
+            key={b.video ?? b.image}
+            style={lead ? { marginTop: `${lead * 100}vh` } : undefined}
+            className={`min-h-screen flex items-center px-6 md:px-16 ${planeLeft ? "justify-end" : "justify-start"}`}
+          >
             <div className={`max-w-sm ${planeLeft ? "text-right" : "text-left"}`}>
               <h3 className="font-display uppercase tracking-tight text-white text-3xl md:text-5xl" style={{ lineHeight: 1.05 }}>
                 <Decode>{b.heading}</Decode>

@@ -27,18 +27,30 @@ export function StoryScene({ id }: { id: SectionId }) {
   const caseStudyId = useStore((s) => s.caseStudyId)
   const content = caseStudyId ? getProjectContent(caseStudyId) : undefined
   if (!content) return null
+
+  // Weighted vertical layout: each block is a 1-unit slot plus its optional
+  // `leadGap` (extra space BEFORE it). The SAME leadGap drives the DOM margin in
+  // Story.tsx, so plane and text stay aligned. `centerFraction` ∈ [0,1] locates a
+  // plane's center within the story section — with no leadGap it collapses to the
+  // former even split (index + 0.5) / count, so other projects are unaffected.
+  const total = content.blocks.reduce((sum, b) => sum + 1 + (b.leadGap ?? 0), 0)
+  let cursor = 0
+
   return (
     <>
-      {content.blocks.map((block, i) => (
-        <StoryBlockPlane key={block.video ?? block.image} id={id} block={block} index={i} count={content.blocks.length} />
-      ))}
+      {content.blocks.map((block, i) => {
+        cursor += block.leadGap ?? 0
+        const centerFraction = (cursor + 0.5) / total
+        cursor += 1
+        return <StoryBlockPlane key={block.video ?? block.image} id={id} block={block} index={i} centerFraction={centerFraction} />
+      })}
     </>
   )
 }
 
 /** One block's plane + parallax slot. Picks the video or image texture variant
  *  (each in its own <Suspense> so a loading video never blanks the others). */
-function StoryBlockPlane({ id, block, index, count }: { id: SectionId; block: StoryBlock; index: number; count: number }) {
+function StoryBlockPlane({ id, block, index, centerFraction }: { id: SectionId; block: StoryBlock; index: number; centerFraction: number }) {
   const aspect = block.aspect ?? 1.6
   const portrait = aspect < 1
   const width = portrait ? PORTRAIT_WIDTH : LANDSCAPE_WIDTH
@@ -46,10 +58,11 @@ function StoryBlockPlane({ id, block, index, count }: { id: SectionId; block: St
   const left = index % 2 === 0
   const x = left ? -X_OFFSET : X_OFFSET
 
-  // Per-block scroll slot within the story section (resize-safe getter).
+  // Per-block scroll slot within the story section (resize-safe getter). Uses the
+  // block's weighted centerFraction so `leadGap` spacing matches the DOM article.
   const anchor = () => {
     const b = useStore.getState().sections[id]
-    return b ? b.top + ((index + 0.5) * b.height) / count : 0
+    return b ? b.top + centerFraction * b.height : 0
   }
 
   const args: [number, number, number, number] = [width, height, 32, 32]
@@ -58,7 +71,7 @@ function StoryBlockPlane({ id, block, index, count }: { id: SectionId; block: St
     <Block factor={1} anchor={anchor}>
       <Suspense fallback={null}>
         {block.video ? (
-          <VideoPlane src={block.video} args={args} position={[x, 0, 0]} />
+          <VideoPlane src={block.video} args={args} position={[x, 0, 0]} playbackRate={block.playbackRate} />
         ) : (
           <ImagePlane src={block.image ?? ""} args={args} position={[x, 0, 0]} />
         )}
@@ -82,7 +95,7 @@ function ImagePlane({ src, args, position }: PlaneVariantProps) {
   return <ChromaticPlane map={texture} args={args} position={position} shiftStrength={1.6} />
 }
 
-function VideoPlane({ src, args, position }: PlaneVariantProps) {
+function VideoPlane({ src, args, position, playbackRate }: PlaneVariantProps & { playbackRate?: number }) {
   // Muted + loop + playsInline so it autoplays everywhere; frameloop="always"
   // keeps the VideoTexture advancing each frame.
   const texture = useVideoTexture(src, { muted: true, loop: true, start: true, playsInline: true, crossOrigin: "anonymous" }) as Texture
@@ -91,11 +104,17 @@ function VideoPlane({ src, args, position }: PlaneVariantProps) {
     texture.colorSpace = SRGBColorSpace
   }, [texture])
   // Honor reduced-motion: pause the video (shows a still frame) instead of looping.
+  // Otherwise play at the block's playbackRate (default 1) — some captured clips
+  // read too fast on the chromatic plane and want slowing down.
   useEffect(() => {
     const video = texture.image as HTMLVideoElement | undefined
     if (!video) return
-    if (reducedMotion) video.pause()
-    else void video.play().catch(() => {})
-  }, [texture, reducedMotion])
+    if (reducedMotion) {
+      video.pause()
+    } else {
+      video.playbackRate = playbackRate ?? 1
+      void video.play().catch(() => {})
+    }
+  }, [texture, reducedMotion, playbackRate])
   return <ChromaticPlane map={texture} args={args} position={position} shiftStrength={1.6} />
 }

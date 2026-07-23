@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useLayoutEffect, useRef, useState, type FocusEvent, type MouseEvent } from "react"
+import { useCallback, useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type FocusEvent, type MouseEvent } from "react"
 import { Link } from "react-router-dom"
 import gsap from "gsap"
 import { ScrambleTextPlugin } from "gsap/ScrambleTextPlugin"
@@ -6,10 +6,33 @@ import { PROJECTS, type Project } from "../config/projects"
 import { useStore } from "../scroll/store"
 import { useTransition } from "../transition/TransitionProvider"
 import { CornerHud } from "../components/CornerHud"
+import { Decode } from "../components/Decode"
 
 gsap.registerPlugin(ScrambleTextPlugin)
 
 const SCRAMBLE_CHARS = "01"
+
+/**
+ * Scramble each `[data-scramble]` target TOWARD its real text (read from
+ * `data-text`, NOT the live `textContent`). Using the stored real text instead
+ * of gsap's `"{original}"` is what fixes the first-view↔hover collision: if a
+ * hover scramble starts while the first-view decode is mid-flight, `"{original}"`
+ * would capture the intermediate binary as the target and leave it as binary
+ * forever. `overwrite:true` kills any in-flight tween on the same target so the
+ * latest scramble always wins and always lands on the real text.
+ */
+function scrambleToReal(targets: ArrayLike<HTMLElement>, stagger: number): void {
+  Array.from(targets).forEach((t, i) => {
+    const text = t.getAttribute("data-text") ?? t.textContent ?? ""
+    gsap.to(t, {
+      duration: 0.7,
+      delay: i * stagger,
+      ease: "none",
+      overwrite: true,
+      scrambleText: { text, chars: SCRAMBLE_CHARS, speed: 1, revealDelay: 0.1 }
+    })
+  })
+}
 
 interface RowRect {
   id: string
@@ -35,7 +58,6 @@ export function WorksList() {
   const rowRefs = useRef<Record<string, HTMLAnchorElement | null>>({})
   const olRef = useRef<HTMLOListElement>(null)
   const rowRects = useRef<RowRect[]>([])
-  const idle = useRef<gsap.core.Timeline | null>(null)
 
   // Cache row rects relative to the <ol> (measured on mount + resize, NOT per move).
   const measure = useCallback(() => {
@@ -89,38 +111,26 @@ export function WorksList() {
     if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setActiveId(null)
   }
 
-  // Scramble on activate + idle opacity loop when nothing is active.
+  // Scramble the active row's meta on hover/focus. Idle rows rest at full opacity
+  // (no breathing pulse) so nothing animates when the list isn't being touched.
   useEffect(() => {
     if (reducedMotion) return
     const rows = Object.values(rowRefs.current).filter((el): el is HTMLAnchorElement => el !== null)
     const activeEl = activeId ? rowRefs.current[activeId] ?? null : null
+    if (!activeEl) return
 
-    if (activeEl) {
-      gsap.set(rows, { clearProps: "opacity" }) // hand opacity back to the CSS dim classes
-      const targets = activeEl.querySelectorAll<HTMLElement>("[data-scramble]")
-      gsap.to(targets, {
-        duration: 0.7,
-        ease: "none",
-        stagger: 0.05,
-        overwrite: true, // kill any prior tween on these same targets (rapid re-hover)
-        scrambleText: { text: "{original}", chars: SCRAMBLE_CHARS, speed: 1, revealDelay: 0.1 }
-      })
-    } else if (activeId === null) {
-      const tl = gsap.timeline({ repeat: -1, yoyo: true })
-      tl.to(rows, { opacity: 0.5, duration: 1.6, ease: "sine.inOut", stagger: 0.15 })
-      idle.current = tl
-    }
+    gsap.set(rows, { clearProps: "opacity" }) // hand opacity back to the CSS dim classes
+    const targets = activeEl.querySelectorAll<HTMLElement>("[data-scramble]")
+    // Scramble toward the REAL text (data-text), overwriting any in-flight
+    // first-view decode so hover mid-decode can't freeze the row in binary.
+    scrambleToReal(targets, 0.05)
 
     return () => {
-      idle.current?.kill()
-      idle.current = null
       // Cancel the in-flight scramble on the row we're leaving, snapping it to its
       // final text (progress(1)) so switching rows fast never leaves one half-decoded.
-      if (activeEl) {
-        activeEl.querySelectorAll<HTMLElement>("[data-scramble]").forEach((s) => {
-          gsap.getTweensOf(s).forEach((t) => t.progress(1).kill())
-        })
-      }
+      activeEl.querySelectorAll<HTMLElement>("[data-scramble]").forEach((s) => {
+        gsap.getTweensOf(s).forEach((t) => t.progress(1).kill())
+      })
       gsap.set(rows, { clearProps: "opacity" })
     }
   }, [activeId, reducedMotion])
@@ -130,26 +140,9 @@ export function WorksList() {
       {/* Background — transparent at idle; the active/persisted project's image
           zooms IN + a legibility veil fades in, and both stay until reset. */}
       <div className="pointer-events-none absolute inset-0 z-0">
-        {PROJECTS.map((p) => {
-          const visible = activeId === p.id
-          return (
-            <img
-              key={p.id}
-              src={p.image}
-              alt=""
-              aria-hidden="true"
-              className="absolute inset-0 h-full w-full object-cover"
-              style={{
-                filter: "grayscale(1) contrast(1.15) brightness(0.6)",
-                opacity: visible ? 1 : 0,
-                // Zoom-IN on appear: 1.0 → 1.18, with the transform running MUCH longer
-                // than the fade so the growth keeps moving after the image is opaque.
-                transform: reducedMotion ? undefined : `scale(${visible ? 1.18 : 1})`,
-                transition: reducedMotion ? undefined : "opacity 600ms ease-out, transform 1400ms cubic-bezier(0.22, 0.61, 0.36, 1)"
-              }}
-            />
-          )
-        })}
+        {PROJECTS.map((p) => (
+          <WorkBackdrop key={p.id} project={p} visible={activeId === p.id} reducedMotion={reducedMotion} />
+        ))}
         {/* palette tint + dark scrim — visible while a row is active/persisted. */}
         <div
           className={[
@@ -166,7 +159,9 @@ export function WorksList() {
       {/* List */}
       <div className="relative z-10 flex min-h-screen flex-col px-6 md:px-16 py-16">
         <header className="flex items-baseline justify-between">
-          <p className="text-xs font-mono tracking-[0.35em] uppercase text-white/60">Selected Work</p>
+          <p className="text-xs font-mono tracking-[0.35em] uppercase text-white/60">
+            <Decode>Selected Work</Decode>
+          </p>
           {/* <p className="text-xs font-mono tracking-[0.35em] uppercase text-white/35">{String(PROJECTS.length).padStart(3, "0")} —</p> */}
         </header>
 
@@ -202,6 +197,61 @@ export function WorksList() {
   )
 }
 
+interface WorkBackdropProps {
+  project: Project
+  visible: boolean
+  reducedMotion: boolean
+}
+
+/**
+ * Full-bleed hover background for one row. If the project has a `hoverVideo` (and
+ * motion is allowed) it plays that muted clip in a loop while the row is active —
+ * with `image` as the poster so there's no blank frame before the video decodes —
+ * and pauses when it isn't. Otherwise (or under reduced-motion) it's the still
+ * image. Same grayscale + zoom-in language either way.
+ */
+function WorkBackdrop({ project, visible, reducedMotion }: WorkBackdropProps) {
+  const videoRef = useRef<HTMLVideoElement>(null)
+  const useVideo = !!project.hoverVideo && !reducedMotion
+
+  // Play only while hovered; pause (keeping the last frame) otherwise. The play()
+  // promise can reject if the pointer leaves before it resolves — swallow it.
+  useEffect(() => {
+    const v = videoRef.current
+    if (!v) return
+    if (visible) void v.play().catch(() => {})
+    else v.pause()
+  }, [visible])
+
+  const style: CSSProperties = {
+    filter: "grayscale(1) contrast(1.15) brightness(0.6)",
+    opacity: visible ? 1 : 0,
+    // Zoom-IN on appear: 1.0 → 1.18, with the transform running MUCH longer than
+    // the fade so the growth keeps moving after the media is opaque.
+    transform: reducedMotion ? undefined : `scale(${visible ? 1.18 : 1})`,
+    transition: reducedMotion ? undefined : "opacity 600ms ease-out, transform 1400ms cubic-bezier(0.22, 0.61, 0.36, 1)"
+  }
+
+  if (useVideo) {
+    return (
+      <video
+        ref={videoRef}
+        src={project.hoverVideo}
+        poster={project.image}
+        muted
+        loop
+        playsInline
+        preload="metadata"
+        aria-hidden="true"
+        className="absolute inset-0 h-full w-full object-cover"
+        style={style}
+      />
+    )
+  }
+
+  return <img src={project.image} alt="" aria-hidden="true" className="absolute inset-0 h-full w-full object-cover" style={style} />
+}
+
 interface WorkRowProps {
   project: Project
   active: boolean
@@ -214,6 +264,28 @@ interface WorkRowProps {
 function WorkRow({ project, active, dimmed, reducedMotion, refCb, onActivate }: WorkRowProps) {
   const { go } = useTransition()
   const to = `/work/${project.id}`
+  const rowRef = useRef<HTMLAnchorElement | null>(null)
+
+  // First-view decode of the row's meta (role / category / year): scramble the
+  // same [data-scramble] spans the hover uses, once, when the row scrolls in.
+  // Reuses the hover mechanism (mutating textContent) so it never fights React.
+  useEffect(() => {
+    const el = rowRef.current
+    if (!el || reducedMotion) return
+    const io = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[0]
+        if (!entry?.isIntersecting) return
+        io.disconnect() // decode once
+        // Toward the REAL text (data-text) + overwrite, so a hover landing
+        // mid-decode can't leave the row stuck in binary (and vice versa).
+        scrambleToReal(el.querySelectorAll<HTMLElement>("[data-scramble]"), 0.06)
+      },
+      { threshold: 0.6 }
+    )
+    io.observe(el)
+    return () => io.disconnect()
+  }, [reducedMotion])
 
   const onClick = (e: MouseEvent<HTMLAnchorElement>) => {
     // Let modified clicks (new tab / middle button) behave natively.
@@ -225,7 +297,10 @@ function WorkRow({ project, active, dimmed, reducedMotion, refCb, onActivate }: 
   return (
     <li>
       <Link
-        ref={refCb}
+        ref={(el) => {
+          rowRef.current = el
+          refCb(el)
+        }}
         to={to}
         aria-label={`${project.title} — ${project.role}, ${project.year}`}
         onFocus={onActivate}
@@ -244,19 +319,23 @@ function WorkRow({ project, active, dimmed, reducedMotion, refCb, onActivate }: 
               active ? "neon-b" : "text-white group-hover:text-white"
             ].join(" ")}
           >
-            {project.title}
+            <Decode>{project.title}</Decode>
           </h3>
         </div>
         <div className="flex shrink-0 items-baseline gap-3 text-[10px] md:text-xs font-mono tracking-[0.3em] uppercase text-white/60">
-          <span data-scramble>{project.role}</span>
+          <span data-scramble data-text={project.role}>
+            {project.role}
+          </span>
           {project.category && (
             <>
               <span className="text-white/20">/</span>
-              <span data-scramble>{project.category}</span>
+              <span data-scramble data-text={project.category}>
+                {project.category}
+              </span>
             </>
           )}
           <span className="text-white/20">/</span>
-          <span data-scramble className="text-[var(--color-accent-b)]">
+          <span data-scramble data-text={project.year} className="text-[var(--color-accent-b)]">
             {project.year}
           </span>
         </div>

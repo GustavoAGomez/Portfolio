@@ -31,26 +31,34 @@ export function Footer() {
       <>
         {/* Visit the live site — RIGHT-aligned, domain as a mid headline + an
             outlined pill button (the stack-chip border language). Reads as a CTA,
-            not a list row, and its alignment opposes the LEFT-aligned next block. */}
-        {content.url && (
+            not a list row, and its alignment opposes the LEFT-aligned next block.
+            When the site is still in development (`urlPending`), the domain is
+            replaced by "Próximamente" and the CTA becomes a non-clickable pill. */}
+        {(content.url || content.urlPending) && (
           <section className="min-h-[45vh] flex flex-col items-end justify-center px-6 md:px-16 py-24 text-right pointer-events-none">
             <p className="text-xs font-mono tracking-[0.35em] uppercase text-white/60">
               <Decode>Sitio en vivo</Decode>
             </p>
             <h2 className="mt-6 font-display uppercase text-white text-3xl md:text-5xl" style={{ lineHeight: 1.05 }}>
-              <Decode delay={0.06}>{prettyUrl(content.url)}</Decode>
+              <Decode delay={0.06}>{content.url ? prettyUrl(content.url) : "Próximamente"}</Decode>
             </h2>
-            <a
-              href={content.url}
-              target="_blank"
-              rel="noreferrer"
-              className="group pointer-events-auto mt-8 inline-flex items-center gap-3 rounded-full border border-white/20 px-6 py-3 text-xs font-mono tracking-[0.3em] uppercase text-white/80 transition-colors hover:border-[var(--color-accent-b)] hover:text-[var(--color-accent-b)]"
-            >
-              <Decode delay={0.12}>Visitar la web</Decode>
-              <span aria-hidden="true" className="text-base transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5">
-                ↗
+            {content.url ? (
+              <a
+                href={content.url}
+                target="_blank"
+                rel="noreferrer"
+                className="group pointer-events-auto mt-8 inline-flex items-center gap-3 rounded-full border border-white/20 px-6 py-3 text-xs font-mono tracking-[0.3em] uppercase text-white/80 transition-colors hover:border-[var(--color-accent-b)] hover:text-[var(--color-accent-b)]"
+              >
+                <Decode delay={0.12}>Visitar la web</Decode>
+                <span aria-hidden="true" className="text-base transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5">
+                  ↗
+                </span>
+              </a>
+            ) : (
+              <span className="mt-8 inline-flex items-center gap-3 rounded-full border border-white/10 px-6 py-3 text-xs font-mono tracking-[0.3em] uppercase text-white/40">
+                <Decode delay={0.12}>En desarrollo</Decode>
               </span>
-            </a>
+            )}
           </section>
         )}
 

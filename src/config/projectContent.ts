@@ -19,6 +19,13 @@ export interface StoryBlock {
   video?: string
   /** Media aspect (w/h). */
   aspect?: number
+  /** Extra vertical space (in viewport heights) BEFORE this block, to loosen the
+   *  rhythm between two blocks. Mirrored in BOTH the DOM (Story margin) and the
+   *  WebGL plane anchor (StoryScene), so text and plane stay aligned. */
+  leadGap?: number
+  /** Playback speed for a `video` block (1 = normal). Values < 1 slow it down —
+   *  useful when a captured clip reads too fast on the chromatic plane. */
+  playbackRate?: number
 }
 
 export interface ProjectCredits {
@@ -46,6 +53,9 @@ export interface ProjectContent {
   credits: ProjectCredits
   /** Live site URL — the footer's "visit the site" CTA (absent → no CTA). */
   url?: string
+  /** Site still in development: the footer shows a non-clickable "Próximamente"
+   *  instead of the live-site CTA. Ignored when `url` is present. */
+  urlPending?: boolean
   /** Next project id (footer navigation). */
   nextId?: string
 }
@@ -104,6 +114,70 @@ export const PROJECT_CONTENT: Record<string, ProjectContent> = {
       client: "Tagoro Dive · El Hierro"
     },
     url: "https://tagorodive.com/",
+    nextId: "basket-portfolio"
+  },
+
+  "basket-portfolio": {
+    title: "BASKET PORTFOLIO",
+    tagline: "Portfolio a medida para un entrenador profesional de baloncesto",
+    intro: {
+      heading: "Un escaparate para un entrenador de baloncesto",
+      paragraphs: [
+        "Daniel es entrenador y coordinador de baloncesto con quince años de recorrido —clubes y colegios de referencia, incluido Movistar Estudiantes—. Necesitaba un portfolio que funcionara como escaparate: captar clientes para entrenamientos individuales y abrir puertas a nuevas oportunidades profesionales.",
+        "Diseñé y desarrollé una landing de una sola página centrada en su trayectoria: un hero en vídeo, secciones de información organizada y una galería animada. El proyecto está en desarrollo activo."
+      ]
+    },
+    // Blocks describe the DEVELOPMENT work (what I built + how), not the site's
+    // promotional copy. Media are captures of the features being described.
+    blocks: [
+      {
+        heading: "Un hero a pantalla completa en vídeo",
+        copy: "La portada abre con un vídeo en bucle y silenciado, servido en local y optimizado, con un poster extraído del propio clip para que la sección no aparezca en negro mientras carga. El encuadre usa object-position responsive para no cortar el aro en vertical.",
+        video: "/videos/basket/hero.mp4",
+        aspect: 1.778 // 16:9
+      },
+      {
+        heading: "Galería con pin y parallax",
+        copy: "Con GSAP ScrollTrigger fijo (pin) el bloque central mientras dos columnas de fotos se desplazan a distinta velocidad (scrub). Toda la sección se desactiva bajo prefers-reduced-motion, donde el pin y el parallax dejarían de tener sentido.",
+        video: "/videos/basket/parallax.mp4",
+        aspect: 1.778 // 16:9
+      },
+      {
+        heading: "Interfaz modular y contenido centralizado",
+        copy: "Cada sección es un componente autónomo —un bento grid con spans alternos, una línea de tiempo, tarjetas— y todo el copy (textos, cifras, listas) se sirve desde un único módulo de datos. Cambiar el contenido no toca la interfaz.",
+        image: "/images/basket/bento.jpg",
+        aspect: 1.6
+      },
+      {
+        heading: "Secciones claras con contraste accesible",
+        copy: "La paleta cambia a fondo claro en formación. Para mantener el contraste AA sobre el blanco hueso se usan tokens de tinta más oscuros, verificados con una auditoría de contraste que recorre el DOM renderizado.",
+        image: "/images/basket/formacion.jpg",
+        aspect: 1.665
+      },
+      {
+        heading: "Responsive hasta el móvil",
+        copy: "Toda la interfaz se adapta hasta 390px con variantes propias de Tailwind (incluida una para pantallas bajas): la navegación colapsa y los revelados al hacer scroll acompañan al recorrido.",
+        image: "/images/basket/mobile.jpg",
+        aspect: 0.462, // vista móvil (retrato)
+        leadGap: 0.5 // más aire respecto al bloque de contraste anterior
+      },
+      {
+        heading: "Footer con vídeo de fondo y marquee",
+        copy: "El cierre monta un vídeo de fondo con lazy-load —no pide un byte hasta que te acercas— teñido para respetar la gama del sitio, y encima un marquee infinito de frases motivacionales que corre en bucle sin salto: son dos mitades idénticas que GSAP desplaza un -50% exacto.",
+        video: "/videos/basket/footer.mp4",
+        aspect: 1.778, // 16:9
+        leadGap: 0.5 // más aire respecto al bloque responsive anterior
+      }
+    ],
+    credits: {
+      role: "Desarrollo web front-end — landing de una sola página, animación e interacción",
+      summary:
+        "Portfolio personal para un entrenador de baloncesto: landing de una sola página con React y Vite, estilos con Tailwind CSS 4 (configuración en CSS, sin archivo JS), animación con GSAP (ScrollTrigger para el pin y el parallax) y transiciones con Framer Motion. Arquitectura de componentes autónomos con el contenido centralizado en un único data source, responsive hasta móvil y con reduced-motion respetado en todo el sitio.",
+      stack: ["React", "Vite", "Tailwind CSS 4", "GSAP", "Framer Motion", "TypeScript"],
+      year: "2026",
+      client: "Dani Valero · Madrid"
+    },
+    urlPending: true,
     nextId: "district-4"
   }
 }

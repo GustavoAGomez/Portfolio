@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react"
 import gsap from "gsap"
 import { lenisRef } from "../scroll/useLenis"
+import { Decode } from "../components/Decode"
 
 /**
  * Hero DOM: small semantic text only. The big GUSGQ headline is rendered in 3D
@@ -14,7 +15,10 @@ export function Hero() {
   useEffect(() => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return
     const ctx = gsap.context(() => {
-      gsap.from(meta.current, { opacity: 0, y: 24, duration: 0.9, delay: 0.35, ease: "power2.out" })
+      // Slide only — NO opacity fade. A fade here would hide the <Decode> scramble
+      // (it plays on landing, ~0.1–0.8s, i.e. while the container would still be
+      // fading in), so the effect would never be seen.
+      gsap.from(meta.current, { y: 24, duration: 0.9, delay: 0.1, ease: "power2.out" })
     })
     return () => ctx.revert()
   }, [])
@@ -53,7 +57,9 @@ export function Hero() {
   return (
     <div className="relative min-h-screen flex flex-col justify-between px-6 md:px-16 py-16 pointer-events-none">
       <div ref={meta} className="max-w-xl">
-        <p className="text-xs font-mono tracking-[0.35em] uppercase text-white/60">Creative Technologist — Portfolio</p>
+        <p className="text-xs font-mono tracking-[0.35em] uppercase text-white/60">
+          <Decode>Creative Technologist — Portfolio</Decode>
+        </p>
       </div>
 
       <h1 className="sr-only">GUSGQ</h1>
