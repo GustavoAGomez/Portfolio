@@ -55,7 +55,7 @@ export function Hero() {
   }, [])
 
   return (
-    <div className="relative min-h-screen flex flex-col justify-between px-6 md:px-16 py-16 pointer-events-none">
+    <div className="relative min-h-svh flex flex-col justify-between px-6 md:px-16 py-16 pointer-events-none">
       <div ref={meta} className="max-w-xl">
         <p className="text-xs font-mono tracking-[0.35em] uppercase text-white/60">
           <Decode>Creative Technologist — Portfolio</Decode>
@@ -75,7 +75,7 @@ export function Hero() {
       <div
         aria-hidden="true"
         className={[
-          "pointer-events-none absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-3",
+          "pointer-events-none absolute bottom-[max(2rem,env(safe-area-inset-bottom))] left-1/2 -translate-x-1/2 flex flex-col items-center gap-3",
           "transition-opacity duration-500",
           hasScrolled ? "opacity-0" : "opacity-100"
         ].join(" ")}

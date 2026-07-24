@@ -2,15 +2,18 @@ import { Suspense, useEffect, useLayoutEffect } from "react"
 import { useTexture, useVideoTexture } from "@react-three/drei"
 import { SRGBColorSpace, type Texture } from "three"
 import { Block } from "../parallax/Block"
+import { useBlock } from "../parallax/useBlock"
 import { ChromaticPlane } from "../ChromaticPlane"
 import { useStore, type SectionId } from "../../scroll/store"
 import { getProjectContent, type StoryBlock } from "../../config/projectContent"
 
-// Plane widths in world units. Landscape is deliberately large so the media
+// Desktop plane width CAPS in world units (reached at ~1440px wide). Below that,
+// planes are a FRACTION of the world width (moksha technique) so they never
+// bleed off narrower viewports. Landscape is deliberately large so the media
 // reads big; portrait is narrower because its height is already tall (w/aspect).
 const LANDSCAPE_WIDTH = 9.6
 const PORTRAIT_WIDTH = 6.2
-// Sideways offset of the plane (text sits on the opposite side in the DOM).
+// Max sideways offset of the plane (text sits on the opposite side in the DOM).
 const X_OFFSET = 2.6
 
 /**
@@ -51,12 +54,28 @@ export function StoryScene({ id }: { id: SectionId }) {
 /** One block's plane + parallax slot. Picks the video or image texture variant
  *  (each in its own <Suspense> so a loading video never blanks the others). */
 function StoryBlockPlane({ id, block, index, centerFraction }: { id: SectionId; block: StoryBlock; index: number; centerFraction: number }) {
+  const { worldWidth, viewportPx } = useBlock()
+  // Stacked (centered plane, copy below) until 1024px — mirrors the DOM's `lg:`
+  // breakpoint in Story.tsx, NOT the 768px `mobile` flag: at md widths there is
+  // no room for the side-by-side layout without plane/text overlap.
+  const stacked = viewportPx.width < 1024
   const aspect = block.aspect ?? 1.6
   const portrait = aspect < 1
-  const width = portrait ? PORTRAIT_WIDTH : LANDSCAPE_WIDTH
+  // Stacked: centered, near-full-bleed (moksha's 0.8 content fraction, a touch
+  // wider for landscape). Desktop: fraction of the world width, capped at the
+  // tuned sizes — at ≥1440px this is exactly the previous fixed layout.
+  const width = portrait
+    ? stacked
+      ? worldWidth * 0.58
+      : Math.min(PORTRAIT_WIDTH, worldWidth * 0.4)
+    : stacked
+      ? worldWidth * 0.86
+      : Math.min(LANDSCAPE_WIDTH, worldWidth * 0.62)
   const height = width / aspect
   const left = index % 2 === 0
-  const x = left ? -X_OFFSET : X_OFFSET
+  const x = stacked ? 0 : (left ? -1 : 1) * Math.min(X_OFFSET, ((worldWidth - width) / 2) * 0.66)
+  // Stacked shifts the plane up so the copy (bottom of the DOM slot) clears it.
+  const y = stacked ? Math.min(1.2, height * 0.18) : 0
 
   // Per-block scroll slot within the story section (resize-safe getter). Uses the
   // block's weighted centerFraction so `leadGap` spacing matches the DOM article.
@@ -71,9 +90,9 @@ function StoryBlockPlane({ id, block, index, centerFraction }: { id: SectionId; 
     <Block factor={1} anchor={anchor}>
       <Suspense fallback={null}>
         {block.video ? (
-          <VideoPlane src={block.video} args={args} position={[x, 0, 0]} playbackRate={block.playbackRate} />
+          <VideoPlane src={block.video} args={args} position={[x, y, 0]} playbackRate={block.playbackRate} />
         ) : (
-          <ImagePlane src={block.image ?? ""} args={args} position={[x, 0, 0]} />
+          <ImagePlane src={block.image ?? ""} args={args} position={[x, y, 0]} />
         )}
       </Suspense>
     </Block>

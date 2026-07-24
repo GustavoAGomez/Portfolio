@@ -8,7 +8,7 @@ export function About() {
   if (content) {
     const c = content.credits
     return (
-      <div className="min-h-[72vh] flex items-center px-6 md:px-16 pointer-events-none">
+      <div className="min-h-[72svh] flex items-center px-6 md:px-16 pointer-events-none">
         <div className="max-w-2xl">
           <p className="text-xs font-mono tracking-[0.35em] uppercase text-white/60">
             <Decode>Trabajo</Decode>
@@ -38,7 +38,7 @@ export function About() {
 
   // Generic detail (placeholder projects).
   return (
-    <div className="min-h-screen flex items-center px-6 md:px-16 pointer-events-none">
+    <div className="min-h-svh flex items-center px-6 md:px-16 pointer-events-none">
       <div className="max-w-lg">
         <p className="text-xs font-mono tracking-[0.35em] uppercase text-white/60">About</p>
         <p className="mt-6 font-display text-white text-3xl md:text-5xl" style={{ lineHeight: 1.08 }}>

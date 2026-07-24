@@ -122,7 +122,12 @@ export function TransitionProvider({ children }: { children: ReactNode }) {
       const reveal = navigateFn === null
       const inDur = opts?.inDur ?? DEFORM_IN_S
       const revealHold = reveal ? opts?.hold ?? 0 : 0
-      const revealDisp = opts?.disp ?? MAX_DISP
+      // The displacement peaks are tuned for desktop widths; on a phone the same
+      // absolute px would warp ~a quarter of the screen. Scale down with viewport
+      // width (never below half strength) — ≥1200px stays exactly as tuned.
+      const dispFactor = Math.max(0.5, Math.min(1, window.innerWidth / 1200))
+      const maxDisp = MAX_DISP * dispFactor
+      const revealDisp = (opts?.disp ?? MAX_DISP) * dispFactor
       const revealScale = opts?.scale ?? SCALE_PEAK
       const revealSkew = opts?.skew ?? SKEW_PEAK
       tl.current?.kill()
@@ -148,7 +153,7 @@ export function TransitionProvider({ children }: { children: ReactNode }) {
 
       if (!reveal) {
         // DEFORM-OUT: abrupt liquify + scale/skew + boil, cover rises to total.
-        t.to(dp, { s: MAX_DISP, duration: DEFORM_OUT_S, ease: "power4.in", onUpdate: setDisp }, 0)
+        t.to(dp, { s: maxDisp, duration: DEFORM_OUT_S, ease: "power4.in", onUpdate: setDisp }, 0)
         t.to(sp, { v: SEED_OUT, duration: DEFORM_OUT_S, ease: "none", onUpdate: setSeed }, 0)
         if (fixed) t.to(fixed, { scale: SCALE_PEAK, skewX: SKEW_PEAK, duration: DEFORM_OUT_S, ease: "power4.in" }, 0)
         t.to(panel, { opacity: 1, duration: DEFORM_OUT_S * 0.55, ease: "power2.in" }, DEFORM_OUT_S * 0.45)
@@ -293,7 +298,7 @@ export function RouteBackButton() {
     <button
       type="button"
       onClick={() => go("/")}
-      className="fixed left-6 top-6 z-40 pointer-events-auto text-[10px] font-mono uppercase tracking-[0.35em] text-white/60 transition-colors hover:text-[var(--color-accent-b)] md:left-8 md:top-8 md:text-xs"
+      className="fixed left-[max(1.5rem,env(safe-area-inset-left))] top-[max(1.5rem,env(safe-area-inset-top))] z-40 pointer-events-auto text-[10px] font-mono uppercase tracking-[0.35em] text-white/60 transition-colors hover:text-[var(--color-accent-b)] md:left-8 md:top-8 md:text-xs"
     >
       ← Index
     </button>

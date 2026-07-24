@@ -33,10 +33,14 @@ export function Story() {
           <article
             key={b.video ?? b.image}
             style={lead ? { marginTop: `${lead * 100}vh` } : undefined}
-            className={`min-h-screen flex items-center px-6 md:px-16 ${planeLeft ? "justify-end" : "justify-start"}`}
+            // Mobile/tablet (moksha-style): the plane centers full-width, so the copy
+            // drops to the bottom of the slot, left-aligned. ≥lg restores the
+            // side-by-side alternation opposite the plane (below lg there isn't
+            // room for both without overlapping).
+            className={`min-h-svh flex items-end pb-[14svh] lg:items-center lg:pb-0 justify-start px-6 md:px-16 ${planeLeft ? "lg:justify-end" : "lg:justify-start"}`}
           >
-            <div className={`max-w-sm ${planeLeft ? "text-right" : "text-left"}`}>
-              <h3 className="font-display uppercase tracking-tight text-white text-3xl md:text-5xl" style={{ lineHeight: 1.05 }}>
+            <div className={`max-w-sm text-left ${planeLeft ? "lg:text-right" : "lg:text-left"}`}>
+              <h3 className="font-display uppercase tracking-tight text-white text-2xl md:text-3xl lg:text-5xl" style={{ lineHeight: 1.05 }}>
                 <Decode>{b.heading}</Decode>
               </h3>
               <p className="mt-5 text-sm md:text-base leading-relaxed text-white/70">

@@ -2,6 +2,7 @@ import { useLayoutEffect } from "react"
 import { Text, useTexture } from "@react-three/drei"
 import { SRGBColorSpace, type Texture } from "three"
 import { Block } from "../parallax/Block"
+import { useBlock } from "../parallax/useBlock"
 import { ChromaticPlane } from "../ChromaticPlane"
 import { useStore, type SectionId } from "../../scroll/store"
 import { PROJECTS } from "../../config/projects"
@@ -16,6 +17,9 @@ const PLANE_WIDTH = 6
  * own scroll slot so it centers as you reach it. Alternates left/right.
  */
 export function WorksScene({ id }: { id: SectionId }) {
+  const { worldWidth, viewportPx } = useBlock()
+  // Mirrors the DOM's `lg:` breakpoint in Gallery.tsx (stacked text below 1024).
+  const stacked = viewportPx.width < 1024
   const textures = useTexture(PROJECTS.map((p) => p.image)) as Texture[]
 
   useLayoutEffect(() => {
@@ -29,9 +33,12 @@ export function WorksScene({ id }: { id: SectionId }) {
     <>
       {PROJECTS.map((project, i) => {
         const left = i % 2 === 0
-        const x = left ? -3 : 3
-        const width = PLANE_WIDTH
-        const height = PLANE_WIDTH / project.aspect
+        // Stacked: centered near-full-bleed plane (moksha); desktop: fraction of
+        // the world width capped at the tuned size (≥1440px = previous layout).
+        const width = stacked ? worldWidth * 0.78 : Math.min(PLANE_WIDTH, worldWidth * 0.42)
+        const height = width / project.aspect
+        const x = stacked ? 0 : (left ? -1 : 1) * Math.min(3, (worldWidth - width) * 0.3)
+        const numberX = stacked ? 0 : x + (left ? 1 : -1) * Math.min(2.5, width * 0.42)
         const map = textures[i] ?? null
 
         // Per-project scroll slot within the works section (resize-safe getter).
@@ -49,7 +56,7 @@ export function WorksScene({ id }: { id: SectionId }) {
               color={BRAND.numberDim}
               anchorX="center"
               anchorY="middle"
-              position={[left ? x + 2.5 : x - 2.5, 0, -8]}
+              position={[numberX, 0, -8]}
             >
               {"0" + project.index}
             </Text>

@@ -87,21 +87,41 @@ export function useHomeSnap(enabled: boolean): void {
       touchStartY = null
     }
 
-    // Stop Lenis (it ignores input while stopped) so our snap owns the gesture.
-    lenis.stop()
-    const opts: AddEventListenerOptions = { passive: false }
-    window.addEventListener("wheel", onWheel, opts)
-    window.addEventListener("touchstart", onTouchStart, { passive: true })
-    window.addEventListener("touchmove", onTouchMove, opts)
-    window.addEventListener("touchend", onTouchEnd, { passive: true })
+    // On very short viewports (landscape phones) the works list can be taller
+    // than the screen — a full-jump snap would leave its bottom unreachable, so
+    // the snap only engages while the viewport is tall enough (free scroll below).
+    const tallEnough = window.matchMedia("(min-height: 560px)")
+    let attached = false
 
-    return () => {
-      if (cooldownTimer) window.clearTimeout(cooldownTimer)
+    const opts: AddEventListenerOptions = { passive: false }
+    const attach = () => {
+      if (attached) return
+      attached = true
+      // Stop Lenis (it ignores input while stopped) so our snap owns the gesture.
+      lenis.stop()
+      window.addEventListener("wheel", onWheel, opts)
+      window.addEventListener("touchstart", onTouchStart, { passive: true })
+      window.addEventListener("touchmove", onTouchMove, opts)
+      window.addEventListener("touchend", onTouchEnd, { passive: true })
+    }
+    const detach = () => {
+      if (!attached) return
+      attached = false
       window.removeEventListener("wheel", onWheel, opts)
       window.removeEventListener("touchstart", onTouchStart)
       window.removeEventListener("touchmove", onTouchMove, opts)
       window.removeEventListener("touchend", onTouchEnd)
       lenis.start()
+    }
+    const onTallChange = (e: MediaQueryListEvent) => (e.matches ? attach() : detach())
+
+    if (tallEnough.matches) attach()
+    tallEnough.addEventListener("change", onTallChange)
+
+    return () => {
+      if (cooldownTimer) window.clearTimeout(cooldownTimer)
+      tallEnough.removeEventListener("change", onTallChange)
+      detach()
     }
   }, [enabled, reducedMotion])
 }

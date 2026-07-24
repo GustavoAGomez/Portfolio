@@ -188,6 +188,36 @@ overflowing. **Honors reduced-motion** (shows text immediately, no scramble). Ev
 uses it, with small stagger `delay`s. Duration auto-scales with length (short cap so long paragraphs
 stay fast); the hero pins explicit durations so it keeps its deliberate pace.
 
+## Responsive (mobile / tablet)
+
+The whole site is responsive with **two aligned DOM↔canvas breakpoints** (keep both sides in sync):
+
+- **`mobile` = `< 768px`** (`SCENE.mobileBreakpoint` = Tailwind `md:`): hero headline fraction
+  (`worldWidth * 0.19` vs `0.16` — kept below ~0.2 because the gem's refraction MAGNIFIES the word
+  and larger fractions get the refracted copies cut at the phone edges), thinner hero stripe, and the
+  diamond's `contentMaxWidth` fraction (0.8 vs 0.6, moksha's numbers).
+- **`stacked` = `< 1024px`** (Tailwind `lg:`), used by the MEDIA scenes (`StoryScene`/`WorksScene`)
+  and mirrored by their DOM (`Story.tsx`/`Gallery.tsx`): below lg the chromatic plane is **centered,
+  near-full-bleed** (moksha's mobile technique) and shifted slightly up, while the copy drops to the
+  bottom of the slot (`items-end pb-[14svh]`), left-aligned; `≥lg` restores the side-by-side
+  left/right alternation. md widths do NOT fit the side-by-side layout — that's why these use lg,
+  not md. The works-list row (`WorksList`) also stacks title-over-meta until `lg` (at md the meta
+  strip is wider than the viewport and would crush the title to 0 width).
+- **World-unit sizes are viewport fractions with desktop caps** — `Math.min(cap, worldWidth * f)`
+  everywhere (story planes, works planes/numbers, statement ambient word), with `f` tuned so
+  **≥1440px reproduces the previous fixed layout exactly**. Never reintroduce fixed world sizes.
+- **`min-h-svh` (never `min-h-screen`/`vh`)** for full-viewport sections (mobile URL bar), fluid
+  `clamp()` type for the works titles / footer headlines, `viewport-fit=cover` + safe-area insets
+  (`max(…, env(safe-area-inset-*))`) on fixed UI: RouteBackButton, CornerHud, hero scroll cue.
+- **Touch works list**: hover doesn't exist, so the FIRST tap on a row plays the hover preview
+  (backdrop video + scramble) and a SECOND tap navigates — the pre-tap `active` state is captured on
+  `pointerdown` (before tap-focus mutates it); tapping outside the rows dismisses. Mouse keeps the
+  deterministic position-based selection.
+- **Home snap** only engages while `(min-height: 560px)` matches — short/landscape-phone viewports
+  scroll freely (the works list can exceed the viewport there and a full-jump snap would trap it).
+- The route transition's px displacement peaks scale with viewport width (×0.5 floor, ≥1200px as
+  tuned) in `TransitionProvider`.
+
 ### Static hosting note (GitHub Pages)
 Client routing needs a rewrite fallback to `index.html` for deep links like `/work/:id` (otherwise a
 hard refresh 404s). On GitHub Pages, add a `404.html` copy of `index.html` or switch `BrowserRouter`

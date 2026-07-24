@@ -33,6 +33,10 @@ export const SCENE = {
    * Raw Lenis velocity is divided by this before being damped in the store.
    */
   velocityRef: 40,
-  /** Below this viewport width we degrade the refraction (bounces / count). */
-  mobileBreakpoint: 700
+  /**
+   * Below this viewport width the WebGL side switches to its mobile layout
+   * (centered planes, wider content fraction). Matches Tailwind's `md:` (768px)
+   * so DOM and canvas always flip together.
+   */
+  mobileBreakpoint: 768
 } as const

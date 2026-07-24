@@ -21,7 +21,7 @@ const FONT = ACTIVE_TYPO.displayFontUrl
  */
 export function HeroScene({ id }: { id: SectionId }) {
   const { getCenter } = useSection(id)
-  const { worldWidth } = useBlock()
+  const { worldWidth, mobile } = useBlock()
   const pointer = useRef<Group>(null)
 
   useFrame((state, dt) => {
@@ -41,7 +41,7 @@ export function HeroScene({ id }: { id: SectionId }) {
         <ChromaticPlane
           color={BRAND.numberDim}
           opacity={0.9}
-          args={[60, 2.4, 32, 4]}
+          args={[60, mobile ? 1.5 : 2.4, 32, 4]}
           rotation={[0, 0, SCENE.stripeAngle]}
           position={[0, 0, -12]}
           shiftStrength={0.8}
@@ -55,7 +55,11 @@ export function HeroScene({ id }: { id: SectionId }) {
       <Block factor={1} anchor={getCenter}>
         <Text
           font={FONT}
-          fontSize={worldWidth * 0.16}
+          // Wider fraction on mobile (moksha-style) so the headline keeps its
+          // presence when the physical width shrinks. Kept below ~0.2: the gem
+          // covers the whole phone screen and its refraction MAGNIFIES the word,
+          // so a larger fraction gets the refracted copies cut at the edges.
+          fontSize={worldWidth * (mobile ? 0.19 : 0.16)}
           color={BRAND.text}
           anchorX="center"
           anchorY="middle"

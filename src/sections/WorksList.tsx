@@ -136,7 +136,13 @@ export function WorksList() {
   }, [activeId, reducedMotion])
 
   return (
-    <div className="relative isolate min-h-screen w-full overflow-hidden pointer-events-auto">
+    <div
+      className="relative isolate min-h-svh w-full overflow-hidden pointer-events-auto"
+      // Touch: a tap on the empty area (outside the rows) dismisses the preview.
+      onPointerDown={(e) => {
+        if (e.pointerType === "touch" && !olRef.current?.contains(e.target as Node)) setActiveId(null)
+      }}
+    >
       {/* Background — transparent at idle; the active/persisted project's image
           zooms IN + a legibility veil fades in, and both stay until reset. */}
       <div className="pointer-events-none absolute inset-0 z-0">
@@ -157,7 +163,7 @@ export function WorksList() {
       </div>
 
       {/* List */}
-      <div className="relative z-10 flex min-h-screen flex-col px-6 md:px-16 py-16">
+      <div className="relative z-10 flex min-h-svh flex-col px-6 md:px-16 py-16">
         <header className="flex items-baseline justify-between">
           <p className="text-xs font-mono tracking-[0.35em] uppercase text-white/60">
             <Decode>Selected Work</Decode>
@@ -265,6 +271,9 @@ function WorkRow({ project, active, dimmed, reducedMotion, refCb, onActivate }: 
   const { go } = useTransition()
   const to = `/work/${project.id}`
   const rowRef = useRef<HTMLAnchorElement | null>(null)
+  // Touch two-tap: `active` captured at touch-down, BEFORE the tap's focus/state
+  // updates land — null means the interaction didn't start as a touch.
+  const touchWasActive = useRef<boolean | null>(null)
 
   // First-view decode of the row's meta (role / category / year): scramble the
   // same [data-scramble] spans the hover uses, once, when the row scrolls in.
@@ -290,6 +299,15 @@ function WorkRow({ project, active, dimmed, reducedMotion, refCb, onActivate }: 
   const onClick = (e: MouseEvent<HTMLAnchorElement>) => {
     // Let modified clicks (new tab / middle button) behave natively.
     if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return
+    // Touch: hover doesn't exist, so the FIRST tap plays the hover preview
+    // (backdrop video + scramble) and only a second tap on the same row navigates.
+    if (touchWasActive.current === false) {
+      touchWasActive.current = null
+      e.preventDefault()
+      onActivate()
+      return
+    }
+    touchWasActive.current = null
     e.preventDefault()
     go(to)
   }
@@ -304,9 +322,14 @@ function WorkRow({ project, active, dimmed, reducedMotion, refCb, onActivate }: 
         to={to}
         aria-label={`${project.title} — ${project.role}, ${project.year}`}
         onFocus={onActivate}
+        onPointerDown={(e) => {
+          touchWasActive.current = e.pointerType === "touch" ? active : null
+        }}
         onClick={onClick}
         className={[
-          "group flex flex-col gap-2 py-5 md:flex-row md:items-baseline md:justify-between md:gap-8 md:py-6",
+          // Stacked (title over meta) until lg — at md widths the meta row is
+          // wider than the viewport and would crush the title to zero width.
+          "group flex flex-col gap-2 py-5 lg:flex-row lg:items-baseline lg:justify-between lg:gap-8 lg:py-6",
           "transition-opacity duration-300 outline-none",
           "focus-visible:opacity-100",
           !reducedMotion && dimmed ? "opacity-40" : "opacity-100"
@@ -315,27 +338,27 @@ function WorkRow({ project, active, dimmed, reducedMotion, refCb, onActivate }: 
         <div className="flex min-w-0 items-baseline">
           <h3
             className={[
-              "font-display uppercase leading-none tracking-tight text-5xl md:text-8xl transition-colors duration-300",
+              "font-display uppercase leading-none tracking-tight text-[clamp(2.5rem,11vw,6rem)] transition-colors duration-300",
               active ? "neon-b" : "text-white group-hover:text-white"
             ].join(" ")}
           >
             <Decode>{project.title}</Decode>
           </h3>
         </div>
-        <div className="flex shrink-0 items-baseline gap-3 text-[10px] md:text-xs font-mono tracking-[0.3em] uppercase text-white/60">
-          <span data-scramble data-text={project.role}>
+        <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1 text-[10px] md:text-xs font-mono tracking-[0.3em] uppercase text-white/60 lg:max-w-[50%] lg:justify-end">
+          <span data-scramble data-text={project.role} className="whitespace-nowrap">
             {project.role}
           </span>
           {project.category && (
             <>
               <span className="text-white/20">/</span>
-              <span data-scramble data-text={project.category}>
+              <span data-scramble data-text={project.category} className="whitespace-nowrap">
                 {project.category}
               </span>
             </>
           )}
           <span className="text-white/20">/</span>
-          <span data-scramble data-text={project.year} className="text-[var(--color-accent-b)]">
+          <span data-scramble data-text={project.year} className="text-[var(--color-accent-b)] whitespace-nowrap">
             {project.year}
           </span>
         </div>

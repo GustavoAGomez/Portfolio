@@ -19,8 +19,11 @@ export function Gallery() {
       {PROJECTS.map((project, i) => {
         const left = i % 2 === 0
         return (
-          <article key={project.id} className={`min-h-screen flex items-center px-6 md:px-16 ${left ? "justify-start" : "justify-end"}`}>
-            <div className={`max-w-xs ${left ? "text-left" : "text-right"}`}>
+          <article
+            key={project.id}
+            className={`min-h-svh flex items-end pb-[14svh] lg:items-center lg:pb-0 justify-start px-6 md:px-16 ${left ? "lg:justify-start" : "lg:justify-end"}`}
+          >
+            <div className={`max-w-xs text-left ${left ? "lg:text-left" : "lg:text-right"}`}>
               <h3 className="font-display text-white text-4xl md:text-6xl">{project.title}</h3>
               <p className="mt-3 text-sm text-white/60">{project.role}</p>
               <p className="mt-1 text-xs tracking-widest uppercase text-[var(--color-accent-b)]">{project.year}</p>

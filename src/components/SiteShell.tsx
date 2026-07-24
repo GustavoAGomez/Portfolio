@@ -74,7 +74,7 @@ export function SiteShell() {
       {/* Scrollable, semantic DOM above the canvas (z:10). #warp-main gets the warp
           filter directly during a transition (it's not fixed → no reposition). */}
       <main id="warp-main" className="relative z-10" style={{ pointerEvents: "none" }}>
-        <Suspense fallback={<div style={{ minHeight: "100vh", background: "var(--color-bg)" }} />}>
+        <Suspense fallback={<div style={{ minHeight: "100svh", background: "var(--color-bg)" }} />}>
           {active.map(({ id, anchor, Dom }) => (
             <Section key={id} id={id} anchor={anchor}>
               <Dom />
