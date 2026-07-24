@@ -218,10 +218,21 @@ The whole site is responsive with **two aligned DOM↔canvas breakpoints** (keep
 - The route transition's px displacement peaks scale with viewport width (×0.5 floor, ≥1200px as
   tuned) in `TransitionProvider`.
 
-### Static hosting note (GitHub Pages)
-Client routing needs a rewrite fallback to `index.html` for deep links like `/work/:id` (otherwise a
-hard refresh 404s). On GitHub Pages, add a `404.html` copy of `index.html` or switch `BrowserRouter`
-→ `HashRouter`. Local Vite dev/preview already serves the fallback.
+## Deploy (Netlify)
+
+Hosted on Netlify with its Git integration: **every push to `main` builds and publishes**, and every
+PR / non-main branch gets its own preview URL. Production: **https://gustavo-gomez-portfolio.netlify.app**.
+
+`netlify.toml` (repo root) is the whole config — Netlify reads it, so build settings are NOT edited in
+the dashboard:
+- `pnpm build` → publish `dist`, pinned to Node 20 / pnpm 9 (matches local).
+- **`/*` → `/index.html` 200.** Client routing needs this rewrite fallback or deep links like
+  `/work/:id` 404 on a hard refresh. Local Vite dev/preview already serves the fallback, so this only
+  ever breaks in production — do not remove it. (Same reason any other static host would need a
+  `404.html` copy or `HashRouter`.)
+- Cache headers: `assets/*` and `fonts/*` immutable for a year (Vite hashes the former, the latter
+  never change); `videos|images|models|env/*` a week + `must-revalidate` since those names are stable
+  and get replaced in place.
 
 ## Conventions specific to this repo
 
