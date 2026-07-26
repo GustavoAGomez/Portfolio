@@ -288,10 +288,16 @@ body {
   );
 }
 
-/* Custom circular cursor (components/Cursor.tsx): white disc in `difference`
- * blend → inverts whatever is under it. Above the warp cover (z:100) so the
- * invert rides through route transitions. Must live OUTSIDE #warp-fixed /
- * #warp-main (their transition filter would trap the blend in a local group). */
+/* Custom circular cursor (components/Cursor.tsx). ACCENT disc in `difference`
+ * blend — with the disc painted accent-B (not white) the "negative" always
+ * lands ON PALETTE instead of arbitrary inverted colors:
+ *   dark bg   → |bg − lime|    ≈ lime   (brand)
+ *   white type→ |white − lime| ≈ electric violet (accent-A family)
+ *   lime type → |lime − lime|  ≈ black  (text knocks out under the disc)
+ * Palette-driven via var(), so a palette swap re-aligns the cursor for free.
+ * Above the warp cover (z:100) so the effect rides through route transitions.
+ * Must live OUTSIDE #warp-fixed / #warp-main (their transition filter would
+ * trap the blend in a local group). */
 .site-cursor {
   position: fixed;
   top: 0;
@@ -299,7 +305,7 @@ body {
   width: 26px;
   height: 26px;
   border-radius: 9999px;
-  background: #fff;
+  background: var(--color-accent-b);
   mix-blend-mode: difference;
   pointer-events: none;
   z-index: 200;
