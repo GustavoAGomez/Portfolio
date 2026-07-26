@@ -193,9 +193,15 @@ mounted via the `description` section's `Scene`, so it's **case-study only** (ne
 `components/Decode.tsx` wraps text and plays the **binary `01` scramble→reveal** the Home works list
 uses on hover (GSAP `ScrambleTextPlugin`) — the FIRST time each element scrolls into view
 (`IntersectionObserver`, once). Text already in view on mount (the hero) decodes on landing. It's an
-inline `<span>` (wrap it in the block element that carries the styling), **hidden until it decodes**
-(no pre-decode flash), with `overflowWrap:anywhere` so the space-less binary wraps instead of
-overflowing. **Honors reduced-motion** (shows text immediately, no scramble). Every case-study text
+inline-block `<span>` (wrap it in the block element that carries the styling), **hidden until it
+decodes** (no pre-decode flash). **Layout-stable**: a visibility-hidden GHOST of the real text
+reserves the final layout from first paint and the scramble plays in an absolute overlay (clipped,
+`overflowWrap:anywhere` so the space-less binary wraps) — the binary wraps at different points than
+the words, so scrambling in-flow used to change the paragraph's line count every frame and everything
+below it jumped (worst on mobile). On complete the ghost is revealed and the overlay emptied. Decode
+must stay the SOLE text child of its styled parent (all current usages are) — inline mid-sentence the
+inline-block box would break the line. **Honors reduced-motion** (plain text immediately, no
+ghost/overlay). Every case-study text
 uses it, with small stagger `delay`s. Duration auto-scales with length (short cap so long paragraphs
 stay fast); the hero pins explicit durations so it keeps its deliberate pace.
 

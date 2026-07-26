@@ -20,6 +20,8 @@ interface DiamondDef {
   factor: number
   /** Spin speed. */
   spin: number
+  /** Spin speed under the mobile breakpoint (defaults to `spin`). */
+  mobileSpin?: number
   /** Hidden on mobile to keep the multipass affordable. */
   mobileHidden?: boolean
   /** Fade the gem to nothing as this section scrolls into the viewport centre
@@ -29,7 +31,9 @@ interface DiamondDef {
 
 const DIAMONDS: DiamondDef[] = [
   // Home hero lens — so large it reads as a glassy refraction background.
-  { section: "hero", x: 0, scale: 20, factor: 0.6, spin: 0.2 },
+  // Faster spin on mobile: with the smaller gem/viewport the 0.2 rotation reads
+  // almost static on a phone, so it gets more life there.
+  { section: "hero", x: 0, scale: 20, factor: 0.6, spin: 0.2, mobileSpin: 0.6 },
   // Case-study hero (statement): the SAME oversized gem behind the project title,
   // warping the dim "BEYOND" word for the same background effect. Fades out as the
   // media section ("story") arrives so it never warps the case-study images.
@@ -149,7 +153,7 @@ export function Diamonds() {
       const fade = fadeBounds ? 1 - clamp01((scroll.scrollY + size.height - (fadeBounds.top - fadeSpan)) / fadeSpan) : 1
       const s = (contentMaxWidth / 35) * d.scale * (hidden ? 0.0001 : fade)
       if (!hidden && fade > 0.002) anyVisible = true
-      const spin = t * d.spin
+      const spin = t * (mobile ? d.mobileSpin ?? d.spin : d.spin)
 
       dummy.position.set(mobile ? 0 : d.x, cur, 0)
       if (reducedMotion) dummy.rotation.set(0.4, 0.6, 0)
