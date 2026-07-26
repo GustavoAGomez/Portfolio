@@ -145,6 +145,9 @@ export const PALETTES = {
   /**
    * "Volt" — electric violet primary + acid-lime hover over violet-black. High
    * contrast (violet ↔ lime), fresh and aggressive. Lime is the non-blue hover.
+   * accentA sits at hue 261° — the EXACT complement of the lime (81°) — and a
+   * step darker than the original #7c4dff, so the chromatic fringe matches the
+   * violet family the difference-blend cursor produces over white type.
    */
   volt: {
     bg: "#090711",
@@ -152,7 +155,7 @@ export const PALETTES = {
     text: "#eef2f4",
     textDim: "#453a63",
     numberDim: "#160f2b",
-    accentA: "#7c4dff",
+    accentA: "#5606f0",
     accentB: "#b6ff2e"
   },
   /**
