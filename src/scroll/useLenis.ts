@@ -42,7 +42,7 @@ export function useLenis(): void {
       // px — raising the default 1.7 makes fast flicks slide much further, and a
       // softer syncTouchLerp (default 0.075) stretches the ease-out of that
       // glide. Tune these two for the skatey feel.
-      touchInertiaExponent: 2.2,
+      touchInertiaExponent: 1.8,
       syncTouchLerp: 0.06,
       autoRaf: false
     })
