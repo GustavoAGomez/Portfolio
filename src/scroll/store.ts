@@ -39,10 +39,19 @@ interface AppState {
    * block images to render. Changes only on navigation.
    */
   caseStudyId: string | null
+  /**
+   * Reactive: MEASURED document-space center (px) of each story block's media
+   * slot, written by Story.tsx (mount / resize / reflow). StoryScene anchors its
+   * planes to these — the DOM is the source of truth for where a plane sits, so
+   * slot heights / gaps / copy length can change freely without canvas drift.
+   * Empty until Story measures (planes fall back to the even-split estimate).
+   */
+  storyAnchors: number[]
   registerSection: (id: SectionId, bounds: SectionBounds) => void
   unregisterSection: (id: SectionId) => void
   setReducedMotion: (v: boolean) => void
   setCaseStudyId: (id: string | null) => void
+  setStoryAnchors: (centers: number[]) => void
 }
 
 export const useStore = create<AppState>((set) => ({
@@ -57,8 +66,10 @@ export const useStore = create<AppState>((set) => ({
       delete next[id]
       return { sections: next }
     }),
+  storyAnchors: [],
   setReducedMotion: (v) => set({ reducedMotion: v }),
-  setCaseStudyId: (id) => set((s) => (s.caseStudyId === id ? s : { caseStudyId: id }))
+  setCaseStudyId: (id) => set((s) => (s.caseStudyId === id ? s : { caseStudyId: id })),
+  setStoryAnchors: (centers) => set({ storyAnchors: centers })
 }))
 
 /**

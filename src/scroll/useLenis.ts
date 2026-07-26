@@ -26,11 +26,18 @@ export function useLenis(): void {
     const applyReduced = () => setReducedMotion(mq.matches)
     applyReduced()
 
+    // Touch devices: native touch scrolling bypasses Lenis entirely (it only
+    // tracks it), so its speed can't be tuned. syncTouch hands the gesture to
+    // Lenis → touchMultiplier applies (faster flicks) and scroll velocity feeds
+    // the chromatic effect on touch too. Desktop wheel behaviour is untouched.
+    const coarse = window.matchMedia("(pointer: coarse)").matches
     const lenis = new Lenis({
       lerp: mq.matches ? 1 : 0.1,
       duration: mq.matches ? 0 : 1.1,
       smoothWheel: !mq.matches,
       wheelMultiplier: 1,
+      syncTouch: coarse && !mq.matches,
+      touchMultiplier: 1.6,
       autoRaf: false
     })
     lenisRef.current = lenis

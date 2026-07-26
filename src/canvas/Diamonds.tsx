@@ -33,7 +33,7 @@ const DIAMONDS: DiamondDef[] = [
   // Home hero lens — so large it reads as a glassy refraction background.
   // Faster spin on mobile: with the smaller gem/viewport the 0.2 rotation reads
   // almost static on a phone, so it gets more life there.
-  { section: "hero", x: 0, scale: 20, factor: 0.6, spin: 0.2, mobileSpin: 0.6 },
+  { section: "hero", x: 0, scale: 20, factor: 0.6, spin: 0.2, mobileSpin: 0.5 },
   // Case-study hero (statement): the SAME oversized gem behind the project title,
   // warping the dim "BEYOND" word for the same background effect. Fades out as the
   // media section ("story") arrives so it never warps the case-study images.

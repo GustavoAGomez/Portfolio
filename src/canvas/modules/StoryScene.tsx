@@ -65,6 +65,8 @@ function StoryBlockPlane({ id, block, index, centerFraction }: { id: SectionId; 
   // Stacked: centered, near-full-bleed (moksha's 0.8 content fraction, a touch
   // wider for landscape). Desktop: fraction of the world width, capped at the
   // tuned sizes — at ≥1440px this is exactly the previous fixed layout.
+  // NOTE: the stacked fractions (0.86 / 0.58) size the DOM spacer in Story.tsx
+  // too — keep them in sync so the plane fills its reserved box exactly.
   const width = portrait
     ? stacked
       ? worldWidth * 0.58
@@ -75,13 +77,16 @@ function StoryBlockPlane({ id, block, index, centerFraction }: { id: SectionId; 
   const height = width / aspect
   const left = index % 2 === 0
   const x = stacked ? 0 : (left ? -1 : 1) * Math.min(X_OFFSET, ((worldWidth - width) / 2) * 0.66)
-  // Stacked shifts the plane up so the copy (bottom of the DOM slot) clears it.
-  const y = stacked ? Math.min(1.2, height * 0.18) : 0
 
-  // Per-block scroll slot within the story section (resize-safe getter). Uses the
-  // block's weighted centerFraction so `leadGap` spacing matches the DOM article.
+  // The DOM is the anchor source of truth: Story.tsx measures each block's media
+  // center (the stacked spacer, or the article on ≥lg) into store.storyAnchors —
+  // the plane renders exactly there, whatever the DOM layout does. The even-split
+  // estimate only covers the first frames before the measurement lands.
   const anchor = () => {
-    const b = useStore.getState().sections[id]
+    const st = useStore.getState()
+    const measured = st.storyAnchors[index]
+    if (measured != null) return measured
+    const b = st.sections[id]
     return b ? b.top + centerFraction * b.height : 0
   }
 
@@ -91,9 +96,9 @@ function StoryBlockPlane({ id, block, index, centerFraction }: { id: SectionId; 
     <Block factor={1} anchor={anchor}>
       <Suspense fallback={null}>
         {block.video ? (
-          <VideoPlane src={block.video} args={args} position={[x, y, 0]} playbackRate={block.playbackRate} anchor={anchor} />
+          <VideoPlane src={block.video} args={args} position={[x, 0, 0]} playbackRate={block.playbackRate} anchor={anchor} />
         ) : (
-          <ImagePlane src={block.image ?? ""} args={args} position={[x, y, 0]} />
+          <ImagePlane src={block.image ?? ""} args={args} position={[x, 0, 0]} />
         )}
       </Suspense>
     </Block>

@@ -44,7 +44,12 @@ export function Block({ factor = 1, anchor, position, rotation, scale, children 
     const f = reducedMotion ? 1 : factor
     const anchorPx = anchor ? anchor() : 0
     const target = (scroll.scrollY + viewportPx.height / 2 - anchorPx) * worldPerPixel * f
-    g.position.y = lerp(g.position.y, target, 0.1)
+    // Stacked (<1024px): plane and its DOM copy sit on top of each other, so the
+    // trailing lerp would drag a lagging plane onto the NEXT block's text during
+    // a fast scroll — lock 1:1 instead (both then move with the same scrollY).
+    // Desktop keeps the trail; it's part of the feel and nothing overlaps there.
+    if (viewportPx.width < 1024) g.position.y = target
+    else g.position.y = lerp(g.position.y, target, 0.1)
   })
 
   return (

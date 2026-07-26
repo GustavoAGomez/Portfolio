@@ -37,6 +37,9 @@ Lenis drives everything; the DOM only provides scroll height + accessible text.
   every section id (`hero | statement | description | story | works | gallery | about | footer`).
 - **`useLenis`** (`src/scroll/`) creates Lenis, drives its rAF, and on each scroll event writes
   `scrollY / progress / rawVelocity` (normalized) into `store.scroll`. Mounted once in `SiteShell`.
+  On coarse-pointer (touch) devices it enables **`syncTouch` + `touchMultiplier: 1.6`** — native
+  touch scrolling bypasses Lenis (speed untunable, and no velocity → no chromatic effect on flicks);
+  syncTouch hands the gesture to Lenis so both work. Desktop wheel behaviour unchanged.
 - **`ScrollBridge`** (inside the Canvas) is the store→frame integrator: each frame it damps
   `velocity` toward `rawVelocity` and decays `rawVelocity` to 0. This is **why the Canvas is
   `frameloop="always"`** — the chromatic decay must keep advancing while React is idle.
@@ -150,8 +153,9 @@ shared detail sections, which **branch on whether `content` exists**.
   - `Description` → the **brief** (overline "Encargo", heading, paragraphs). **Right-aligned**
     (`justify-end` + `text-right`) so text alternates left/right down the page. `min-h-[78vh]`.
   - `About` → **credits** (overline "Trabajo", role, summary, stack chips, client·year). `min-h-[72vh]`.
-  - `Story` → the **media walkthrough** (overline "Detalles"): one full-viewport slot per block,
-    heading+copy on the opposite side of the media, text kept in the DOM.
+  - `Story` → the **media walkthrough** (overline "Detalles"): ≥lg one full-viewport slot per block
+    with heading+copy opposite the media; <lg compact slots (spacer + copy under it). It MEASURES
+    the per-block media centers into `store.storyAnchors` for StoryScene (see Responsive).
   - `Footer` → **next project** link (`nextId`) navigated with the warp transition; else a generic
     mailto.
   - (`Description`/`About` were shortened from `min-h-screen` to tighten the gap between them.)
@@ -215,11 +219,19 @@ The whole site is responsive with **two aligned DOM↔canvas breakpoints** (keep
   diamond's `contentMaxWidth` fraction (0.8 vs 0.6, moksha's numbers).
 - **`stacked` = `< 1024px`** (Tailwind `lg:`), used by the MEDIA scenes (`StoryScene`/`WorksScene`)
   and mirrored by their DOM (`Story.tsx`/`Gallery.tsx`): below lg the chromatic plane is **centered,
-  near-full-bleed** (moksha's mobile technique) and shifted slightly up, while the copy drops to the
-  bottom of the slot (`items-end pb-[14svh]`), left-aligned; `≥lg` restores the side-by-side
-  left/right alternation. md widths do NOT fit the side-by-side layout — that's why these use lg,
-  not md. The works-list row (`WorksList`) also stacks title-over-meta until `lg` (at md the meta
-  strip is wider than the viewport and would crush the title to 0 width).
+  near-full-bleed** (moksha's mobile technique). **The story's DOM is the anchor source of truth**:
+  each stacked block is a COMPACT self-sized slot — a `[data-plane-slot]` spacer reserving the
+  plane's exact box (same 0.86/0.58 width fractions as StoryScene — keep in sync) with the copy
+  right under it and breathing via `pt/pb` only — and `Story.tsx` MEASURES each block's media center
+  (spacer below lg, article on ≥lg) into `store.storyAnchors`; StoryScene pins every plane to the
+  measured center (even-split fraction only as pre-measure fallback). So slot heights/gaps/copy can
+  change freely in CSS with zero canvas drift. `≥lg` keeps the full-viewport side-by-side
+  alternation. md widths do NOT fit side-by-side — that's why these use lg, not md. The works-list
+  row (`WorksList`) also stacks title-over-meta until `lg`. Two more alignment invariants:
+  - **Section overlines ("Detalles" / "Selected Work") are `absolute`** — `WorksScene` (gallery)
+    still splits its SECTION height into equal slots, so in-flow header height would drift anchors.
+  - **`<Block>` snaps (no trailing lerp) below 1024px** — stacked text+plane overlap page-wise, so
+    the desktop trailing lag would drag a plane onto the next block's text during fast scrolls.
 - **World-unit sizes are viewport fractions with desktop caps** — `Math.min(cap, worldWidth * f)`
   everywhere (story planes, works planes/numbers, statement ambient word), with `f` tuned so
   **≥1440px reproduces the previous fixed layout exactly**. Never reintroduce fixed world sizes.

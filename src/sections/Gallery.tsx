@@ -12,8 +12,10 @@ import { PROJECTS } from "../config/projects"
  */
 export function Gallery() {
   return (
-    <div className="pointer-events-none">
-      <div className="px-6 md:px-16 pt-24">
+    <div className="pointer-events-none relative">
+      {/* Out of flow — WorksScene splits the section height into equal slots;
+          in-flow header height would drift every plane anchor (cf. Story.tsx). */}
+      <div className="absolute top-0 left-0 px-6 md:px-16 pt-24">
         <p className="text-xs font-mono tracking-[0.35em] uppercase text-white/60">Selected Work</p>
       </div>
       {PROJECTS.map((project, i) => {
