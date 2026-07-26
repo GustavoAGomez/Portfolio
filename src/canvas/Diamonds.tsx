@@ -69,8 +69,18 @@ export function Diamonds() {
   const [envFbo, backfaceFbo, backfaceMaterial, refractionMaterial] = useMemo(() => {
     const w = size.width * ratio
     const h = size.height * ratio
-    const env = new WebGLRenderTarget(w, h)
-    const backface = new WebGLRenderTarget(w, h)
+    // Mobile/tablet: the FBOs render at a capped pixel ratio (≤1.5) — their
+    // content is only ever seen THROUGH the gem's refraction warp, where the
+    // extra resolution is invisible, and the env pass is a full scene render so
+    // its fill-rate dominates the multipass cost. The shader samples both maps
+    // at normalized UVs, so FBO size is independent of `resolution` — that
+    // uniform must stay the SCREEN buffer size (gl_FragCoord domain). ≥1024px
+    // keeps full-res FBOs (previous behaviour, GLSL untouched).
+    const fboRatio = size.width < 1024 ? Math.min(ratio, 1.5) : ratio
+    const fw = Math.round(size.width * fboRatio)
+    const fh = Math.round(size.height * fboRatio)
+    const env = new WebGLRenderTarget(fw, fh)
+    const backface = new WebGLRenderTarget(fw, fh)
     const backfaceMat = new BackfaceMaterial()
     const refractionMat = new RefractionMaterial({
       envMap: env.texture,
@@ -117,6 +127,7 @@ export function Diamonds() {
     const { scroll, sections, reducedMotion } = useStore.getState()
     const t = clock.getElapsedTime()
     const contentMaxWidth = worldWidth * (mobile ? 0.8 : 0.6)
+    let anyVisible = false
 
     DIAMONDS.forEach((d, i) => {
       const bounds = sections[d.section]
@@ -137,6 +148,7 @@ export function Diamonds() {
       const fadeSpan = size.height
       const fade = fadeBounds ? 1 - clamp01((scroll.scrollY + size.height - (fadeBounds.top - fadeSpan)) / fadeSpan) : 1
       const s = (contentMaxWidth / 35) * d.scale * (hidden ? 0.0001 : fade)
+      if (!hidden && fade > 0.002) anyVisible = true
       const spin = t * d.spin
 
       dummy.position.set(mobile ? 0 : d.x, cur, 0)
@@ -147,6 +159,21 @@ export function Diamonds() {
       mesh.setMatrixAt(i, dummy.matrix)
     })
     mesh.instanceMatrix.needsUpdate = true
+
+    // No gem visible (e.g. deep in a case study's story after fadeOutAt shrank it
+    // to nothing): skip the whole double-FBO multipass — 1 scene render instead of
+    // 4. The mesh sits on layer 1 so the layer-0 render excludes it for free; the
+    // FBOs just hold stale (unused) frames until a gem scrolls back into view.
+    // Same manual clear as the multipass, so the background tone doesn't shift.
+    if (!anyVisible) {
+      gl.autoClear = false
+      camera.layers.set(0)
+      gl.setRenderTarget(null)
+      gl.clearColor()
+      gl.clearDepth()
+      gl.render(scene, camera)
+      return
+    }
 
     // ---- EXACT multipass order (GUSGQ diamonds/Diamonds.jsx) ----
     gl.autoClear = false

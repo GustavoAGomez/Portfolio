@@ -25,6 +25,26 @@ const LANDING_SKEW = 5 // start skew deg (vs SKEW_PEAK 2)
 const LANDING_SPLIT = 12 // px RGB-split flash offset during recompose
 const LANDING_SPLIT_OPACITY = 0.3
 
+/**
+ * LITE mode — mobile/tablet (or low-RAM device): skip the SVG displacement
+ * filter entirely. Two reasons, both measured on real phones:
+ * 1. feTurbulence+feDisplacementMap over the full viewport is the worst case for
+ *    SVG filters (cost scales with filtered area; animating `seed` regenerates
+ *    the whole noise field per frame on the CPU).
+ * 2. `filter: url(#warp)` on #warp-fixed wraps the WebGL canvas — Chrome/Android
+ *    then composites GL content through the software filter path, which is the
+ *    flicker seen on some devices.
+ * Lite keeps the visual language via compositor-only properties (transform
+ * scale/skew punch, cover fade, RGB-split flash, grain) — no paint, no filter.
+ * Decided per-run (not per-mount) so rotation/resize picks the right mode.
+ */
+const isLiteWarp = (): boolean =>
+  window.innerWidth < 1024 || ((navigator as { deviceMemory?: number }).deviceMemory ?? 8) <= 4
+
+// Lite compensates for the missing liquify with a slightly harder punch.
+const LITE_SCALE_BOOST = 1.03
+const LITE_SKEW_BOOST = 1.5
+
 /** Per-run overrides — used by the landing to hit harder than a nav transition. */
 interface WarpOpts {
   /** Reveal-only: seconds held fully covered before recomposing. */
@@ -120,6 +140,7 @@ export function TransitionProvider({ children }: { children: ReactNode }) {
       }
       const fixed = document.getElementById("warp-fixed")
       const reveal = navigateFn === null
+      const lite = isLiteWarp()
       const inDur = opts?.inDur ?? DEFORM_IN_S
       const revealHold = reveal ? opts?.hold ?? 0 : 0
       // The displacement peaks are tuned for desktop widths; on a phone the same
@@ -128,8 +149,10 @@ export function TransitionProvider({ children }: { children: ReactNode }) {
       const dispFactor = Math.max(0.5, Math.min(1, window.innerWidth / 1200))
       const maxDisp = MAX_DISP * dispFactor
       const revealDisp = (opts?.disp ?? MAX_DISP) * dispFactor
-      const revealScale = opts?.scale ?? SCALE_PEAK
-      const revealSkew = opts?.skew ?? SKEW_PEAK
+      const revealScale = lite ? (opts?.scale ?? SCALE_PEAK) * LITE_SCALE_BOOST : opts?.scale ?? SCALE_PEAK
+      const revealSkew = lite ? (opts?.skew ?? SKEW_PEAK) + LITE_SKEW_BOOST : opts?.skew ?? SKEW_PEAK
+      const scalePeak = lite ? SCALE_PEAK * LITE_SCALE_BOOST : SCALE_PEAK
+      const skewPeak = lite ? SKEW_PEAK + LITE_SKEW_BOOST : SKEW_PEAK
       tl.current?.kill()
 
       const dp = { s: reveal ? revealDisp : 0 }
@@ -137,13 +160,18 @@ export function TransitionProvider({ children }: { children: ReactNode }) {
       const setDisp = () => disp.setAttribute("scale", dp.s.toFixed(2))
       const setSeed = () => turb.setAttribute("seed", String(Math.round(sp.v)))
 
-      // Apply the warp filter to the real content for the duration.
-      for (const el of warpTargets()) {
-        el.style.filter = "url(#warp)"
-        el.style.willChange = "filter, transform"
+      // Apply the warp filter to the real content for the duration — desktop only.
+      // Lite never touches `filter`, so the canvas stays on the pure GPU path.
+      if (!lite) {
+        for (const el of warpTargets()) {
+          el.style.filter = "url(#warp)"
+          el.style.willChange = "filter, transform"
+        }
+        setDisp()
+        setSeed()
+      } else if (fixed) {
+        fixed.style.willChange = "transform"
       }
-      setDisp()
-      setSeed()
       if (fixed) gsap.set(fixed, reveal ? { scale: revealScale, skewX: revealSkew } : { scale: 1, skewX: 0 })
       gsap.set(panel, { opacity: reveal ? 1 : 0 })
       gsap.set([tintA, tintB], { opacity: 0, x: 0 })
@@ -153,9 +181,12 @@ export function TransitionProvider({ children }: { children: ReactNode }) {
 
       if (!reveal) {
         // DEFORM-OUT: abrupt liquify + scale/skew + boil, cover rises to total.
-        t.to(dp, { s: maxDisp, duration: DEFORM_OUT_S, ease: "power4.in", onUpdate: setDisp }, 0)
-        t.to(sp, { v: SEED_OUT, duration: DEFORM_OUT_S, ease: "none", onUpdate: setSeed }, 0)
-        if (fixed) t.to(fixed, { scale: SCALE_PEAK, skewX: SKEW_PEAK, duration: DEFORM_OUT_S, ease: "power4.in" }, 0)
+        // (lite: transform punch only — no displacement/seed, they'd be no-ops.)
+        if (!lite) {
+          t.to(dp, { s: maxDisp, duration: DEFORM_OUT_S, ease: "power4.in", onUpdate: setDisp }, 0)
+          t.to(sp, { v: SEED_OUT, duration: DEFORM_OUT_S, ease: "none", onUpdate: setSeed }, 0)
+        }
+        if (fixed) t.to(fixed, { scale: scalePeak, skewX: skewPeak, duration: DEFORM_OUT_S, ease: "power4.in" }, 0)
         t.to(panel, { opacity: 1, duration: DEFORM_OUT_S * 0.55, ease: "power2.in" }, DEFORM_OUT_S * 0.45)
         // brief RGB-split flash at the peak
         t.set(tintA, { x: SPLIT }, DEFORM_OUT_S - 0.08)
@@ -171,8 +202,10 @@ export function TransitionProvider({ children }: { children: ReactNode }) {
       // `revealHold` first, so the fresh scene can paint before it uncovers.
       const outStart = reveal ? revealHold : DEFORM_OUT_S + HOLD_S
       t.to(panel, { opacity: 0, duration: inDur, ease: "power2.out" }, outStart)
-      t.to(dp, { s: 0, duration: inDur, ease: "power3.out", onUpdate: setDisp }, outStart)
-      t.to(sp, { v: reveal ? SEED_OUT : SEED_IN, duration: inDur, ease: "none", onUpdate: setSeed }, outStart)
+      if (!lite) {
+        t.to(dp, { s: 0, duration: inDur, ease: "power3.out", onUpdate: setDisp }, outStart)
+        t.to(sp, { v: reveal ? SEED_OUT : SEED_IN, duration: inDur, ease: "none", onUpdate: setSeed }, outStart)
+      }
       if (fixed) t.to(fixed, { scale: 1, skewX: 0, duration: inDur, ease: "power3.out" }, outStart)
 
       // Reveal RGB-split flash (landing): a chromatic kick as the cover lifts and

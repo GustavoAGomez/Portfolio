@@ -1,4 +1,5 @@
-import { Suspense, useEffect, useLayoutEffect } from "react"
+import { Suspense, useEffect, useLayoutEffect, useRef } from "react"
+import { useFrame, useThree } from "@react-three/fiber"
 import { useTexture, useVideoTexture } from "@react-three/drei"
 import { SRGBColorSpace, type Texture } from "three"
 import { Block } from "../parallax/Block"
@@ -90,7 +91,7 @@ function StoryBlockPlane({ id, block, index, centerFraction }: { id: SectionId; 
     <Block factor={1} anchor={anchor}>
       <Suspense fallback={null}>
         {block.video ? (
-          <VideoPlane src={block.video} args={args} position={[x, y, 0]} playbackRate={block.playbackRate} />
+          <VideoPlane src={block.video} args={args} position={[x, y, 0]} playbackRate={block.playbackRate} anchor={anchor} />
         ) : (
           <ImagePlane src={block.image ?? ""} args={args} position={[x, y, 0]} />
         )}
@@ -114,11 +115,18 @@ function ImagePlane({ src, args, position }: PlaneVariantProps) {
   return <ChromaticPlane map={texture} args={args} position={position} shiftStrength={1.6} />
 }
 
-function VideoPlane({ src, args, position, playbackRate }: PlaneVariantProps & { playbackRate?: number }) {
+function VideoPlane({ src, args, position, playbackRate, anchor }: PlaneVariantProps & { playbackRate?: number; anchor: () => number }) {
   // Muted + loop + playsInline so it autoplays everywhere; frameloop="always"
   // keeps the VideoTexture advancing each frame.
   const texture = useVideoTexture(src, { muted: true, loop: true, start: true, playsInline: true, crossOrigin: "anonymous" }) as Texture
   const reducedMotion = useStore((s) => s.reducedMotion)
+  const { size } = useThree()
+  // Proximity gate — decoding EVERY case-study video simultaneously for the whole
+  // scroll is the main non-render cost on mobile (decode + per-frame texture
+  // upload; a paused video produces no new frames, so pausing kills both). True
+  // while this block is near the viewport; starts true because `start: true`
+  // already autoplayed.
+  const nearRef = useRef(true)
   useEffect(() => {
     texture.colorSpace = SRGBColorSpace
   }, [texture])
@@ -132,8 +140,21 @@ function VideoPlane({ src, args, position, playbackRate }: PlaneVariantProps & {
       video.pause()
     } else {
       video.playbackRate = playbackRate ?? 1
-      void video.play().catch(() => {})
+      if (nearRef.current) void video.play().catch(() => {})
     }
   }, [texture, reducedMotion, playbackRate])
+  // Play only while the block is within ~a viewport of the screen (asymmetric
+  // hysteresis: resumes at 1.1·vh, pauses past 1.6·vh, so the boundary never
+  // thrashes). Reading the store + one compare per frame — effectively free.
+  useFrame(() => {
+    const video = texture.image as HTMLVideoElement | undefined
+    if (!video || reducedMotion) return
+    const dist = Math.abs(anchor() - (useStore.getState().scroll.scrollY + size.height / 2))
+    const near = dist < size.height * (nearRef.current ? 1.6 : 1.1)
+    if (near === nearRef.current) return
+    nearRef.current = near
+    if (near) void video.play().catch(() => {})
+    else video.pause()
+  })
   return <ChromaticPlane map={texture} args={args} position={position} shiftStrength={1.6} />
 }

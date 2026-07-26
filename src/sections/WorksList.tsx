@@ -271,9 +271,6 @@ function WorkRow({ project, active, dimmed, reducedMotion, refCb, onActivate }: 
   const { go } = useTransition()
   const to = `/work/${project.id}`
   const rowRef = useRef<HTMLAnchorElement | null>(null)
-  // Touch two-tap: `active` captured at touch-down, BEFORE the tap's focus/state
-  // updates land — null means the interaction didn't start as a touch.
-  const touchWasActive = useRef<boolean | null>(null)
 
   // First-view decode of the row's meta (role / category / year): scramble the
   // same [data-scramble] spans the hover uses, once, when the row scrolls in.
@@ -299,15 +296,9 @@ function WorkRow({ project, active, dimmed, reducedMotion, refCb, onActivate }: 
   const onClick = (e: MouseEvent<HTMLAnchorElement>) => {
     // Let modified clicks (new tab / middle button) behave natively.
     if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return
-    // Touch: hover doesn't exist, so the FIRST tap plays the hover preview
-    // (backdrop video + scramble) and only a second tap on the same row navigates.
-    if (touchWasActive.current === false) {
-      touchWasActive.current = null
-      e.preventDefault()
-      onActivate()
-      return
-    }
-    touchWasActive.current = null
+    // ONE tap/click always navigates — touch included. (There used to be a two-tap
+    // gate on touch so the first tap could show the hover preview; it read as an
+    // unresponsive link, so the preview is now just the press feedback below.)
     e.preventDefault()
     go(to)
   }
@@ -321,10 +312,10 @@ function WorkRow({ project, active, dimmed, reducedMotion, refCb, onActivate }: 
         }}
         to={to}
         aria-label={`${project.title} — ${project.role}, ${project.year}`}
+        // Touch feedback comes from focus (a tap focuses the anchor), NOT from
+        // pointerdown: a finger landing on a row to SCROLL also fires pointerdown,
+        // and activating there would flash the backdrop video on every scroll drag.
         onFocus={onActivate}
-        onPointerDown={(e) => {
-          touchWasActive.current = e.pointerType === "touch" ? active : null
-        }}
         onClick={onClick}
         className={[
           // Stacked (title over meta) until lg — at md widths the meta row is

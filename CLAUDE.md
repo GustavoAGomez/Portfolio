@@ -59,7 +59,14 @@ Lenis drives everything; the DOM only provides scroll height + accessible text.
   `useFrame` owns the render loop** (renders straight to screen in the exact moksha pass order),
   so R3F auto-render is off. Scale is viewport-relative (`s = contentMaxWidth/35 * scale`). FBOs
   are recreated + disposed on resize (`useMemo` on size). The shiny fresnel makes camera-facing
-  facets bright — that's the gem look, intended.
+  facets bright — that's the gem look, intended. Two perf valves (GLSL untouched):
+  - **When NO gem instance is visible** (all hidden or faded to ~0 — e.g. deep in a case study
+    after `fadeOutAt`), the frame skips the whole multipass and does ONE manual scene render
+    (same clear, so the background tone doesn't shift). 4 scene renders/frame → 1 exactly where
+    the story videos + chromatic planes live.
+  - **Below 1024px the FBOs render at a capped pixel ratio (≤1.5)** — their content is only seen
+    through the gem's warp. The `resolution` uniform stays the SCREEN buffer size (it's the
+    `gl_FragCoord` domain); the maps are sampled at normalized UVs, so FBO size is independent.
   - **CRITICAL: no EffectComposer.** A postprocessing composer would fight the manual multipass
     and kill the lens. Grain + vignette are a **CSS overlay** (`.fx-overlay` in `index.css`,
     mounted in `SiteShell`) instead. Background is a **clear color** (`onCreated → gl.setClearColor`),
@@ -153,7 +160,11 @@ shared detail sections, which **branch on whether `content` exists**.
   picks `VideoPlane` (drei `useVideoTexture`) or `ImagePlane` (`useTexture`), each in its own
   `<Suspense>`. Landscape planes are wide (`LANDSCAPE_WIDTH`), portrait narrower. **The Canvas has no
   React Router context**, so StoryScene reads which project to render from `store.caseStudyId` (set by
-  SiteShell) — NOT from the router. `VideoPlane` **pauses the `<video>` under reduced-motion**.
+  SiteShell) — NOT from the router. `VideoPlane` **pauses the `<video>` under reduced-motion**, and
+  **also pauses any video whose block is more than ~a viewport away** (asymmetric hysteresis
+  1.1/1.6·vh so the boundary never thrashes) — otherwise every case-study video decodes + uploads
+  simultaneously for the whole scroll, the main non-render cost on mobile. A paused video produces
+  no new frames, so pausing kills the per-frame texture upload too.
 - **Media assets** live in `public/videos/tagoro/` (`hero.mp4`, `map-zoom.mp4`, `carousel.mp4` — the
   map-zoom/carousel are short boomerang loops, all compressed small) and `public/images/tagoro/`
   (`01-home.jpg` also serves as the works-list thumbnail, `02-map.jpg`, `05-la-isla-v.jpg` portrait).
@@ -209,14 +220,20 @@ The whole site is responsive with **two aligned DOM↔canvas breakpoints** (keep
 - **`min-h-svh` (never `min-h-screen`/`vh`)** for full-viewport sections (mobile URL bar), fluid
   `clamp()` type for the works titles / footer headlines, `viewport-fit=cover` + safe-area insets
   (`max(…, env(safe-area-inset-*))`) on fixed UI: RouteBackButton, CornerHud, hero scroll cue.
-- **Touch works list**: hover doesn't exist, so the FIRST tap on a row plays the hover preview
-  (backdrop video + scramble) and a SECOND tap navigates — the pre-tap `active` state is captured on
-  `pointerdown` (before tap-focus mutates it); tapping outside the rows dismisses. Mouse keeps the
-  deterministic position-based selection.
+- **Touch works list**: ONE tap on a row navigates (there is no two-tap "preview first" gate — it read
+  as a dead link). The hover preview still appears on touch because the tap focuses the anchor and
+  `onFocus` activates the row; it is deliberately NOT triggered on `pointerdown`, since a finger
+  landing on a row to scroll fires that too and would flash the backdrop video on every drag. Tapping
+  outside the rows dismisses. Mouse keeps the deterministic position-based selection.
 - **Home snap** only engages while `(min-height: 560px)` matches — short/landscape-phone viewports
   scroll freely (the works list can exceed the viewport there and a full-jump snap would trap it).
 - The route transition's px displacement peaks scale with viewport width (×0.5 floor, ≥1200px as
-  tuned) in `TransitionProvider`.
+  tuned) in `TransitionProvider`. **Below 1024px (or `navigator.deviceMemory ≤ 4`) the warp runs in
+  LITE mode**: the SVG `feTurbulence`+`feDisplacementMap` filter is never applied — full-viewport
+  displacement is the worst case for SVG filters, and `filter: url(#warp)` over the WebGL canvas
+  forces Chrome/Android through a software-composite path that flickers on some phones. Lite keeps
+  the language with compositor-only pieces (slightly boosted scale/skew punch, cover fade, RGB-split
+  flash, grain); desktop is untouched. Decided per-run in `isLiteWarp()`.
 
 ## Deploy (Netlify)
 
