@@ -39,7 +39,9 @@ Lenis drives everything; the DOM only provides scroll height + accessible text.
   `scrollY / progress / rawVelocity` (normalized) into `store.scroll`. Mounted once in `SiteShell`.
   On coarse-pointer (touch) devices it enables **`syncTouch` + `touchMultiplier: 1.6`** — native
   touch scrolling bypasses Lenis (speed untunable, and no velocity → no chromatic effect on flicks);
-  syncTouch hands the gesture to Lenis so both work. Desktop wheel behaviour unchanged.
+  syncTouch hands the gesture to Lenis so both work. Flick glide is tuned slippery:
+  `touchInertiaExponent: 1.9` (touchend glides `|velocity|^exp` px, default 1.7) + `syncTouchLerp:
+  0.06` (softer ease-out, default 0.075). Desktop wheel behaviour unchanged.
 - **`ScrollBridge`** (inside the Canvas) is the store→frame integrator: each frame it damps
   `velocity` toward `rawVelocity` and decays `rawVelocity` to 0. This is **why the Canvas is
   `frameloop="always"`** — the chromatic decay must keep advancing while React is idle.
@@ -228,8 +230,9 @@ The whole site is responsive with **two aligned DOM↔canvas breakpoints** (keep
   change freely in CSS with zero canvas drift. `≥lg` keeps the full-viewport side-by-side
   alternation. md widths do NOT fit side-by-side — that's why these use lg, not md. The works-list
   row (`WorksList`) also stacks title-over-meta until `lg`. Two more alignment invariants:
-  - **Section overlines ("Detalles" / "Selected Work") are `absolute`** — `WorksScene` (gallery)
-    still splits its SECTION height into equal slots, so in-flow header height would drift anchors.
+  - **Gallery's "Selected Work" overline is `absolute`** — `WorksScene` still splits its SECTION
+    height into equal fraction slots, so in-flow header height would drift its anchors. The story's
+    "Detalles" overline is back IN FLOW (measured anchors absorb its height).
   - **`<Block>` snaps (no trailing lerp) below 1024px** — stacked text+plane overlap page-wise, so
     the desktop trailing lag would drag a plane onto the next block's text during fast scrolls.
 - **World-unit sizes are viewport fractions with desktop caps** — `Math.min(cap, worldWidth * f)`

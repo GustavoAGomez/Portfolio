@@ -57,8 +57,11 @@ export function Story() {
 
   return (
     <div ref={rootRef} className="pointer-events-none relative">
-      {/* Overline out of flow so it adds no height above the first block. */}
-      <div className="absolute top-0 left-0 px-6 md:px-16 pt-24">
+      {/* Overline IN FLOW — safe here because the plane anchors are MEASURED
+          from the DOM (its height just pushes the blocks down and the planes
+          follow). Gallery.tsx still needs its absolute header: WorksScene splits
+          the section into equal fraction slots. */}
+      <div className="px-6 md:px-16 pt-24 pb-6">
         <p className="text-xs font-mono tracking-[0.35em] uppercase text-white/60">
           <Decode>Detalles</Decode>
         </p>
@@ -81,7 +84,7 @@ export function Story() {
             style={lead ? { marginTop: `${lead * 100}vh` } : undefined}
             // Stacked: compact self-sized slot (spacer + copy), breathing via
             // pt/pb. ≥lg: full-viewport slot, copy centered opposite the plane.
-            className={`flex flex-col pt-[10svh] pb-[6svh] px-6 md:px-16 lg:min-h-svh lg:flex-row lg:items-center lg:py-0 lg:justify-normal ${planeLeft ? "lg:justify-end" : "lg:justify-start"}`}
+            className={`flex flex-col pt-[10svh] pb-[6svh] px-6 md:px-16 lg:min-h-svh lg:flex-row lg:items-center lg:py-0 ${planeLeft ? "lg:justify-end" : "lg:justify-start"}`}
           >
             {/* Plane box (stacked only) — the chromatic plane renders exactly
                 here (StoryScene anchors to this element's measured center). */}
