@@ -256,6 +256,10 @@ body {
   font-synthesis: none;
   text-transform: uppercase;
   letter-spacing: -0.02em;
+  /* Tuned for SINGLE-LINE display text (Anton caps span ~0.87em — at 0.86 a
+   * wrapped block collides its lines). This beats any `leading-*` utility in
+   * the cascade: text that can WRAP must set an inline lineHeight ≥1 instead
+   * (Statement h2, Story h3 do). */
   line-height: 0.86;
 }
 

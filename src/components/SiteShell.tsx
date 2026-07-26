@@ -44,7 +44,8 @@ export function SiteShell() {
   useEffect(() => {
     const workId = workIdFromPath(pathname)
     useStore.getState().setCaseStudyId(workId && getProjectContent(workId) ? workId : null)
-    useStore.getState().scroll.scrollY = 0
+    const scroll = useStore.getState().scroll
+    scroll.scrollY = 0
     const lenis = lenisRef.current
     if (lenis) {
       // force:true so it works even while Lenis is stopped by the Home snap.
@@ -53,6 +54,13 @@ export function SiteShell() {
     } else {
       window.scrollTo(0, 0)
     }
+    // The immediate jump above emits a scroll event whose huge delta SATURATES
+    // the velocity — every chromatic plane on the new route would then render
+    // wobbled + RGB-split (reads as "media at the wrong size") until the damped
+    // decay finishes. A route jump is not scroll motion: zero it. AFTER the
+    // scrollTo so the event it emits can't re-write rawVelocity.
+    scroll.rawVelocity = 0
+    scroll.velocity = 0
   }, [pathname])
 
   return (

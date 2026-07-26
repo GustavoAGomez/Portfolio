@@ -37,7 +37,10 @@ export function useLenis(): void {
       smoothWheel: !mq.matches,
       wheelMultiplier: 1,
       syncTouch: coarse && !mq.matches,
-      touchMultiplier: 1.6,
+      // 1:1 finger tracking. touchMultiplier scales the DRAG too (not just the
+      // flick) and any value ≠ 1 reads as robotic on iOS — content must move
+      // exactly with the finger. Speed comes from the flick inertia instead.
+      touchMultiplier: 1,
       // Slippery flick (syncTouch): on touchend Lenis glides |velocity|^exponent
       // px — raising the default 1.7 makes fast flicks slide much further, and a
       // softer syncTouchLerp (default 0.075) stretches the ease-out of that

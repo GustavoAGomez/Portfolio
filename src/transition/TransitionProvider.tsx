@@ -331,7 +331,11 @@ export function RouteBackButton() {
     <button
       type="button"
       onClick={() => go("/")}
-      className="fixed left-[max(1.5rem,env(safe-area-inset-left))] top-[max(1.5rem,env(safe-area-inset-top))] z-40 pointer-events-auto text-[10px] font-mono uppercase tracking-[0.35em] text-white/60 transition-colors hover:text-[var(--color-accent-b)] md:left-8 md:top-8 md:text-xs"
+      // Chip treatment (same language as the credits' stack chips): thin border +
+      // translucent bg + backdrop blur so it stays legible over ANY content that
+      // scrolls under it (story media, light UI screenshots). md:left-16 aligns
+      // it with the sections' px-16 gutter.
+      className="fixed left-[max(1.5rem,env(safe-area-inset-left))] top-[max(1.5rem,env(safe-area-inset-top))] z-40 pointer-events-auto rounded-full border border-white/15 bg-[var(--color-bg)]/40 backdrop-blur-md px-3.5 py-1.5 text-[10px] font-mono uppercase tracking-[0.35em] text-white/70 transition-colors hover:text-[var(--color-accent-b)] hover:border-white/30 md:left-16 md:top-8 md:text-xs"
     >
       ← Index
     </button>

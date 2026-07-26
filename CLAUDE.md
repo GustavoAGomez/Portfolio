@@ -39,9 +39,11 @@ Lenis drives everything; the DOM only provides scroll height + accessible text.
   `scrollY / progress / rawVelocity` (normalized) into `store.scroll`. Mounted once in `SiteShell`.
   On coarse-pointer (touch) devices it enables **`syncTouch` + `touchMultiplier: 1.6`** — native
   touch scrolling bypasses Lenis (speed untunable, and no velocity → no chromatic effect on flicks);
-  syncTouch hands the gesture to Lenis so both work. Flick glide is tuned slippery:
-  `touchInertiaExponent: 1.9` (touchend glides `|velocity|^exp` px, default 1.7) + `syncTouchLerp:
-  0.06` (softer ease-out, default 0.075). Desktop wheel behaviour unchanged.
+  syncTouch hands the gesture to Lenis so both work. Feel tuning: **`touchMultiplier` MUST stay 1**
+  (it scales the DRAG too — anything ≠1 breaks the 1:1 finger tracking and reads robotic on iOS;
+  speed lives in the flick instead), `touchInertiaExponent` (touchend glides `|velocity|^exp` px,
+  default 1.7, currently 1.8) + `syncTouchLerp` (glide ease-out, default 0.075, currently 0.06).
+  Desktop wheel behaviour unchanged.
 - **`ScrollBridge`** (inside the Canvas) is the store→frame integrator: each frame it damps
   `velocity` toward `rawVelocity` and decays `rawVelocity` to 0. This is **why the Canvas is
   `frameloop="always"`** — the chromatic decay must keep advancing while React is idle.
@@ -108,7 +110,10 @@ only which sections are active changes.
 - **Routes** (`SiteShell`): `/` → Home; `/work/:id` → detail (a `DetailGuard` `<Navigate to="/"/>`s
   on an unknown id); `*` → redirect home. Rows in `WorksList` navigate with the transition (below).
 - **On navigation**, SiteShell resets scroll (`lenis.scrollTo(0,{immediate,force})` + `scrollY=0` +
-  `lenis.resize()`) and sets `store.caseStudyId` from the URL. `<Section>` unregisters bounds on
+  `lenis.resize()`) **and zeroes `rawVelocity`/`velocity` AFTER the jump** — the immediate scrollTo
+  emits a scroll event whose delta saturates the velocity, and every chromatic plane on the new
+  route would render wobbled/zoomed ("media at the wrong size") until the decay finished. It also
+  sets `store.caseStudyId` from the URL. `<Section>` unregisters bounds on
   unmount, so no orphan bounds survive a route change.
 
 ### Route transition — the WARP (`src/transition/TransitionProvider.tsx`)
@@ -119,6 +124,10 @@ capture) via an SVG `feDisplacementMap` applied to `#warp-fixed` (the fixed canv
 scale/skew punch, and an opaque cover (+ brief RGB-split flash & grain) hiding the route swap. A
 safety timeout force-finishes and clears inline styles. reduced-motion navigates instantly; browser
 back/forward plays the recompose (deform-in) only. `RouteBackButton` uses it to return Home.
+**The Canvas measures itself with `resize={{ offsetSize: true, … }}`** (layout size, not
+`getBoundingClientRect`): the warp's scale transform on `#warp-fixed` inflates the bounding rect, and
+without offsetSize R3F resized the whole world ~19% during every transition (story media visibly
+oversized, snapping back only when the warp cleared). Keep offsetSize when touching Canvas props.
 
 ### Two render modes — the diamond owns the loop on Home AND on case studies
 - **Diamond present** (Home hero, or a case-study `description`): `<Diamonds>` runs a **priority-1
@@ -153,8 +162,10 @@ shared detail sections, which **branch on whether `content` exists**.
 - **Section roles** (each `sections/*.tsx` branches on `content`):
   - `Statement` → project **title + tagline** (centered). Overline decodes on landing (below).
   - `Description` → the **brief** (overline "Encargo", heading, paragraphs). **Right-aligned**
-    (`justify-end` + `text-right`) so text alternates left/right down the page. `min-h-[78vh]`.
-  - `About` → **credits** (overline "Trabajo", role, summary, stack chips, client·year). `min-h-[72vh]`.
+    (`justify-end` + `text-right`) so text alternates left/right down the page. `min-h-[78svh]`.
+  - `About` → **credits** (overline "Trabajo", role, summary, stack chips, client·year). `min-h-[72svh]`.
+  - Both carry `py-[12svh]`: min-h only guarantees air while content is SHORTER than it — long copy
+    on phones outgrows the box and the next section starts glued to the last line without the py.
   - `Story` → the **media walkthrough** (overline "Detalles"): ≥lg one full-viewport slot per block
     with heading+copy opposite the media; <lg compact slots (spacer + copy under it). It MEASURES
     the per-block media centers into `store.storyAnchors` for StoryScene (see Responsive).

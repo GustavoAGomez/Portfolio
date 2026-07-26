@@ -46,6 +46,14 @@ export function Scene({ sections }: SceneProps) {
         dpr={SCENE.dpr}
         gl={{ antialias: true, alpha: false, powerPreference: "high-performance" }}
         camera={{ zoom: SCENE.zoom, position: SCENE.cameraPosition, near: SCENE.near, far: SCENE.far }}
+        // offsetSize: measure the canvas by LAYOUT size (offsetWidth), not
+        // getBoundingClientRect — the route-warp scales #warp-fixed with a CSS
+        // transform, and bounding-rect measurement made R3F believe the viewport
+        // grew ~19% during every transition: the whole world (story planes!)
+        // resized oversized, then snapped back when the warp cleared. Layout
+        // size never changes during the warp, so world sizes stay correct (and
+        // the diamond FBOs stop being recreated mid-transition).
+        resize={{ offsetSize: true, scroll: true, debounce: { scroll: 50, resize: 0 } }}
         frameloop="always"
         onCreated={({ gl }) => gl.setClearColor(BRAND.bg, 1)}
         style={{ position: "fixed", inset: 0, width: "100vw", height: "100vh", zIndex: 0 }}

@@ -13,7 +13,12 @@ export function Description() {
   if (!intro) return null
 
   return (
-    <div className="min-h-[78svh] flex items-center justify-start md:justify-end px-6 md:px-16 pointer-events-none">
+    // py: when the copy is TALLER than the min-h (long briefs on phones) the
+    // flex box grows to exactly the content and the next section starts glued
+    // to the last line — the padding guarantees breathing room in that case
+    // (with short content the min-h + centering dominates, so desktop is
+    // untouched).
+    <div className="min-h-[78svh] py-[12svh] flex items-center justify-start md:justify-end px-6 md:px-16 pointer-events-none">
       <div className="max-w-3xl text-left md:text-right">
         <p className="text-xs font-mono tracking-[0.35em] uppercase text-white/60">
           <Decode>Encargo</Decode>

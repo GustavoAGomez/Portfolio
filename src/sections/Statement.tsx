@@ -12,7 +12,11 @@ export function Statement() {
   if (content) {
     return (
       <div className="min-h-svh flex flex-col items-center justify-center px-6 text-center pointer-events-none">
-        <h2 ref={line} className="font-display uppercase leading-[0.9] tracking-tight text-white text-[14vw] md:text-[10vw]">
+        {/* Inline lineHeight (like Story's h3): .font-display hard-sets 0.86 —
+            tuned for SINGLE-line display text — and beats any leading-* utility
+            in the cascade; at 0.86 a wrapped title (mobile) collides its lines
+            (Anton caps span ~0.87em). Inline style wins over the class. */}
+        <h2 ref={line} className="font-display uppercase tracking-tight text-white text-[14vw] md:text-[10vw]" style={{ lineHeight: 1 }}>
           <Decode duration={0.6}>{content.title}</Decode>
         </h2>
         <p className="mt-6 text-xs md:text-sm font-mono tracking-[0.35em] uppercase text-[var(--color-accent-b)]">
@@ -27,7 +31,8 @@ export function Statement() {
   // Generic detail (placeholder projects).
   return (
     <div className="min-h-svh flex items-center justify-center px-6 pointer-events-none">
-      <h2 ref={line} className="font-display text-center leading-[0.9] text-[13vw] md:text-[9vw]">
+      {/* Inline lineHeight: this one always wraps (3 lines) — see note above. */}
+      <h2 ref={line} className="font-display text-center text-[13vw] md:text-[9vw]" style={{ lineHeight: 1 }}>
         <span className="text-white">CULTURE IS</span>
         <br />
         <span className="neon-b">NOT YOUR</span>

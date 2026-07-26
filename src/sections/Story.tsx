@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react"
+import { useLayoutEffect, useRef, type CSSProperties } from "react"
 import { useCurrentProject } from "../routes/useCurrentProject"
 import { useStore } from "../scroll/store"
 import { Decode } from "../components/Decode"
@@ -28,8 +28,10 @@ export function Story() {
 
   // Measure media centers (doc-space) on mount, resize and any reflow of the
   // section (ResizeObserver on the root catches copy/fonts reflows). rect.top +
-  // scrollY is scroll-independent, so WHEN we measure doesn't matter.
-  useEffect(() => {
+  // scrollY is scroll-independent, so WHEN we measure doesn't matter — but it
+  // runs as a LAYOUT effect so the anchors are right before the first paint of
+  // the route (no visible snap from the fallback estimate).
+  useLayoutEffect(() => {
     const root = rootRef.current
     if (!root || !content) return
     const measure = () => {
@@ -72,7 +74,9 @@ export function Story() {
         // on the opposite side (mirrored for odd blocks) so text stays readable.
         const planeLeft = i % 2 === 0
         // `leadGap` (viewport heights) loosens the rhythm before a block. The
-        // measured anchors absorb it automatically.
+        // measured anchors absorb it automatically. Stacked compresses it hard
+        // (12svh per unit instead of 100vh): the compact slots already carry
+        // their own rhythm, and a full-viewport gap reads as dead space there.
         const lead = b.leadGap ?? 0
         // Spacer mirrors StoryScene's stacked plane box: width fraction of the
         // viewport (86vw landscape / 58vw portrait) at the block's aspect.
@@ -81,10 +85,10 @@ export function Story() {
         return (
           <article
             key={b.video ?? b.image}
-            style={lead ? { marginTop: `${lead * 100}vh` } : undefined}
+            style={lead ? ({ "--lead-mt": `${lead * 12}svh`, "--lead-mt-lg": `${lead * 100}vh` } as CSSProperties) : undefined}
             // Stacked: compact self-sized slot (spacer + copy), breathing via
             // pt/pb. ≥lg: full-viewport slot, copy centered opposite the plane.
-            className={`flex flex-col pt-[10svh] pb-[6svh] px-6 md:px-16 lg:min-h-svh lg:flex-row lg:items-center lg:py-0 ${planeLeft ? "lg:justify-end" : "lg:justify-start"}`}
+            className={`mt-[var(--lead-mt)] lg:mt-[var(--lead-mt-lg)] flex flex-col pt-[10svh] pb-[6svh] px-6 md:px-16 lg:min-h-svh lg:flex-row lg:items-center lg:py-0 ${planeLeft ? "lg:justify-end" : "lg:justify-start"}`}
           >
             {/* Plane box (stacked only) — the chromatic plane renders exactly
                 here (StoryScene anchors to this element's measured center). */}
