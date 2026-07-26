@@ -10,6 +10,7 @@ import { useLenis, lenisRef } from "../scroll/useLenis"
 import { useHomeSnap } from "../scroll/useHomeSnap"
 import { useStore } from "../scroll/store"
 import { TransitionProvider, RouteBackButton } from "../transition/TransitionProvider"
+import { Cursor } from "./Cursor"
 
 /** Route logic only: an invalid `/work/:id` redirects home. Renders no content
  *  (the section content is owned by the shell's <main>, driven by the URL). */
@@ -93,6 +94,10 @@ export function SiteShell() {
 
       {/* Back-to-home control on detail routes (navigates with the iris). */}
       <RouteBackButton />
+
+      {/* Inverting circular cursor — desktop (fine pointer) only. Outside the
+          warp layers so their transition filter can't trap its blend mode. */}
+      <Cursor />
 
       {/* Route logic (validation / redirects) — no visible content of its own. */}
       <Routes>

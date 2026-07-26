@@ -288,6 +288,30 @@ body {
   );
 }
 
+/* Custom circular cursor (components/Cursor.tsx): white disc in `difference`
+ * blend → inverts whatever is under it. Above the warp cover (z:100) so the
+ * invert rides through route transitions. Must live OUTSIDE #warp-fixed /
+ * #warp-main (their transition filter would trap the blend in a local group). */
+.site-cursor {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 26px;
+  height: 26px;
+  border-radius: 9999px;
+  background: #fff;
+  mix-blend-mode: difference;
+  pointer-events: none;
+  z-index: 200;
+  opacity: 0;
+  will-change: transform;
+}
+/* Hide the native cursor everywhere while the custom one is mounted. */
+html.custom-cursor,
+html.custom-cursor * {
+  cursor: none !important;
+}
+
 /* Grain + vignette overlay — replaces the postprocessing composer, which is
  * incompatible with the diamond's manual multipass render. Sits above the canvas
  * (z:5), below the DOM text (z:10). pointer-events:none so it never blocks. */

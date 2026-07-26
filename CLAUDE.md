@@ -301,5 +301,12 @@ the dashboard:
   `videos/`.
 - The `<Canvas>` is wrapped in `CanvasErrorBoundary` so a WebGL-context failure degrades to
   DOM-only instead of blanking the page.
+- **Custom cursor** (`components/Cursor.tsx` + `.site-cursor` in index.css): white disc in
+  `mix-blend-mode: difference` (inverts anything under it — over the lime hover title it lands on
+  the palette's violet, near-complements). quickTo trailing, delegated-hover growth over
+  `a/button/[data-cursor]` (back.out pop, shrink on press). Fine-pointer only; reduced-motion keeps
+  the native cursor. Mounted in SiteShell OUTSIDE `#warp-fixed`/`#warp-main` — their transition
+  filter would trap the blend — at z:200 (above the warp cover). `html.custom-cursor` hides the
+  native cursor globally.
 - Pinned to **React 18 → R3F 8 / drei 9** on purpose (R3F 9 / drei 10 require React 19). Do not
   bump these to "latest".
