@@ -4,10 +4,9 @@ import { Text } from "@react-three/drei"
 import { Group } from "three"
 import { Block } from "../parallax/Block"
 import { useBlock } from "../parallax/useBlock"
-import { ChromaticPlane } from "../ChromaticPlane"
 import { useSection } from "../../scroll/useSection"
 import { useStore, type SectionId } from "../../scroll/store"
-import { SCENE, BRAND } from "../../config/tokens"
+import { BRAND } from "../../config/tokens"
 import { ACTIVE_TYPO } from "../../config/typography"
 import { damp } from "../../lib/math"
 
@@ -36,6 +35,10 @@ export function HeroScene({ id }: { id: SectionId }) {
 
   return (
     <group ref={pointer}>
+      {/* Diagonal stripe + chromatic wash: desactivados. Se dejan como
+          referencia — al reactivarlos hay que volver a importar `ChromaticPlane`
+          y `SCENE` (tsc corre con noUnusedLocals y el build de Netlify falla si
+          se importan sin usar). */}
       {/* Diagonal stripe, slow background factor. */}
       {/* <Block factor={0.5} anchor={getCenter}>
         <ChromaticPlane
