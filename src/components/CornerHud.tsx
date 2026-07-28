@@ -117,7 +117,7 @@ export function CornerHud({ links = SITE_LINKS, variant = "overlay" }: CornerHud
             key={l.label}
             href={l.href}
             {...(l.external ? { target: "_blank", rel: "noreferrer" } : {})}
-            className="transition-colors hover:text-[var(--color-accent-b)]"
+            className="hover-neon-b"
           >
             <Decode delay={0.1 + i * 0.08}>{l.label}</Decode>
           </a>

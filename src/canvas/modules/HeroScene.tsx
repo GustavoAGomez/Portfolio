@@ -37,7 +37,7 @@ export function HeroScene({ id }: { id: SectionId }) {
   return (
     <group ref={pointer}>
       {/* Diagonal stripe, slow background factor. */}
-      <Block factor={0.5} anchor={getCenter}>
+      {/* <Block factor={0.5} anchor={getCenter}>
         <ChromaticPlane
           color={BRAND.numberDim}
           opacity={0.9}
@@ -46,11 +46,11 @@ export function HeroScene({ id }: { id: SectionId }) {
           position={[0, 0, -12]}
           shiftStrength={0.8}
         />
-      </Block>
+      </Block> */}
       {/* Faint chromatic wash behind the title. */}
-      <Block factor={0.8} anchor={getCenter}>
+      {/* <Block factor={0.8} anchor={getCenter}>
         <ChromaticPlane color={BRAND.accentA} opacity={0.05} args={[14, 9, 16, 16]} position={[0, 0, -6]} shiftStrength={1.2} />
-      </Block>
+      </Block> */}
       {/* The headline — 3D so the diamond can refract it (layer 0, z behind the gem). */}
       <Block factor={1} anchor={getCenter}>
         <Text

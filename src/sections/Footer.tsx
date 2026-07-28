@@ -73,7 +73,7 @@ export function Footer() {
                   <Decode>Siguiente proyecto</Decode>
                 </p>
                 <Link to={nextTo} onClick={onNext} className="group pointer-events-auto mt-4 flex items-baseline gap-4 md:gap-6">
-                  <span className="font-display uppercase text-white text-[clamp(2.25rem,9vw,6rem)] leading-none transition-colors group-hover:text-[var(--color-accent-b)]">
+                  <span className="font-display uppercase text-white text-[clamp(2.25rem,9vw,6rem)] leading-none hover-neon-b">
                     <Decode delay={0.06}>{next.title}</Decode>
                   </span>
                   <span aria-hidden="true" className="font-display text-[clamp(1.5rem,5vw,3.75rem)] text-white/40 transition-all group-hover:translate-x-1 group-hover:text-[var(--color-accent-b)]">
@@ -87,7 +87,7 @@ export function Footer() {
                   <Decode>Contacto</Decode>
                 </p>
                 <a href="mailto:stgustavo.gomez@gmail.com" className="group pointer-events-auto mt-4 flex items-baseline gap-4 md:gap-6">
-                  <span className="font-display uppercase text-white text-[clamp(2.25rem,9vw,6rem)] leading-none transition-colors group-hover:text-[var(--color-accent-b)]">
+                  <span className="font-display uppercase text-white text-[clamp(2.25rem,9vw,6rem)] leading-none hover-neon-b">
                     <Decode delay={0.06}>Hablemos</Decode>
                   </span>
                   <span aria-hidden="true" className="font-display text-[clamp(1.5rem,5vw,3.75rem)] text-white/40 transition-all group-hover:translate-x-1 group-hover:text-[var(--color-accent-b)]">
@@ -111,7 +111,7 @@ export function Footer() {
       <div className="diagonal-stripe absolute inset-0" />
       <div className="relative px-6 md:px-16 pt-24 pb-10">
         <p className="text-xs font-mono tracking-[0.35em] uppercase text-white/60">Contact</p>
-        <a href="mailto:stgustavo.gomez@gmail.com" className="pointer-events-auto inline-block font-display text-white text-[clamp(2.5rem,9vw,6rem)] mt-4 hover:neon-b transition-all">
+        <a href="mailto:stgustavo.gomez@gmail.com" className="pointer-events-auto inline-block font-display text-white text-[clamp(2.5rem,9vw,6rem)] mt-4 hover-neon-b">
           SAY HELLO
         </a>
         <p className="mt-8 text-xs text-white/40">© {new Date().getFullYear()} — Built with three.js, R3F &amp; Lenis.</p>

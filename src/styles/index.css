@@ -35,6 +35,7 @@
   font-style: normal;
   font-display: swap;
 }
+
 /* Batch fonts (lazy — only the active system's faces are actually fetched). */
 @font-face {
   font-family: "Chakra Petch";
@@ -43,6 +44,7 @@
   font-style: normal;
   font-display: swap;
 }
+
 @font-face {
   font-family: "Rajdhani";
   src: url("/fonts/Rajdhani-Bold.woff2") format("woff2");
@@ -50,6 +52,7 @@
   font-style: normal;
   font-display: swap;
 }
+
 @font-face {
   font-family: "Michroma";
   src: url("/fonts/Michroma-Regular.woff2") format("woff2");
@@ -57,6 +60,7 @@
   font-style: normal;
   font-display: swap;
 }
+
 @font-face {
   font-family: "Bruno Ace";
   src: url("/fonts/BrunoAce-Regular.woff2") format("woff2");
@@ -64,6 +68,7 @@
   font-style: normal;
   font-display: swap;
 }
+
 @font-face {
   font-family: "Orbitron";
   src: url("/fonts/Orbitron-Bold.woff2") format("woff2");
@@ -71,6 +76,7 @@
   font-style: normal;
   font-display: swap;
 }
+
 @font-face {
   font-family: "Space Grotesk";
   src: url("/fonts/SpaceGrotesk-Regular.woff2") format("woff2");
@@ -78,6 +84,7 @@
   font-style: normal;
   font-display: swap;
 }
+
 @font-face {
   font-family: "Space Grotesk";
   src: url("/fonts/SpaceGrotesk-Bold.woff2") format("woff2");
@@ -85,6 +92,7 @@
   font-style: normal;
   font-display: swap;
 }
+
 @font-face {
   font-family: "Space Mono";
   src: url("/fonts/SpaceMono-Regular.woff2") format("woff2");
@@ -92,6 +100,7 @@
   font-style: normal;
   font-display: swap;
 }
+
 /* Batch 5 — Fontshare (Awwwards-tier, free commercial) + JetBrains Mono. */
 @font-face {
   font-family: "Clash Display";
@@ -100,6 +109,7 @@
   font-style: normal;
   font-display: swap;
 }
+
 @font-face {
   font-family: "Satoshi";
   src: url("/fonts/Satoshi-Regular.woff2") format("woff2");
@@ -107,6 +117,7 @@
   font-style: normal;
   font-display: swap;
 }
+
 @font-face {
   font-family: "Satoshi";
   src: url("/fonts/Satoshi-Bold.woff2") format("woff2");
@@ -114,6 +125,7 @@
   font-style: normal;
   font-display: swap;
 }
+
 @font-face {
   font-family: "Cabinet Grotesk";
   src: url("/fonts/CabinetGrotesk-Bold.woff2") format("woff2");
@@ -121,6 +133,7 @@
   font-style: normal;
   font-display: swap;
 }
+
 @font-face {
   font-family: "General Sans";
   src: url("/fonts/GeneralSans-Regular.woff2") format("woff2");
@@ -128,6 +141,7 @@
   font-style: normal;
   font-display: swap;
 }
+
 @font-face {
   font-family: "General Sans";
   src: url("/fonts/GeneralSans-Semibold.woff2") format("woff2");
@@ -135,6 +149,7 @@
   font-style: normal;
   font-display: swap;
 }
+
 @font-face {
   font-family: "JetBrains Mono";
   src: url("/fonts/JetBrainsMono-Medium.woff2") format("woff2");
@@ -142,6 +157,7 @@
   font-style: normal;
   font-display: swap;
 }
+
 /* Batch 6 — Fontshare oversized-display sets. */
 @font-face {
   font-family: "Tanker";
@@ -150,6 +166,7 @@
   font-style: normal;
   font-display: swap;
 }
+
 @font-face {
   font-family: "Array";
   src: url("/fonts/Array-Regular.woff2") format("woff2");
@@ -157,6 +174,7 @@
   font-style: normal;
   font-display: swap;
 }
+
 @font-face {
   font-family: "Supreme";
   src: url("/fonts/Supreme-Regular.woff2") format("woff2");
@@ -164,6 +182,7 @@
   font-style: normal;
   font-display: swap;
 }
+
 @font-face {
   font-family: "Supreme";
   src: url("/fonts/Supreme-Bold.woff2") format("woff2");
@@ -171,6 +190,7 @@
   font-style: normal;
   font-display: swap;
 }
+
 /* Batch 7 — more Tanker-adjacent oversized displays (Google, free). */
 @font-face {
   font-family: "Unbounded";
@@ -179,6 +199,7 @@
   font-style: normal;
   font-display: swap;
 }
+
 @font-face {
   font-family: "Bricolage Grotesque";
   src: url("/fonts/BricolageGrotesque-Bold.woff2") format("woff2");
@@ -186,6 +207,7 @@
   font-style: normal;
   font-display: swap;
 }
+
 @font-face {
   font-family: "Syne";
   src: url("/fonts/Syne-Bold.woff2") format("woff2");
@@ -193,6 +215,7 @@
   font-style: normal;
   font-display: swap;
 }
+
 @font-face {
   font-family: "IBM Plex Sans";
   src: url("/fonts/IBMPlexSans-Regular.woff2") format("woff2");
@@ -200,6 +223,7 @@
   font-style: normal;
   font-display: swap;
 }
+
 @font-face {
   font-family: "IBM Plex Sans";
   src: url("/fonts/IBMPlexSans-SemiBold.woff2") format("woff2");
@@ -207,6 +231,7 @@
   font-style: normal;
   font-display: swap;
 }
+
 @font-face {
   font-family: "IBM Plex Mono";
   src: url("/fonts/IBMPlexMono-Medium.woff2") format("woff2");
@@ -220,12 +245,15 @@ html.lenis,
 html.lenis body {
   height: auto;
 }
+
 .lenis.lenis-smooth {
   scroll-behavior: auto !important;
 }
+
 .lenis.lenis-smooth [data-lenis-prevent] {
   overscroll-behavior: contain;
 }
+
 .lenis.lenis-stopped {
   overflow: hidden;
 }
@@ -261,6 +289,7 @@ body {
    * the cascade: text that can WRAP must set an inline lineHeight ≥1 instead
    * (Statement h2, Story h3 do). */
   line-height: 0.86;
+  /* white-space: nowrap; */
 }
 
 /* Neon glow for the statement / accents. Glow colour tracks the palette via the
@@ -272,6 +301,7 @@ body {
     0 0 0.35em rgba(var(--accent-b-rgb), 0.35),
     0 0 1.1em rgba(var(--accent-b-rgb), 0.18);
 }
+
 .neon-a {
   color: var(--color-accent-a);
   text-shadow:
@@ -279,25 +309,54 @@ body {
     0 0 0.4em rgba(var(--accent-a-rgb), 0.3);
 }
 
-/* Recurring diagonal stripe (~PI/8 ≈ 22.5deg). */
-.diagonal-stripe {
-  background: repeating-linear-gradient(
-    112.5deg,
-    transparent 0 22px,
-    rgba(255, 255, 255, 0.04) 22px 24px
-  );
+/* HOVER = LIME, siempre. Regla de color para CUALQUIER texto interactivo, y la
+ * razón es el cursor: el disco es accent-B en `difference`, así que
+ *   sobre texto lime  → |lime − lime|  = NEGRO  (disco verde, letras negras) ✔
+ *   sobre texto blanco→ |blanco − lime| = violeta                            ✘
+ * Un hover que se queda en blanco rompe el look. `.hover-neon-b` aplica el
+ * glow de .neon-b al pasar por encima — en el propio elemento o en su `group`
+ * (fila / link con varios spans), y también en :focus-visible (teclado + tap,
+ * que es como se activa la lista en táctil). */
+.hover-neon-b {
+  transition:
+    color 300ms ease,
+    text-shadow 300ms ease;
 }
 
-/* Custom circular cursor (components/Cursor.tsx). ACCENT disc in `difference`
- * blend — with the disc painted accent-B (not white) the "negative" always
- * lands ON PALETTE instead of arbitrary inverted colors:
- *   dark bg   → |bg − lime|    ≈ lime   (brand)
- *   white type→ |white − lime| ≈ electric violet (accent-A family)
- *   lime type → |lime − lime|  ≈ black  (text knocks out under the disc)
- * Palette-driven via var(), so a palette swap re-aligns the cursor for free.
- * Above the warp cover (z:100) so the effect rides through route transitions.
- * Must live OUTSIDE #warp-fixed / #warp-main (their transition filter would
- * trap the blend in a local group). */
+.hover-neon-b:hover,
+.hover-neon-b:focus-visible,
+.group:hover .hover-neon-b,
+.group:focus-visible .hover-neon-b {
+  color: var(--color-accent-b);
+  text-shadow:
+    0 0 0.03em rgba(var(--accent-b-rgb), 0.55),
+    0 0 0.35em rgba(var(--accent-b-rgb), 0.35),
+    0 0 1.1em rgba(var(--accent-b-rgb), 0.18);
+}
+
+/* Recurring diagonal stripe (~PI/8 ≈ 22.5deg). */
+.diagonal-stripe {
+  background: repeating-linear-gradient(112.5deg,
+      transparent 0 22px,
+      rgba(255, 255, 255, 0.04) 22px 24px);
+}
+
+/* Custom circular cursor (components/Cursor.tsx) — INVERT + TINT, two discs.
+ * The goal: the disc is always LIME and any text under it turns BLACK, over
+ * ANY content (DOM text, the WebGL canvas, video, photos), with no per-element
+ * hover involved:
+ *   1. `--invert`: white disc, `difference` → negative of the backdrop
+ *      (page ≈ #090711 → near-white; any bright type → near-black).
+ *   2. `--tint`: lime disc, `multiply` on top → paints that negative
+ *      (near-white → lime, near-black → black).
+ * A single lime disc in `difference` (the previous version) only worked over
+ * lime type; over WHITE type it read violet — which is the bug this fixes.
+ * They must stay SIBLINGS in the root stacking context and in this paint order:
+ * the tint blends with the backdrop accumulated below it, so wrapping them (or
+ * any transformed/filtered ancestor) isolates the group and breaks it. Same
+ * reason they live OUTSIDE #warp-fixed / #warp-main. Palette-driven via var(),
+ * so a palette swap re-tints the cursor for free. Above the warp cover (z:100)
+ * so the effect rides through route transitions. */
 .site-cursor {
   position: fixed;
   top: 0;
@@ -305,13 +364,43 @@ body {
   width: 26px;
   height: 26px;
   border-radius: 9999px;
-  background: var(--color-accent-b);
-  mix-blend-mode: difference;
   pointer-events: none;
   z-index: 200;
   opacity: 0;
   will-change: transform;
 }
+
+.site-cursor--invert {
+  background: #fff;
+  mix-blend-mode: difference;
+  /* Umbral por LUMINANCIA. Sin él el negativo es un degradado (letra ciruela
+   * sobre texto lima, oliva turbio sobre texto gris). `grayscale` antes del
+   * contraste es imprescindible: umbralar por canal deja vivo el canal que el
+   * texto no tiene — sobre el título lima (azul≈0) el invertido salía azul puro
+   * y el multiply lo dejaba en azul marino en vez de negro. En gris cualquier
+   * texto es "claro" y el fondo "oscuro", así que el corte es limpio:
+   *   fondo → blanco → tintado = LIMA · texto (del color que sea) → negro.
+   * Se aplica al backdrop (la página), no al disco. Sin soporte de
+   * backdrop-filter degrada al negativo sin umbral: sigue siendo lima/negro,
+   * sólo menos puro. */
+  backdrop-filter: grayscale(1) contrast(3);
+  -webkit-backdrop-filter: grayscale(1) contrast(3);
+}
+
+.site-cursor--tint {
+  background: var(--color-accent-b);
+  mix-blend-mode: multiply;
+}
+
+/* Suelo de color: `lighten` = max por canal, así que el knockout de las letras
+ * deja de ser negro puro y cae en el fondo de la paleta (#090711) — el mismo
+ * tono que el resto de la web — mientras el lima (todos sus canales por encima)
+ * queda intacto. */
+.site-cursor--floor {
+  background: var(--color-bg);
+  mix-blend-mode: lighten;
+}
+
 /* Hide the native cursor everywhere while the custom one is mounted. */
 html.custom-cursor,
 html.custom-cursor * {
@@ -327,12 +416,14 @@ html.custom-cursor * {
   z-index: 5;
   pointer-events: none;
 }
+
 .fx-overlay::before {
   content: "";
   position: absolute;
   inset: 0;
   background: radial-gradient(ellipse at center, transparent 52%, rgba(0, 0, 0, 0.6) 100%);
 }
+
 .fx-overlay::after {
   content: "";
   position: absolute;
@@ -354,6 +445,7 @@ html.custom-cursor * {
   overflow: hidden;
   pointer-events: none;
 }
+
 /* Fixed viewport layer for the canvas + grain, so the warp filter can wrap it
  * without breaking the canvas's position:fixed (idle: no filter → normal). */
 .warp-fixed {
@@ -361,6 +453,7 @@ html.custom-cursor * {
   inset: 0;
   z-index: 0;
 }
+
 .warp-overlay {
   position: fixed;
   inset: 0;
@@ -369,10 +462,12 @@ html.custom-cursor * {
   display: none;
   pointer-events: none;
 }
+
 .warp-overlay.active {
   display: block;
   pointer-events: auto;
 }
+
 /* Opaque cover (opacity animated by GSAP). */
 .warp-panel {
   position: absolute;
@@ -380,6 +475,7 @@ html.custom-cursor * {
   background: var(--color-bg);
   opacity: 0;
 }
+
 /* RGB-split flash tints — offset ±X (set by GSAP), screen blend, brief. */
 .warp-tint {
   position: absolute;
@@ -388,12 +484,15 @@ html.custom-cursor * {
   mix-blend-mode: screen;
   will-change: transform, opacity;
 }
+
 .warp-tint-a {
   background: var(--color-accent-a);
 }
+
 .warp-tint-b {
   background: var(--color-accent-b);
 }
+
 /* Flickering grain (same SVG as .fx-overlay). */
 .warp-grain {
   position: absolute;
@@ -403,20 +502,25 @@ html.custom-cursor * {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   background-size: 180px 180px;
 }
+
 .warp-overlay.active .warp-grain {
   animation: warp-flicker 0.1s steps(2, end) infinite;
 }
+
 @keyframes warp-flicker {
   0% {
     opacity: 0.03;
   }
+
   50% {
     opacity: 0.09;
   }
+
   100% {
     opacity: 0.04;
   }
 }
+
 @media (prefers-reduced-motion: reduce) {
   .warp-overlay.active .warp-grain {
     animation: none;
@@ -428,17 +532,21 @@ html.custom-cursor * {
 .scroll-cue-dot {
   animation: scroll-cue 1.8s ease-in-out infinite;
 }
+
 @keyframes scroll-cue {
   0% {
     transform: translate(-50%, 0);
     opacity: 0;
   }
+
   15% {
     opacity: 1;
   }
+
   75% {
     opacity: 1;
   }
+
   100% {
     transform: translate(-50%, 28px);
     opacity: 0;
@@ -446,13 +554,20 @@ html.custom-cursor * {
 }
 
 @media (prefers-reduced-motion: reduce) {
+
   .neon-b,
-  .neon-a {
+  .neon-a,
+  .hover-neon-b:hover,
+  .hover-neon-b:focus-visible,
+  .group:hover .hover-neon-b,
+  .group:focus-visible .hover-neon-b {
     text-shadow: none;
   }
+
   .fx-overlay::after {
     opacity: 0.025;
   }
+
   /* No loop — static dot; the cue still shows and hides on scroll. */
   .scroll-cue-dot {
     animation: none;

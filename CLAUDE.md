@@ -198,24 +198,37 @@ scale: 20, factor: 0.6, fadeOutAt: "story" }` instance. Key points:
   is fully gone before the first `story` image can appear and **never warps the media**. Full behind
   the statement, gradually gone by "Detalles".
 
-### Case-study grey background (`DescriptionScene`)
+### Case-study background plane (`DescriptionScene`)
 Because the manual diamond loop draws the clear colour darker (rgb ~6–7), the case study would look
-pure black. `canvas/modules/DescriptionScene.tsx` fixes this: a **fixed, full-screen grey plane** on
-layer 0 at `z:-30` (`meshBasicMaterial` `#0f0f0f`, `toneMapped=false`), behind everything incl. the
-ambient word. It does NOT scroll (no `<Block>`); it just fills the viewport for the whole case study,
-restoring the soft grey (renders ≈rgb 18). The gem refracts it, so the gem sits on grey too. It is
-mounted via the `description` section's `Scene`, so it's **case-study only** (never on Home/DETAIL).
+pure black. `canvas/modules/DescriptionScene.tsx` fixes this: a **fixed, full-screen plane** on
+layer 0 at `z:-30` (`meshBasicMaterial` `BRAND.bg`, `toneMapped=false`), behind everything incl. the
+ambient word. It does NOT scroll (no `<Block>`); it just fills the viewport for the whole case study.
+Drawn as geometry the colour lands **1:1 on screen** (measured: exactly `#090711`, same as the Home),
+so no route is a different black — it used to be `surface` (#141026) and the case study read lighter
+than the Home. The gem refracts it, so the gem sits on the same tone. It is mounted via the
+`description` section's `Scene`, so it's **case-study only** (never on Home/DETAIL).
+(Measuring these: hide `.fx-overlay` first — its vignette darkens the edges of every screenshot,
+which is why the page *looks* black in a corner crop while the centre is exactly `#090711`.)
 
 ### The decode / scramble text effect
 `components/Decode.tsx` wraps text and plays the **binary `01` scramble→reveal** the Home works list
 uses on hover (GSAP `ScrambleTextPlugin`) — the FIRST time each element scrolls into view
 (`IntersectionObserver`, once). Text already in view on mount (the hero) decodes on landing. It's an
 inline-block `<span>` (wrap it in the block element that carries the styling), **hidden until it
-decodes** (no pre-decode flash). **Layout-stable**: a visibility-hidden GHOST of the real text
-reserves the final layout from first paint and the scramble plays in an absolute overlay (clipped,
-`overflowWrap:anywhere` so the space-less binary wraps) — the binary wraps at different points than
-the words, so scrambling in-flow used to change the paragraph's line count every frame and everything
-below it jumped (worst on mobile). On complete the ghost is revealed and the overlay emptied. Decode
+decodes** (no pre-decode flash). **Layout-stable on two levels**:
+1. a visibility-hidden GHOST of the real text reserves the final layout from first paint and the
+   scramble plays in an absolute overlay — the binary wraps at different points than the words, so
+   scrambling in-flow used to change the paragraph's line count every frame and everything below it
+   jumped (worst on mobile);
+2. the overlay is split into **one `nowrap` span per LAID-OUT LINE**, measured off the ghost with a
+   Range (word by word, grouped by `rect.top`) **after `document.fonts.ready`** so the webfont's
+   metrics are the ones in play. Without this the *text itself* still re-wrapped inside the stable
+   box: the space-less binary is narrower, so a title that ends on two lines flashed on ONE line and
+   then jumped (the reported mobile flicker). Per line the structure is the final one from frame one
+   and cannot change. Lines reveal in reading order (delay + duration proportional to their share of
+   the characters, so the overall pace matches the old single tween) and each is **pre-filled with
+   binary** — a line waiting its turn must not sit there showing its real text.
+On complete the ghost is revealed and the overlay emptied. Decode
 must stay the SOLE text child of its styled parent (all current usages are) — inline mid-sentence the
 inline-block box would break the line. **Honors reduced-motion** (plain text immediately, no
 ghost/overlay). Every case-study text
@@ -301,12 +314,39 @@ the dashboard:
   `videos/`.
 - The `<Canvas>` is wrapped in `CanvasErrorBoundary` so a WebGL-context failure degrades to
   DOM-only instead of blanking the page.
-- **Custom cursor** (`components/Cursor.tsx` + `.site-cursor` in index.css): white disc in
-  `mix-blend-mode: difference` (inverts anything under it — over the lime hover title it lands on
-  the palette's violet, near-complements). quickTo trailing, delegated-hover growth over
-  `a/button/[data-cursor]` (back.out pop, shrink on press). Fine-pointer only; reduced-motion keeps
-  the native cursor. Mounted in SiteShell OUTSIDE `#warp-fixed`/`#warp-main` — their transition
-  filter would trap the blend — at z:200 (above the warp cover). `html.custom-cursor` hides the
-  native cursor globally.
+- **Custom cursor = INVERT + TINT, two discs** (`components/Cursor.tsx` + `.site-cursor*` in
+  index.css). The look is fixed: **lime disc, and any text under it goes black** — over ANY content
+  (DOM text, the WebGL hero `<Text>`, video, photos), with no per-element hover involved.
+  1. `--invert`: white disc, `mix-blend-mode: difference`, + `backdrop-filter: grayscale(1)
+     contrast(3)` — a LUMINANCE threshold (without it the negative is a gradient: plum letters over
+     lime type, muddy olive over grey type). The `grayscale` is not optional: thresholding per
+     channel leaves alive whatever channel the type lacks, so over the lime works-list title the
+     invert came out pure blue and the tint left it navy instead of black. It degrades gracefully
+     if backdrop-filter is unsupported (plain negative, still lime/black nearly everywhere).
+  2. `--tint`: lime (accent-B) disc, `mix-blend-mode: multiply`, painted ON TOP — turns that
+     black/white negative into lime/black.
+  3. `--floor`: bg-coloured disc, `mix-blend-mode: lighten` (= max per channel) — floors that black
+     at the palette bg (`#090711`), so the knocked-out letters are the SAME tone as the page and
+     never pure black; lime is above it in every channel, so it passes through untouched.
+  They MUST stay siblings in the root stacking context, in that paint order: the tint blends with
+  the backdrop accumulated below it, so ANY wrapper (or transformed/filtered ancestor) isolates the
+  group and breaks the effect. Same reason they're mounted in SiteShell OUTSIDE
+  `#warp-fixed`/`#warp-main`, at z:200 (above the warp cover). Both discs are driven by the SAME
+  gsap tweens (quickTo trailing + delegated-hover growth over `a/button/[data-cursor]`, back.out
+  pop, shrink on press) so they stay pixel-aligned. Fine-pointer only; reduced-motion keeps the
+  native cursor. `html.custom-cursor` hides the native cursor globally.
+  A single lime disc in `difference` was the previous version — it only landed on black over lime
+  type and read violet over white type; that's the bug this replaced.
+- **Hover = lime, siempre** — the hover *language* (independent of the cursor now): every
+  interactive text goes to accent-B via `.hover-neon-b` (index.css — colour + the `.neon-b` glow;
+  fires on the element, on its `.group`, and on `:focus-visible`; glow dropped under reduced-motion).
+  Applied to the works-list title + meta, footer next-project/mailto, HUD links and the back button.
+  Note plain `hover:neon-b` in a Tailwind class does NOT work (`neon-b` is raw CSS, not a registered
+  utility) — that's what `.hover-neon-b` is for.
+- **The works-list selection re-runs on scroll** (`WorksList`): position-based hover goes stale when
+  the cursor sits still and the page scrolls under it (no mousemove fires) — the row never activated
+  and its title stayed white. A window `pointermove` ref + `scroll` listener re-tests the last mouse
+  position (and clears when it falls outside the `<ol>`); the CSS `hover-neon-b` on the title is the
+  belt-and-braces fallback since browser `:hover` does update on scroll.
 - Pinned to **React 18 → R3F 8 / drei 9** on purpose (R3F 9 / drei 10 require React 19). Do not
   bump these to "latest".

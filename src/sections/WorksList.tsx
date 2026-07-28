@@ -58,6 +58,8 @@ export function WorksList() {
   const rowRefs = useRef<Record<string, HTMLAnchorElement | null>>({})
   const olRef = useRef<HTMLOListElement>(null)
   const rowRects = useRef<RowRect[]>([])
+  /** Última posición conocida del ratón (para re-evaluar la fila en scroll). */
+  const pointer = useRef<{ x: number; y: number } | null>(null)
 
   // Cache row rects relative to the <ol> (measured on mount + resize, NOT per move).
   const measure = useCallback(() => {
@@ -105,6 +107,41 @@ export function WorksList() {
       }
     }
   }
+
+  // La selección por posición se queda OBSOLETA al hacer scroll: si el cursor se
+  // queda quieto sobre la lista y la página se mueve, las filas pasan por debajo
+  // sin disparar un solo mousemove, así que la fila bajo el cursor nunca se
+  // activaba — el título seguía en blanco y el cursor (disco lime en
+  // `difference`) se leía violeta en vez de verde/negro. Reevaluamos con la
+  // última posición del ratón en cada scroll (Lenis hace scroll nativo, así que
+  // el evento `scroll` de window llega igual).
+  useEffect(() => {
+    const track = (e: PointerEvent) => {
+      if (e.pointerType !== "mouse") return
+      pointer.current = { x: e.clientX, y: e.clientY }
+    }
+    const onScroll = () => {
+      const p = pointer.current
+      const ol = olRef.current
+      if (!p || !ol) return
+      const r = ol.getBoundingClientRect()
+      // Fuera de la caja de la lista → nada activo (equivale al mouseleave que
+      // el scroll no dispara).
+      if (p.x < r.left || p.x > r.right || p.y < r.top || p.y >= r.bottom) {
+        setActiveId(null)
+        return
+      }
+      selectAt(p.y)
+    }
+    window.addEventListener("pointermove", track, { passive: true })
+    window.addEventListener("scroll", onScroll, { passive: true })
+    return () => {
+      window.removeEventListener("pointermove", track)
+      window.removeEventListener("scroll", onScroll)
+    }
+    // selectAt sólo lee refs + setState estables: no necesita re-suscribirse.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   // Clear when the pointer leaves the list (mouse) or focus exits it (keyboard).
   const handleListBlur = (e: FocusEvent<HTMLOListElement>) => {
@@ -329,26 +366,33 @@ function WorkRow({ project, active, dimmed, reducedMotion, refCb, onActivate }: 
         <div className="flex min-w-0 items-baseline">
           <h3
             className={[
-              "font-display uppercase leading-none tracking-tight text-[clamp(2.5rem,11vw,6rem)] transition-colors duration-300",
-              active ? "neon-b" : "text-white group-hover:text-white"
+              // `hover-neon-b` es el respaldo puramente CSS del estado `active`:
+              // el :hover del navegador SÍ se actualiza al hacer scroll, así que
+              // el título nunca se queda blanco bajo el cursor (blanco + disco
+              // lime en difference = violeta; lime + disco lime = negro).
+              "font-display uppercase leading-none tracking-tight text-[clamp(2.5rem,11vw,6rem)] transition-colors duration-300 hover-neon-b",
+              active ? "neon-b" : "text-white"
             ].join(" ")}
           >
             <Decode>{project.title}</Decode>
           </h3>
         </div>
-        <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1 text-[10px] md:text-xs font-mono tracking-[0.3em] uppercase text-white/60 lg:max-w-[50%] lg:justify-end">
+        {/* Toda la meta pasa a lime con la fila (los separadores heredan el color
+            y sólo bajan de opacidad), para que el cursor no caiga nunca sobre
+            texto blanco dentro de un elemento hovereado. */}
+        <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1 text-[10px] md:text-xs font-mono tracking-[0.3em] uppercase text-white/60 transition-colors duration-300 group-hover:text-[var(--color-accent-b)] group-focus-visible:text-[var(--color-accent-b)] lg:max-w-[50%] lg:justify-end">
           <span data-scramble data-text={project.role} className="whitespace-nowrap">
             {project.role}
           </span>
           {project.category && (
             <>
-              <span className="text-white/20">/</span>
+              <span className="opacity-30">/</span>
               <span data-scramble data-text={project.category} className="whitespace-nowrap">
                 {project.category}
               </span>
             </>
           )}
-          <span className="text-white/20">/</span>
+          <span className="opacity-30">/</span>
           <span data-scramble data-text={project.year} className="text-[var(--color-accent-b)] whitespace-nowrap">
             {project.year}
           </span>
