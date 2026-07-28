@@ -383,8 +383,13 @@ body {
    * Se aplica al backdrop (la página), no al disco. Sin soporte de
    * backdrop-filter degrada al negativo sin umbral: sigue siendo lima/negro,
    * sólo menos puro. */
+  /* SIN `-webkit-backdrop-filter` a mano: el minificador del build trata las dos
+   * declaraciones como la misma propiedad y se queda con la ÚLTIMA, así que la
+   * versión estándar desaparecía del CSS de producción... y Chrome ≥149 ya no
+   * entiende la prefijada (computa `none`). Resultado: en dev el umbral iba y en
+   * el deploy no — el disco caía en ciruela sobre el título lima. Lightning CSS
+   * ya añade los prefijos que hagan falta según browserslist; no los escribas. */
   backdrop-filter: grayscale(1) contrast(3);
-  -webkit-backdrop-filter: grayscale(1) contrast(3);
 }
 
 .site-cursor--tint {
