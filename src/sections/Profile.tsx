@@ -55,7 +55,8 @@ export function Profile() {
         </p>
         {/* Inline lineHeight — same reason as Statement: .font-display's 0.86
             collides wrapped lines; 1 keeps the two words readable on mobile. */}
-        <h2 ref={line} className="mt-6 font-display uppercase tracking-tight text-white text-[14vw] md:text-[9vw]" style={{ lineHeight: 1 }}>
+        {/* min(9vw, 8.1rem): 9vw stops growing at the 1440px content cap. */}
+        <h2 ref={line} className="mt-6 font-display uppercase tracking-tight text-white text-[14vw] md:text-[min(9vw,8.1rem)]" style={{ lineHeight: 1 }}>
           <Decode duration={0.6}>{ABOUT.title}</Decode>
         </h2>
         <p className="mt-6 text-xs md:text-sm font-mono tracking-[0.35em] uppercase text-[var(--color-accent-b)]">
@@ -66,7 +67,7 @@ export function Profile() {
       </div>
 
       {/* ── Photo (WebGL plane) + bio — plane left, copy right on ≥lg ────── */}
-      <article className="flex flex-col pt-[10svh] pb-[6svh] px-6 md:px-16 lg:min-h-svh lg:flex-row lg:items-center lg:justify-end lg:py-0">
+      <article className="content-max flex flex-col pt-[10svh] pb-[6svh] px-6 md:px-16 lg:min-h-svh lg:flex-row lg:items-center lg:justify-end lg:py-0">
         {/* Plane box (stacked only) — mirrors ProfileScene's 0.58 fraction. */}
         <div data-plane-slot aria-hidden="true" className="self-center lg:hidden" style={{ width: "58vw", aspectRatio: String(ABOUT.photo.aspect) }} />
         <div className="max-w-sm text-left mt-7 lg:mt-0 lg:text-right">
@@ -81,8 +82,8 @@ export function Profile() {
         </div>
       </article>
 
-      {/* ── Areas — numbered 01–04, right-aligned (alternates the page) ──── */}
-      <div className="min-h-[72svh] py-[12svh] flex items-center justify-start md:justify-end px-6 md:px-16">
+      {/* ── Areas — numbered 01–05, right-aligned (alternates the page) ──── */}
+      <div className="content-max min-h-[72svh] py-[12svh] flex items-center justify-start md:justify-end px-6 md:px-16">
         <div className="max-w-2xl text-left md:text-right">
           <p className="text-xs font-mono tracking-[0.35em] uppercase text-white/60">
             <Decode>Qué hago</Decode>
@@ -106,7 +107,7 @@ export function Profile() {
       </div>
 
       {/* ── Trajectory (mini-timeline) + brands — left-aligned ───────────── */}
-      <div className="min-h-[72svh] py-[12svh] flex items-center px-6 md:px-16">
+      <div className="content-max min-h-[72svh] py-[12svh] flex items-center px-6 md:px-16">
         <div className="w-full max-w-3xl">
           <p className="text-xs font-mono tracking-[0.35em] uppercase text-white/60">
             <Decode>Trayectoria</Decode>

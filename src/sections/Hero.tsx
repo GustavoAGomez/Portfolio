@@ -55,7 +55,7 @@ export function Hero() {
   }, [])
 
   return (
-    <div className="relative min-h-svh flex flex-col justify-between px-6 md:px-16 py-16 pointer-events-none">
+    <div className="content-max relative min-h-svh flex flex-col justify-between px-6 md:px-16 py-16 pointer-events-none">
       <div ref={meta} className="max-w-xl">
         <p className="text-xs font-mono tracking-[0.35em] uppercase text-white/60">
           <Decode>Creative Technologist — Portfolio</Decode>

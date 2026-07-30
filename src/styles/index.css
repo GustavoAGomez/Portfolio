@@ -334,6 +334,21 @@ body {
     0 0 1.1em rgba(var(--accent-b-rgb), 0.18);
 }
 
+/* Site-wide CONTENT CAP: past 1440px the content box stops growing and centers,
+ * so ultra-wide screens read like a normal desktop instead of pushing items to
+ * the extremes. 1440 is deliberate — every WebGL world-unit size is capped "so
+ * ≥1440px reproduces the tuned layout exactly", so DOM and canvas stay in the
+ * exact tuned relationship at any larger width. Applied to each section's
+ * content container (the px-6/px-16 padding stays INSIDE the box); full-bleed
+ * backdrops (works hover image, diagonal-stripe) stay full-bleed.
+ * MIRRORED on the canvas side as SCENE.contentMaxPx (tokens.ts → useBlock's
+ * `layoutWidth`) — change both together. */
+.content-max {
+  width: 100%;
+  max-width: 1440px;
+  margin-inline: auto;
+}
+
 /* Recurring diagonal stripe (~PI/8 ≈ 22.5deg). */
 .diagonal-stripe {
   background: repeating-linear-gradient(112.5deg,

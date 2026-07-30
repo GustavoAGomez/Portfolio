@@ -20,7 +20,7 @@ const FONT = ACTIVE_TYPO.displayFontUrl
  */
 export function HeroScene({ id }: { id: SectionId }) {
   const { getCenter } = useSection(id)
-  const { worldWidth, mobile } = useBlock()
+  const { layoutWidth, mobile } = useBlock()
   const pointer = useRef<Group>(null)
 
   useFrame((state, dt) => {
@@ -62,7 +62,9 @@ export function HeroScene({ id }: { id: SectionId }) {
           // presence when the physical width shrinks. Kept below ~0.2: the gem
           // covers the whole phone screen and its refraction MAGNIFIES the word,
           // so a larger fraction gets the refracted copies cut at the edges.
-          fontSize={worldWidth * (mobile ? 0.19 : 0.16)}
+          // layoutWidth (not worldWidth): past 1440px the headline stops growing
+          // with the viewport, matching the DOM's .content-max cap.
+          fontSize={layoutWidth * (mobile ? 0.19 : 0.16)}
           color={BRAND.text}
           anchorX="center"
           anchorY="middle"

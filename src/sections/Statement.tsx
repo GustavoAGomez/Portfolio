@@ -16,7 +16,8 @@ export function Statement() {
             tuned for SINGLE-line display text — and beats any leading-* utility
             in the cascade; at 0.86 a wrapped title (mobile) collides its lines
             (Anton caps span ~0.87em). Inline style wins over the class. */}
-        <h2 ref={line} className="font-display uppercase tracking-tight text-white text-[14vw] md:text-[10vw]" style={{ lineHeight: 1 }}>
+        {/* min(10vw, 9rem): 10vw stops growing at the 1440px content cap. */}
+        <h2 ref={line} className="font-display uppercase tracking-tight text-white text-[14vw] md:text-[min(10vw,9rem)]" style={{ lineHeight: 1 }}>
           <Decode duration={0.6}>{content.title}</Decode>
         </h2>
         <p className="mt-6 text-xs md:text-sm font-mono tracking-[0.35em] uppercase text-[var(--color-accent-b)]">
@@ -32,7 +33,7 @@ export function Statement() {
   return (
     <div className="min-h-svh flex items-center justify-center px-6 pointer-events-none">
       {/* Inline lineHeight: this one always wraps (3 lines) — see note above. */}
-      <h2 ref={line} className="font-display text-center text-[13vw] md:text-[9vw]" style={{ lineHeight: 1 }}>
+      <h2 ref={line} className="font-display text-center text-[13vw] md:text-[min(9vw,8.1rem)]" style={{ lineHeight: 1 }}>
         <span className="text-white">CULTURE IS</span>
         <br />
         <span className="neon-b">NOT YOUR</span>

@@ -38,5 +38,12 @@ export const SCENE = {
    * (centered planes, wider content fraction). Matches Tailwind's `md:` (768px)
    * so DOM and canvas always flip together.
    */
-  mobileBreakpoint: 768
+  mobileBreakpoint: 768,
+  /**
+   * Site-wide content cap in px — past this the layout stops growing and
+   * centers (ultra-wide screens read like a normal desktop). MIRRORS the DOM's
+   * `.content-max` class in styles/index.css — change both together. Exposed to
+   * the canvas as useBlock's `layoutWidth` (world units).
+   */
+  contentMaxPx: 1440
 } as const

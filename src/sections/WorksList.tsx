@@ -177,7 +177,7 @@ export function WorksList() {
       </div>
 
       {/* List */}
-      <div className="relative z-10 flex min-h-svh flex-col px-6 md:px-16 py-16">
+      <div className="content-max relative z-10 flex min-h-svh flex-col px-6 md:px-16 py-16">
         <header className="flex items-baseline justify-between">
           <p className="text-xs font-mono tracking-[0.35em] uppercase text-white/60">
             <Decode>Selected Work</Decode>

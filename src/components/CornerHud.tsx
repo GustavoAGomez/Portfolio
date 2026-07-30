@@ -106,7 +106,7 @@ export function CornerHud({ links = SITE_LINKS, variant = "overlay" }: CornerHud
 
   return (
     <div
-      className={`pointer-events-none ${positional} flex flex-col items-start gap-3 md:flex-row md:items-end md:justify-between px-6 md:px-16 text-[10px] md:text-xs font-mono tracking-[0.15em] md:tracking-[0.25em] uppercase text-white/50`}
+      className={`pointer-events-none ${positional} content-max flex flex-col items-start gap-3 md:flex-row md:items-end md:justify-between px-6 md:px-16 text-[10px] md:text-xs font-mono tracking-[0.15em] md:tracking-[0.25em] uppercase text-white/50`}
     >
       <div>
         <p className="text-white/70">

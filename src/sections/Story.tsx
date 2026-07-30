@@ -63,7 +63,7 @@ export function Story() {
           from the DOM (its height just pushes the blocks down and the planes
           follow). Gallery.tsx still needs its absolute header: WorksScene splits
           the section into equal fraction slots. */}
-      <div className="px-6 md:px-16 pt-24 pb-6">
+      <div className="content-max px-6 md:px-16 pt-24 pb-6">
         <p className="text-xs font-mono tracking-[0.35em] uppercase text-white/60">
           <Decode>Detalles</Decode>
         </p>
@@ -88,7 +88,7 @@ export function Story() {
             style={lead ? ({ "--lead-mt": `${lead * 12}svh`, "--lead-mt-lg": `${lead * 100}vh` } as CSSProperties) : undefined}
             // Stacked: compact self-sized slot (spacer + copy), breathing via
             // pt/pb. ≥lg: full-viewport slot, copy centered opposite the plane.
-            className={`mt-[var(--lead-mt)] lg:mt-[var(--lead-mt-lg)] flex flex-col pt-[10svh] pb-[6svh] px-6 md:px-16 lg:min-h-svh lg:flex-row lg:items-center lg:py-0 ${planeLeft ? "lg:justify-end" : "lg:justify-start"}`}
+            className={`content-max mt-[var(--lead-mt)] lg:mt-[var(--lead-mt-lg)] flex flex-col pt-[10svh] pb-[6svh] px-6 md:px-16 lg:min-h-svh lg:flex-row lg:items-center lg:py-0 ${planeLeft ? "lg:justify-end" : "lg:justify-start"}`}
           >
             {/* Plane box (stacked only) — the chromatic plane renders exactly
                 here (StoryScene anchors to this element's measured center). */}
