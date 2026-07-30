@@ -33,9 +33,10 @@ interface SceneProps {
  */
 export function Scene({ sections }: SceneProps) {
   const modules = sections.filter((s) => s.Scene)
-  // Mount the diamond render loop on the Home (hero lens) and on the case study
-  // (`description` marks it) — where an oversized gem sits behind the statement.
-  const showDiamonds = sections.some((s) => s.id === "hero" || s.id === "description")
+  // Mount the diamond render loop wherever an oversized gem sits behind a hero:
+  // the Home (hero lens), the case study (`description` marks it) and /about
+  // (`profile` — gem behind the name, warping the ambient ABOUT word).
+  const showDiamonds = sections.some((s) => s.id === "hero" || s.id === "description" || s.id === "profile")
 
   return (
     <>

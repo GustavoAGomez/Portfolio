@@ -6,7 +6,7 @@ import { BackfaceMaterial } from "./materials/BackfaceMaterial"
 import { RefractionMaterial } from "./materials/RefractionMaterial"
 import { useBlock } from "./parallax/useBlock"
 import { useStore, type SectionId } from "../scroll/store"
-import { lerp, clamp01 } from "../lib/math"
+import { lerp } from "../lib/math"
 
 const DIAMOND_URL = "/models/diamond.glb"
 
@@ -24,9 +24,15 @@ interface DiamondDef {
   mobileSpin?: number
   /** Hidden on mobile to keep the multipass affordable. */
   mobileHidden?: boolean
-  /** Fade the gem to nothing as this section scrolls into the viewport centre
-   *  (used to stop the case-study gem from bleeding into the media section). */
-  fadeOutAt?: SectionId
+  /** Anchor to the section's FIRST VIEWPORT (top + vh/2) instead of its centre —
+   *  for a section that spans a whole page (profile) rather than one svh box. */
+  heroAnchor?: boolean
+  /** TRIGGERED shrink, not scroll-scrubbed — once the viewport scrolls past the
+   *  hero (~45% of its viewport, with hysteresis) the gem launches a fixed-time
+   *  collapse to 0, and re-grows when you scroll back up. Used by both the
+   *  case-study statement and /about — it also guarantees the gem is long gone
+   *  before any media/portrait plane can pass behind the lens. */
+  shrinkPastHero?: boolean
 }
 
 const DIAMONDS: DiamondDef[] = [
@@ -35,10 +41,19 @@ const DIAMONDS: DiamondDef[] = [
   // almost static on a phone, so it gets more life there.
   { section: "hero", x: 0, scale: 20, factor: 0.6, spin: 0.5, mobileSpin: 0.5 },
   // Case-study hero (statement): the SAME oversized gem behind the project title,
-  // warping the dim "BEYOND" word for the same background effect. Fades out as the
-  // media section ("story") arrives so it never warps the case-study images.
-  { section: "statement", x: 0, scale: 20, factor: 0.6, spin: 0.2, fadeOutAt: "story" }
+  // warping the dim ambient word for the same background effect. Leaving the
+  // hero TRIGGERS the eased collapse (same shrinkPastHero + timing as /about),
+  // so it is long gone before the case-study media can appear.
+  { section: "statement", x: 0, scale: 20, factor: 0.6, spin: 0.2, shrinkPastHero: true },
+  // About-me hero (profile): the same oversized gem behind "GUSTAVO GÓMEZ",
+  // warping the ambient ABOUT word (ProfileScene). The profile section spans the
+  // whole /about page, so it anchors to the first viewport; leaving the hero
+  // TRIGGERS an eased collapse (see shrinkPastHero).
+  { section: "profile", x: 0, scale: 20, factor: 0.6, spin: 0.2, heroAnchor: true, shrinkPastHero: true }
 ]
+
+/** shrinkPastHero collapse/re-grow duration, seconds — identical both ways. */
+const SHRINK_DURATION = 0.7
 
 const dummy = new Object3D()
 
@@ -58,9 +73,16 @@ const dummy = new Object3D()
 export function Diamonds() {
   const gltf = useGLTF(DIAMOND_URL) as unknown as { nodes: Record<string, Mesh> }
   const { gl, scene, camera, size, clock } = useThree()
-  const { worldPerPixel, worldWidth, mobile } = useBlock()
+  const { worldPerPixel, layoutWidth, mobile } = useBlock()
   const model = useRef<InstancedMesh>(null)
   const yLerp = useRef<number[]>(DIAMONDS.map(() => 0))
+  // Triggered-shrink state (shrinkPastHero): latched past/not-past + a LINEAR
+  // 0–1 progress advanced at fixed speed (smoothstepped into the scale), so the
+  // collapse and the re-grow take exactly the same time — an exponential lerp
+  // read slower on the way out (the shrinking tail is visible; the growing tail
+  // isn't).
+  const shrunk = useRef<boolean[]>(DIAMONDS.map(() => false))
+  const shrinkAnim = useRef<number[]>(DIAMONDS.map(() => 1))
   const ratio = gl.getPixelRatio()
 
   const geometry = useMemo<BufferGeometry | undefined>(() => {
@@ -125,17 +147,19 @@ export function Diamonds() {
     }
   }, [gl, camera])
 
-  useFrame(() => {
+  useFrame((_, delta) => {
     const mesh = model.current
     if (!mesh) return
     const { scroll, sections, reducedMotion } = useStore.getState()
     const t = clock.getElapsedTime()
-    const contentMaxWidth = worldWidth * (mobile ? 0.8 : 0.6)
+    // layoutWidth: the gem stops growing past the 1440px content cap too, so an
+    // ultra-wide hero reads exactly like the tuned desktop one.
+    const contentMaxWidth = layoutWidth * (mobile ? 0.8 : 0.6)
     let anyVisible = false
 
     DIAMONDS.forEach((d, i) => {
       const bounds = sections[d.section]
-      const center = bounds ? bounds.top + bounds.height / 2 : 0
+      const center = bounds ? bounds.top + (d.heroAnchor ? size.height : bounds.height) / 2 : 0
       const targetY = reducedMotion ? 0 : (scroll.scrollY + size.height / 2 - center) * worldPerPixel * d.factor
       const cur = lerp(yLerp.current[i] ?? 0, targetY, 0.1)
       yLerp.current[i] = cur
@@ -144,13 +168,22 @@ export function Diamonds() {
       // so on the Home only the hero gem shows (works gem sits behind the opaque
       // list). mobile also drops the decorative ones.
       const hidden = !bounds || (mobile && d.mobileHidden)
-      // Shrink the gem to nothing over the viewport-height BEFORE `fadeOutAt`'s
-      // section even starts to appear at the bottom of the screen (measured on the
-      // viewport BOTTOM, not centre) — so it is fully gone before the first media
-      // image can scroll into view and never warps it. Full through the statement.
-      const fadeBounds = d.fadeOutAt ? sections[d.fadeOutAt] : undefined
-      const fadeSpan = size.height
-      const fade = fadeBounds ? 1 - clamp01((scroll.scrollY + size.height - (fadeBounds.top - fadeSpan)) / fadeSpan) : 1
+      let fade = 1
+      if (d.shrinkPastHero && bounds) {
+        // TRIGGER, not scrub: crossing ~45% of the hero launches the collapse
+        // to 0; scrolling back above ~30% re-grows it. The asymmetric
+        // thresholds are hysteresis so the boundary never thrashes (same
+        // pattern as the story-video pause). reduced-motion snaps instantly.
+        const was = shrunk.current[i] ?? false
+        const now = scroll.scrollY > bounds.top + size.height * (was ? 0.3 : 0.45)
+        shrunk.current[i] = now
+        const target = now ? 0 : 1
+        const prev = shrinkAnim.current[i] ?? 1
+        const step = delta / SHRINK_DURATION
+        const p = reducedMotion ? target : prev + Math.max(-step, Math.min(step, target - prev))
+        shrinkAnim.current[i] = p
+        fade = p * p * (3 - 2 * p) // smoothstep — symmetric ease, no visible tail
+      }
       const s = (contentMaxWidth / 35) * d.scale * (hidden ? 0.0001 : fade)
       if (!hidden && fade > 0.002) anyVisible = true
       const spin = t * (mobile ? d.mobileSpin ?? d.spin : d.spin)
@@ -164,7 +197,7 @@ export function Diamonds() {
     })
     mesh.instanceMatrix.needsUpdate = true
 
-    // No gem visible (e.g. deep in a case study's story after fadeOutAt shrank it
+    // No gem visible (e.g. deep in a case study's story after shrinkPastHero shrank it
     // to nothing): skip the whole double-FBO multipass — 1 scene render instead of
     // 4. The mesh sits on layer 1 so the layer-0 render excludes it for free; the
     // FBOs just hold stale (unused) frames until a gem scrolls back into view.

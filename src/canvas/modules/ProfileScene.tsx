@@ -15,10 +15,11 @@ const PORTRAIT_WIDTH = 5.6
 const X_OFFSET = 2.6
 
 /**
- * About-me WebGL layer: the portrait photo as a chromatic plane (same RGB-split
- * trail + parallax as the case-study media — the photo is a graphic piece of the
- * system, not a headshot <img>), plus a giant dim brand word behind it (the
- * works-list "dim number" language). Anchored to the slot Profile.tsx measures.
+ * About-me WebGL layer: the case-study hero language (oversized gem — mounted by
+ * Scene via `profile` — refracting a dim ambient "ABOUT" word behind the name)
+ * plus the portrait photo as a chromatic plane (same RGB-split trail + parallax
+ * as the case-study media — the photo is a graphic piece of the system, not a
+ * headshot <img>). Photo anchored to the slot Profile.tsx measures.
  */
 export function ProfileScene({ id }: { id: SectionId }) {
   const { worldWidth, viewportPx } = useBlock()
@@ -42,23 +43,46 @@ export function ProfileScene({ id }: { id: SectionId }) {
     return b ? b.top + b.height * 0.35 : 0
   }
 
+  // Ambient-word anchor: the profile section spans the whole /about page, so
+  // the statement-style word pins to its FIRST viewport (the hero), mirroring
+  // the gem's `heroAnchor` in Diamonds.tsx.
+  const heroAnchor = () => {
+    const b = useStore.getState().sections[id]
+    return (b ? b.top : 0) + viewportPx.height / 2
+  }
+
   return (
-    <Block factor={1} anchor={anchor}>
-      {/* Giant dim brand word behind the photo — same tone as the works numbers. */}
-      <Text
-        font={ACTIVE_TYPO.displayFontUrl}
-        fontSize={width * 0.55}
-        color={BRAND.numberDim}
-        anchorX="center"
-        anchorY="middle"
-        position={[stacked ? 0 : x + width * 0.5, 0, -8]}
-      >
-        GUSGQ
-      </Text>
-      <Suspense fallback={null}>
-        <PhotoPlane src={ABOUT.photo.src} args={[width, height, 32, 32]} position={[x, 0, 0]} />
-      </Suspense>
-    </Block>
+    <>
+      {/* /about runs in the diamond's manual-loop render mode (gem behind the
+          hero), which draws the clear colour darker than R3F auto-render — same
+          fix as the case study (DescriptionScene): a fixed full-screen plane so
+          the page stays exactly BRAND.bg. */}
+      <mesh position={[0, 0, -30]} frustumCulled={false}>
+        <planeGeometry args={[140, 140]} />
+        <meshBasicMaterial color={BRAND.bg} toneMapped={false} />
+      </mesh>
+      {/* Statement-style ambient word behind the hero, warped by the gem.
+          0.4375 ≈ StatementScene's 0.3125 scaled by 7/5 chars, so the 5-letter
+          ABOUT bleeds the same width PROJECT does. */}
+      <Block factor={0.45} anchor={heroAnchor}>
+        <Text
+          font={ACTIVE_TYPO.displayFontUrl}
+          fontSize={Math.min(8.4, worldWidth * 0.4375)}
+          color={BRAND.textDim}
+          anchorX="center"
+          anchorY="middle"
+          position={[0, 0, -14]}
+          letterSpacing={-0.04}
+        >
+          ABOUT
+        </Text>
+      </Block>
+      <Block factor={1} anchor={anchor}>
+        <Suspense fallback={null}>
+          <PhotoPlane src={ABOUT.photo.src} args={[width, height, 32, 32]} position={[x, 0, 0]} />
+        </Suspense>
+      </Block>
+    </>
   )
 }
 
