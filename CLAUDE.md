@@ -93,22 +93,24 @@ only which sections are active changes.
   not per page). There is no `App.tsx`; SiteShell replaced it. It also wraps everything in
   `TransitionProvider` and mounts the `RouteBackButton`.
 - **The URL is the single source of truth for the active section set.**
-  `routes/activeSections.ts#activeSectionsFor(pathname)` returns one of THREE sets; SiteShell feeds
+  `routes/activeSections.ts#activeSectionsFor(pathname)` returns one of FOUR sets; SiteShell feeds
   it to BOTH `<main>` (DOM) and `<Scene sections>` (WebGL). No global `enabled` flag.
 - **`src/config/sections.ts`** holds the section REGISTRY (`Record<SectionId, SectionConfig>` — every
-  id must have an entry) and composes three disjoint route sets:
+  id must have an entry) and composes four disjoint route sets:
   - `HOME_SECTIONS = [hero, works]` — landing: name + diamond lens + interactive works list.
   - `DETAIL_SECTIONS = [statement, gallery, about, footer]` — generic placeholder detail (projects
     with no case-study content); `gallery` = the 3D chromatic-plane module (`Gallery` DOM + `WorksScene`).
   - `CASE_STUDY_SECTIONS = [statement, description, about, story, footer]` — a real case study; `story`
     (media walkthrough) replaces the generic `gallery`, and `description` (the brief) is inserted.
-  - **`activeSectionsFor`**: an invalid or non-`/work` path → HOME; a valid `/work/:id` → CASE_STUDY
-    if `getProjectContent(id)` exists, else DETAIL. Invalid ids fall back to HOME so there's no flash
-    before the route's `<Navigate>` redirect lands.
+  - `ABOUT_SECTIONS = [profile, footer]` — `/about`, the personal About Me (see below).
+  - **`activeSectionsFor`**: `/about` → ABOUT; an invalid or non-`/work` path → HOME; a valid
+    `/work/:id` → CASE_STUDY if `getProjectContent(id)` exists, else DETAIL. Invalid ids fall back to
+    HOME so there's no flash before the route's `<Navigate>` redirect lands.
   - **To move a section between routes, move it between those arrays.** Sets are disjoint, so
     navigation unmounts one set and mounts the other cleanly (bounds re-register, no orphans).
-- **Routes** (`SiteShell`): `/` → Home; `/work/:id` → detail (a `DetailGuard` `<Navigate to="/"/>`s
-  on an unknown id); `*` → redirect home. Rows in `WorksList` navigate with the transition (below).
+- **Routes** (`SiteShell`): `/` → Home; `/about` → About Me; `/work/:id` → detail (a `DetailGuard`
+  `<Navigate to="/"/>`s on an unknown id); `*` → redirect home. Rows in `WorksList` navigate with
+  the transition (below).
 - **On navigation**, SiteShell resets scroll (`lenis.scrollTo(0,{immediate,force})` + `scrollY=0` +
   `lenis.resize()`) **and zeroes `rawVelocity`/`velocity` AFTER the jump** — the immediate scrollTo
   emits a scroll event whose delta saturates the velocity, and every chromatic plane on the new
@@ -234,6 +236,26 @@ inline-block box would break the line. **Honors reduced-motion** (plain text imm
 ghost/overlay). Every case-study text
 uses it, with small stagger `delay`s. Duration auto-scales with length (short cap so long paragraphs
 stay fast); the hero pins explicit durations so it keeps its deliberate pace.
+
+## About Me (`/about`)
+
+Personal CV-light page, deliberately NOT a LinkedIn-style CV (researched against top creative-dev
+portfolios — Payot/Bizarro/Miranda pattern): short first-person bio, numbered areas (01–04) instead
+of a skills wall, a 3-line mini-timeline, and a brands list that credits agency/team work (Santander,
+Toyota, Netflix…) without exposing NDA'd projects. Detailed stacks stay in each case study's
+`credits.stack`. No downloadable CV (LinkedIn in the HUD covers it).
+
+- **Data-driven** from `src/config/aboutContent.ts` (same i18n-ready pattern as projectContent).
+- **`Profile`** (`sections/Profile.tsx`) is the whole DOM; **`ProfileScene`** renders the portrait
+  photo as a **chromatic plane** (RGB-split + parallax — the photo is a graphic piece, not an <img>)
+  plus a giant dim `GUSGQ` behind it. Anchoring copies the Story technique: Profile MEASURES the
+  photo slot (`[data-plane-slot]` <lg, the `article` ≥lg) into **`store.profileAnchors`**; the
+  stacked plane fraction (0.58) must stay in sync between both files. Both are code-split with the
+  detail modules (`preloadDetailModules`).
+- No diamond on `/about` → R3F auto-render mode (same as generic DETAIL).
+- The HUD's `SITE_LINKS` gained an **internal** About link (warp navigation via `useTransition`,
+  hidden while already on `/about`); `Footer` has an about branch (Spanish "Hablemos" close) and
+  `RouteBackButton` shows on `/about` too. Photo asset: `public/images/about/gustavo.jpg`.
 
 ## Responsive (mobile / tablet)
 

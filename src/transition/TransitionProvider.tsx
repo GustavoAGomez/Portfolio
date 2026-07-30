@@ -322,11 +322,11 @@ export function TransitionProvider({ children }: { children: ReactNode }) {
   )
 }
 
-/** "Back to index" control for detail routes — navigates home with the transition. */
+/** "Back to index" control for detail + about routes — navigates home with the transition. */
 export function RouteBackButton() {
   const { go } = useTransition()
   const { pathname } = useLocation()
-  if (!pathname.startsWith("/work/")) return null
+  if (!pathname.startsWith("/work/") && !pathname.startsWith("/about")) return null
   return (
     <button
       type="button"

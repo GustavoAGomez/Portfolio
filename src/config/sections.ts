@@ -19,8 +19,14 @@ import { StoryScene } from "../canvas/modules/StoryScene"
 // plain ComponentType the config uses; keeps JSX rendering uniform, no `any`.)
 const loadGallery = () => import("../sections/Gallery")
 const loadWorksScene = () => import("../canvas/modules/WorksScene")
+const loadProfile = () => import("../sections/Profile")
+const loadProfileScene = () => import("../canvas/modules/ProfileScene")
 const Gallery = lazy(() => loadGallery().then((m) => ({ default: m.Gallery }))) as unknown as ComponentType
 const WorksScene = lazy(() => loadWorksScene().then((m) => ({ default: m.WorksScene }))) as unknown as ComponentType<{
+  id: SectionId
+}>
+const Profile = lazy(() => loadProfile().then((m) => ({ default: m.Profile }))) as unknown as ComponentType
+const ProfileScene = lazy(() => loadProfileScene().then((m) => ({ default: m.ProfileScene }))) as unknown as ComponentType<{
   id: SectionId
 }>
 
@@ -31,6 +37,8 @@ const WorksScene = lazy(() => loadWorksScene().then((m) => ({ default: m.WorksSc
 export function preloadDetailModules(): void {
   void loadGallery()
   void loadWorksScene()
+  void loadProfile()
+  void loadProfileScene()
 }
 
 export interface SectionConfig {
@@ -56,6 +64,7 @@ const REGISTRY: Record<SectionId, SectionConfig> = {
   works: { id: "works", Dom: WorksList },
   gallery: { id: "gallery", Dom: Gallery, Scene: WorksScene },
   about: { id: "about", Dom: About },
+  profile: { id: "profile", anchor: true, Dom: Profile, Scene: ProfileScene }, // /about: CV-light bio + chromatic photo plane
   footer: { id: "footer", Dom: Footer }
 }
 
@@ -76,3 +85,5 @@ export const HOME_SECTIONS: SectionConfig[] = [REGISTRY.hero, REGISTRY.works]
 export const DETAIL_SECTIONS: SectionConfig[] = [REGISTRY.statement, REGISTRY.gallery, REGISTRY.about, REGISTRY.footer]
 /** Case-study detail (projects with content): `story` replaces the generic gallery. */
 export const CASE_STUDY_SECTIONS: SectionConfig[] = [REGISTRY.statement, REGISTRY.description, REGISTRY.about, REGISTRY.story, REGISTRY.footer]
+/** /about — the personal About Me page (CV-light profile + shared footer). */
+export const ABOUT_SECTIONS: SectionConfig[] = [REGISTRY.profile, REGISTRY.footer]

@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom"
+import { Link, useLocation } from "react-router-dom"
 import { type MouseEvent } from "react"
 import { useCurrentProject } from "../routes/useCurrentProject"
 import { useTransition } from "../transition/TransitionProvider"
@@ -14,6 +14,7 @@ function prettyUrl(url: string): string {
 export function Footer() {
   const { content } = useCurrentProject()
   const { go } = useTransition()
+  const isAbout = useLocation().pathname.startsWith("/about")
 
   // Case study: live-site CTA → next project → shared footer HUD.
   if (content) {
@@ -102,6 +103,29 @@ export function Footer() {
           <CornerHud variant="block" />
         </div>
       </>
+    )
+  }
+
+  // About page: Spanish contact close (same language as the case studies).
+  if (isAbout) {
+    return (
+      <div className="relative flex flex-col justify-end">
+        <div className="diagonal-stripe absolute inset-0" />
+        <div className="relative px-6 md:px-16 pt-24 pb-10">
+          <p className="text-xs font-mono tracking-[0.35em] uppercase text-white/60">
+            <Decode>Contacto</Decode>
+          </p>
+          <a href="mailto:stgustavo.gomez@gmail.com" className="group pointer-events-auto mt-4 flex items-baseline gap-4 md:gap-6">
+            <span className="font-display uppercase text-white text-[clamp(2.25rem,9vw,6rem)] leading-none hover-neon-b">
+              <Decode delay={0.06}>Hablemos</Decode>
+            </span>
+            <span aria-hidden="true" className="font-display text-[clamp(1.5rem,5vw,3.75rem)] text-white/40 transition-all group-hover:translate-x-1 group-hover:text-[var(--color-accent-b)]">
+              →
+            </span>
+          </a>
+        </div>
+        <CornerHud variant="block" />
+      </div>
     )
   }
 

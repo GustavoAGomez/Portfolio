@@ -102,6 +102,7 @@ export function SiteShell() {
       {/* Route logic (validation / redirects) — no visible content of its own. */}
       <Routes>
         <Route path="/" element={null} />
+        <Route path="/about" element={null} />
         <Route path="/work/:id" element={<DetailGuard />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

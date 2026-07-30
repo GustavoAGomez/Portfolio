@@ -1,7 +1,7 @@
 import { create } from "zustand"
 import { clamp01 } from "../lib/math"
 
-export type SectionId = "hero" | "statement" | "description" | "story" | "works" | "gallery" | "about" | "footer"
+export type SectionId = "hero" | "statement" | "description" | "story" | "works" | "gallery" | "about" | "profile" | "footer"
 
 export interface SectionBounds {
   /** Document-space top (px), independent of current scroll. */
@@ -47,11 +47,20 @@ interface AppState {
    * Empty until Story measures (planes fall back to the even-split estimate).
    */
   storyAnchors: number[]
+  /**
+   * Reactive: MEASURED document-space centers (px) of the About page's media
+   * slots, written by Profile.tsx exactly like storyAnchors — ProfileScene pins
+   * its chromatic planes to them. Disjoint route sets mean story/profile never
+   * coexist, but each keeps its own field so neither can clobber the other
+   * during a route swap.
+   */
+  profileAnchors: number[]
   registerSection: (id: SectionId, bounds: SectionBounds) => void
   unregisterSection: (id: SectionId) => void
   setReducedMotion: (v: boolean) => void
   setCaseStudyId: (id: string | null) => void
   setStoryAnchors: (centers: number[]) => void
+  setProfileAnchors: (centers: number[]) => void
 }
 
 export const useStore = create<AppState>((set) => ({
@@ -67,9 +76,11 @@ export const useStore = create<AppState>((set) => ({
       return { sections: next }
     }),
   storyAnchors: [],
+  profileAnchors: [],
   setReducedMotion: (v) => set({ reducedMotion: v }),
   setCaseStudyId: (id) => set((s) => (s.caseStudyId === id ? s : { caseStudyId: id })),
-  setStoryAnchors: (centers) => set({ storyAnchors: centers })
+  setStoryAnchors: (centers) => set({ storyAnchors: centers }),
+  setProfileAnchors: (centers) => set({ profileAnchors: centers })
 }))
 
 /**

@@ -1,4 +1,4 @@
-import { HOME_SECTIONS, DETAIL_SECTIONS, CASE_STUDY_SECTIONS, type SectionConfig } from "../config/sections"
+import { HOME_SECTIONS, DETAIL_SECTIONS, CASE_STUDY_SECTIONS, ABOUT_SECTIONS, type SectionConfig } from "../config/sections"
 import { PROJECTS } from "../config/projects"
 import { getProjectContent } from "../config/projectContent"
 
@@ -21,6 +21,7 @@ export function isValidProject(id: string | null | undefined): boolean {
  * route's <Navigate> redirect lands.
  */
 export function activeSectionsFor(pathname: string): SectionConfig[] {
+  if (/^\/about\/?$/.test(pathname)) return ABOUT_SECTIONS
   const id = workIdFromPath(pathname)
   if (!id || !isValidProject(id)) return HOME_SECTIONS
   // Projects with case-study content get the story layout; the rest stay generic.

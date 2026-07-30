@@ -1,7 +1,9 @@
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useRef, useState, type MouseEvent } from "react"
+import { useLocation } from "react-router-dom"
 import gsap from "gsap"
 import { ScrambleTextPlugin } from "gsap/ScrambleTextPlugin"
 import { useStore } from "../scroll/store"
+import { useTransition } from "../transition/TransitionProvider"
 import { Decode } from "./Decode"
 
 gsap.registerPlugin(ScrambleTextPlugin)
@@ -11,13 +13,17 @@ export interface HudLink {
   href: string
   /** External links open in a new tab; mailto/internal links do not. */
   external?: boolean
+  /** In-app route — navigated with the warp transition instead of a page load. */
+  internal?: boolean
 }
 
 /**
- * Canonical site contact links (LinkedIn + Gmail). Default for every page's HUD,
- * so the footer stays identical across Home and the case studies.
+ * Canonical site links (About + LinkedIn + Gmail). Default for every page's HUD,
+ * so the footer stays identical across Home and the case studies. The internal
+ * About link is hidden while already on /about (a self-link reads as noise).
  */
 export const SITE_LINKS: HudLink[] = [
+  { label: "About", href: "/about", internal: true },
   { label: "LinkedIn", href: "https://www.linkedin.com/in/gustavoagomez93/", external: true },
   { label: "Gmail", href: "mailto:stgustavo.gomez@gmail.com" }
 ]
@@ -54,6 +60,10 @@ interface CornerHudProps {
  */
 export function CornerHud({ links = SITE_LINKS, variant = "overlay" }: CornerHudProps) {
   const reducedMotion = useStore((s) => s.reducedMotion)
+  const { go } = useTransition()
+  const { pathname } = useLocation()
+  // Hide an internal link that points at the page we're already on.
+  const visibleLinks = links.filter((l) => !(l.internal && pathname === l.href))
   const [time, setTime] = useState(() => formatMadrid())
   // Hold the tick until the clock has decoded once, so the scramble isn't
   // overwritten mid-play by a setState. Reduced-motion ticks immediately.
@@ -112,16 +122,28 @@ export function CornerHud({ links = SITE_LINKS, variant = "overlay" }: CornerHud
         </p>
       </div>
       <nav className="pointer-events-auto flex gap-4 md:gap-6">
-        {links.map((l, i) => (
-          <a
-            key={l.label}
-            href={l.href}
-            {...(l.external ? { target: "_blank", rel: "noreferrer" } : {})}
-            className="hover-neon-b"
-          >
-            <Decode delay={0.1 + i * 0.08}>{l.label}</Decode>
-          </a>
-        ))}
+        {visibleLinks.map((l, i) => {
+          // Internal routes navigate with the warp transition (modified clicks
+          // keep native behavior: new tab / middle button).
+          const onClick = l.internal
+            ? (e: MouseEvent<HTMLAnchorElement>) => {
+                if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return
+                e.preventDefault()
+                go(l.href)
+              }
+            : undefined
+          return (
+            <a
+              key={l.label}
+              href={l.href}
+              onClick={onClick}
+              {...(l.external ? { target: "_blank", rel: "noreferrer" } : {})}
+              className="hover-neon-b"
+            >
+              <Decode delay={0.1 + i * 0.08}>{l.label}</Decode>
+            </a>
+          )
+        })}
       </nav>
     </div>
   )
