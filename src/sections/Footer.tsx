@@ -1,16 +1,16 @@
 import { Link, useLocation } from "react-router-dom"
 import { useEffect, useRef, type MouseEvent } from "react"
+import gsap from "gsap"
 import { useCurrentProject } from "../routes/useCurrentProject"
 import { useTransition } from "../transition/TransitionProvider"
 import { useStore } from "../scroll/store"
 import { PROJECTS } from "../config/projects"
 import { ABOUT } from "../config/aboutContent"
-import { scrambleToReal } from "../lib/scramble"
 import { Decode } from "../components/Decode"
 import { CornerHud } from "../components/CornerHud"
 
-/** Meta of the "Sobre mí" row — mirrors a works-list row's role/category/year. */
-const ABOUT_ROW_META = ["Gustavo Gómez", "Creative front-end", "Madrid"] as const
+/** Copies of the marquee phrase per half — enough to exceed any viewport width. */
+const MARQUEE_REPEATS = 4
 
 /** Strip protocol + trailing slash for a clean display label (tagorodive.com). */
 function prettyUrl(url: string): string {
@@ -23,32 +23,27 @@ export function Footer() {
   const isAbout = useLocation().pathname.startsWith("/about")
   const reducedMotion = useStore((s) => s.reducedMotion)
 
-  // "Sobre mí" row (case studies only): first-view decode of its meta — the same
-  // IntersectionObserver + scramble-toward-real-text mechanism as a works row
-  // (Decode can't drive these spans: the hover scramble mutates textContent and
-  // would fight Decode's ghost/overlay structure).
-  const aboutRowRef = useRef<HTMLAnchorElement | null>(null)
+  // "Sobre mí" marquee (case studies only): an infinite band — the track holds
+  // TWO identical halves and loops xPercent 0→-50, so the wrap lands exactly on
+  // the seam and never jumps. Compositor-only (transform), killed on unmount;
+  // reduced-motion never starts it (static band, still clickable).
+  const marqueeTrack = useRef<HTMLDivElement | null>(null)
+  const marqueeTween = useRef<gsap.core.Tween | null>(null)
   useEffect(() => {
-    const el = aboutRowRef.current
-    if (!el || reducedMotion) return
-    const io = new IntersectionObserver(
-      (entries) => {
-        const entry = entries[0]
-        if (!entry?.isIntersecting) return
-        io.disconnect() // decode once
-        scrambleToReal(el.querySelectorAll<HTMLElement>("[data-scramble]"), 0.06)
-      },
-      { threshold: 0.6 }
-    )
-    io.observe(el)
-    return () => io.disconnect()
+    const track = marqueeTrack.current
+    if (!track || reducedMotion) return
+    marqueeTween.current = gsap.to(track, { xPercent: -50, ease: "none", duration: 22, repeat: -1 })
+    return () => {
+      marqueeTween.current?.kill()
+      marqueeTween.current = null
+      gsap.set(track, { xPercent: 0 })
+    }
   }, [reducedMotion, content])
 
-  // Hover/focus re-scramble of the row meta (same feel as the Home list).
-  const scrambleAboutMeta = () => {
-    const el = aboutRowRef.current
-    if (!el || reducedMotion) return
-    scrambleToReal(el.querySelectorAll<HTMLElement>("[data-scramble]"), 0.05)
+  // Hover slows the band to a crawl (readable + "it noticed you"), leave restores.
+  const setMarqueeSpeed = (scale: number) => {
+    const tween = marqueeTween.current
+    if (tween) gsap.to(tween, { timeScale: scale, duration: 0.5, ease: "power2.out", overwrite: true })
   }
 
   // Case study: live-site CTA → next project → shared footer HUD.
@@ -103,41 +98,37 @@ export function Footer() {
           </section>
         )}
 
-        {/* About teaser — a WORKS-LIST ROW: full-width, bordered top/bottom,
-            display title left + mono meta right, with the exact hover language
-            of the Home list (lime + binary scramble). Reads as "the author is
-            one more entry in the index" — louder than the HUD's tiny About link,
-            without the centered-hero look. */}
-        <section className="min-h-[36svh] flex flex-col justify-center px-6 md:px-16 py-24 pointer-events-none">
-          <p className="text-xs font-mono tracking-[0.35em] uppercase text-white/60">
+        {/* About teaser — an infinite MARQUEE band: full-bleed, bordered top and
+            bottom, "SOBRE MÍ →" looping right-to-left in giant display type. The
+            whole band is one link to /about; hovering slows it to a crawl and
+            tints the words lime (the arrows are lime always). Louder than the
+            HUD's tiny About link, without the centered-hero look. */}
+        <section className="min-h-[36svh] flex flex-col justify-center py-24 pointer-events-none">
+          <p className="px-6 md:px-16 text-xs font-mono tracking-[0.35em] uppercase text-white/60">
             <Decode>Quién hay detrás</Decode>
           </p>
           <Link
-            ref={aboutRowRef}
             to="/about"
             onClick={onAbout}
-            onMouseEnter={scrambleAboutMeta}
-            onFocus={scrambleAboutMeta}
-            aria-label="Sobre mí — Gustavo Gómez, creative front-end, Madrid"
-            className="group pointer-events-auto mt-6 flex flex-col gap-2 border-y border-white/10 py-5 lg:flex-row lg:items-baseline lg:justify-between lg:gap-8 lg:py-6"
+            onMouseEnter={() => setMarqueeSpeed(0.15)}
+            onMouseLeave={() => setMarqueeSpeed(1)}
+            aria-label="Sobre mí — quién hay detrás"
+            className="group pointer-events-auto mt-6 block overflow-hidden border-y border-white/10 py-5 md:py-7"
           >
-            <span className="font-display uppercase leading-none tracking-tight text-white text-[clamp(2.5rem,11vw,6rem)] transition-colors duration-300 hover-neon-b">
-              <Decode>Sobre mí</Decode>
-            </span>
-            <span className="flex flex-wrap items-baseline gap-x-3 gap-y-1 text-[10px] md:text-xs font-mono tracking-[0.3em] uppercase text-white/60 transition-colors duration-300 group-hover:text-[var(--color-accent-b)] group-focus-visible:text-[var(--color-accent-b)] lg:max-w-[50%] lg:justify-end">
-              {ABOUT_ROW_META.map((m, i) => (
-                <span key={m} className="contents">
-                  {i > 0 && <span className="opacity-30">/</span>}
-                  <span
-                    data-scramble
-                    data-text={m}
-                    className={`whitespace-nowrap ${i === ABOUT_ROW_META.length - 1 ? "text-[var(--color-accent-b)]" : ""}`}
-                  >
-                    {m}
-                  </span>
-                </span>
+            <div ref={marqueeTrack} className="flex w-max whitespace-nowrap will-change-transform" aria-hidden="true">
+              {[0, 1].map((half) => (
+                <div key={half} className="flex items-baseline">
+                  {Array.from({ length: MARQUEE_REPEATS }, (_, i) => (
+                    <span key={i} className="flex items-baseline gap-5 md:gap-9 mr-5 md:mr-9">
+                      <span className="font-display uppercase leading-none tracking-tight text-white text-[clamp(2.75rem,8vw,5.5rem)] transition-colors duration-300 hover-neon-b">
+                        Sobre mí
+                      </span>
+                      <span className="font-display leading-none text-[clamp(1.75rem,5vw,3.5rem)] text-[var(--color-accent-b)]">→</span>
+                    </span>
+                  ))}
+                </div>
               ))}
-            </span>
+            </div>
           </Link>
         </section>
 
