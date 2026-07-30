@@ -1,11 +1,16 @@
 import { Link, useLocation } from "react-router-dom"
-import { type MouseEvent } from "react"
+import { useEffect, useRef, type MouseEvent } from "react"
 import { useCurrentProject } from "../routes/useCurrentProject"
 import { useTransition } from "../transition/TransitionProvider"
+import { useStore } from "../scroll/store"
 import { PROJECTS } from "../config/projects"
 import { ABOUT } from "../config/aboutContent"
+import { scrambleToReal } from "../lib/scramble"
 import { Decode } from "../components/Decode"
 import { CornerHud } from "../components/CornerHud"
+
+/** Meta of the "Sobre mí" row — mirrors a works-list row's role/category/year. */
+const ABOUT_ROW_META = ["Gustavo Gómez", "Creative front-end", "Madrid"] as const
 
 /** Strip protocol + trailing slash for a clean display label (tagorodive.com). */
 function prettyUrl(url: string): string {
@@ -16,6 +21,35 @@ export function Footer() {
   const { content } = useCurrentProject()
   const { go } = useTransition()
   const isAbout = useLocation().pathname.startsWith("/about")
+  const reducedMotion = useStore((s) => s.reducedMotion)
+
+  // "Sobre mí" row (case studies only): first-view decode of its meta — the same
+  // IntersectionObserver + scramble-toward-real-text mechanism as a works row
+  // (Decode can't drive these spans: the hover scramble mutates textContent and
+  // would fight Decode's ghost/overlay structure).
+  const aboutRowRef = useRef<HTMLAnchorElement | null>(null)
+  useEffect(() => {
+    const el = aboutRowRef.current
+    if (!el || reducedMotion) return
+    const io = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[0]
+        if (!entry?.isIntersecting) return
+        io.disconnect() // decode once
+        scrambleToReal(el.querySelectorAll<HTMLElement>("[data-scramble]"), 0.06)
+      },
+      { threshold: 0.6 }
+    )
+    io.observe(el)
+    return () => io.disconnect()
+  }, [reducedMotion, content])
+
+  // Hover/focus re-scramble of the row meta (same feel as the Home list).
+  const scrambleAboutMeta = () => {
+    const el = aboutRowRef.current
+    if (!el || reducedMotion) return
+    scrambleToReal(el.querySelectorAll<HTMLElement>("[data-scramble]"), 0.05)
+  }
 
   // Case study: live-site CTA → next project → shared footer HUD.
   if (content) {
@@ -69,21 +103,40 @@ export function Footer() {
           </section>
         )}
 
-        {/* About teaser — CENTERED big link to /about, between the right-aligned
-            live-site CTA and the left-aligned next-project headline, so the three
-            closing gestures alternate across the page. Louder than the HUD's tiny
-            About link on purpose: after reading what was built, "who built it" is
-            the natural next question. */}
-        <section className="min-h-[40svh] flex flex-col items-center justify-center px-6 md:px-16 py-24 text-center pointer-events-none">
+        {/* About teaser — a WORKS-LIST ROW: full-width, bordered top/bottom,
+            display title left + mono meta right, with the exact hover language
+            of the Home list (lime + binary scramble). Reads as "the author is
+            one more entry in the index" — louder than the HUD's tiny About link,
+            without the centered-hero look. */}
+        <section className="min-h-[36svh] flex flex-col justify-center px-6 md:px-16 py-24 pointer-events-none">
           <p className="text-xs font-mono tracking-[0.35em] uppercase text-white/60">
             <Decode>Quién hay detrás</Decode>
           </p>
-          <Link to="/about" onClick={onAbout} className="group pointer-events-auto mt-6 flex items-baseline gap-4 md:gap-6">
-            <span className="font-display uppercase text-white text-[clamp(2rem,7vw,4.5rem)] leading-none hover-neon-b">
-              <Decode delay={0.06}>Sobre mí</Decode>
+          <Link
+            ref={aboutRowRef}
+            to="/about"
+            onClick={onAbout}
+            onMouseEnter={scrambleAboutMeta}
+            onFocus={scrambleAboutMeta}
+            aria-label="Sobre mí — Gustavo Gómez, creative front-end, Madrid"
+            className="group pointer-events-auto mt-6 flex flex-col gap-2 border-y border-white/10 py-5 lg:flex-row lg:items-baseline lg:justify-between lg:gap-8 lg:py-6"
+          >
+            <span className="font-display uppercase leading-none tracking-tight text-white text-[clamp(2.5rem,11vw,6rem)] transition-colors duration-300 hover-neon-b">
+              <Decode>Sobre mí</Decode>
             </span>
-            <span aria-hidden="true" className="font-display text-[clamp(1.25rem,4vw,3rem)] text-white/40 transition-all group-hover:translate-x-1 group-hover:text-[var(--color-accent-b)]">
-              →
+            <span className="flex flex-wrap items-baseline gap-x-3 gap-y-1 text-[10px] md:text-xs font-mono tracking-[0.3em] uppercase text-white/60 transition-colors duration-300 group-hover:text-[var(--color-accent-b)] group-focus-visible:text-[var(--color-accent-b)] lg:max-w-[50%] lg:justify-end">
+              {ABOUT_ROW_META.map((m, i) => (
+                <span key={m} className="contents">
+                  {i > 0 && <span className="opacity-30">/</span>}
+                  <span
+                    data-scramble
+                    data-text={m}
+                    className={`whitespace-nowrap ${i === ABOUT_ROW_META.length - 1 ? "text-[var(--color-accent-b)]" : ""}`}
+                  >
+                    {m}
+                  </span>
+                </span>
+              ))}
             </span>
           </Link>
         </section>

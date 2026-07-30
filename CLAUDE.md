@@ -257,9 +257,12 @@ Toyota, Netflix…) without exposing NDA'd projects. Detailed stacks stay in eac
   hidden while already on `/about`); `Footer` has an about branch (Spanish "Hablemos" close **+ a
   `tel:` pill with the phone number** — tapping opens the device dialer) and `RouteBackButton`
   shows on `/about` too. Photo asset: `public/images/about/gustavo.jpg`.
-- Every case-study `Footer` also carries a **centered "Sobre mí →" teaser** (between the
-  right-aligned live-site CTA and the left-aligned next-project headline, so the closing gestures
-  alternate) — the loud route to `/about`, vs the HUD's small link.
+- Every case-study `Footer` also carries a **"Sobre mí" teaser styled as a works-list ROW**
+  (full-width, border-y, display title left + mono meta right, the Home list's lime hover +
+  binary scramble — helper shared via `lib/scramble.ts`), between the live-site CTA and the
+  next-project headline — the loud route to `/about`, vs the HUD's small link. Its meta spans
+  can't use `<Decode>` (the hover scramble mutates textContent and would fight Decode's overlay),
+  so they first-view-decode via the same IO + `scrambleToReal` mechanism as a works row.
 
 ## Responsive (mobile / tablet)
 
