@@ -257,15 +257,12 @@ Toyota, Netflix…) without exposing NDA'd projects. Detailed stacks stay in eac
   hidden while already on `/about`); `Footer` has an about branch (Spanish "Hablemos" close **+ a
   `tel:` pill with the phone number** — tapping opens the device dialer) and `RouteBackButton`
   shows on `/about` too. Photo asset: `public/images/about/gustavo.jpg`.
-- Every case-study `Footer` also carries a **"Sobre mí" MARQUEE teaser**: a full-bleed border-y
-  band with "SOBRE MÍ →" looping right-to-left in giant display type (white words, lime arrows),
-  between the live-site CTA and the next-project headline — the loud route to `/about`, vs the
-  HUD's small link. The whole band is one Link (warp nav). Loop technique: the track holds TWO
-  identical halves and tweens `xPercent: 0→-50` repeat:-1 — the wrap lands exactly on the seam,
-  no jump. Hover slows it (`timeScale` 0.15) and tints the words lime (`hover-neon-b` under the
-  link's `.group`); reduced-motion never starts the tween (static band, still clickable).
-  (`lib/scramble.ts` holds the works-list scramble helper, extracted while iterating here —
-  WorksList consumes it.)
+- Every case-study `Footer` also carries a small **"Sobre mí →" teaser**: left-aligned, the
+  "Siguiente proyecto" language one size down (overline + display link + arrow, lime hover +
+  glow), between the live-site CTA and the next-project headline. Iterated through centered
+  hero / works-row / marquee versions (in this branch's history) before landing here — Gustavo
+  wanted it eye-catching but SMALL. (`lib/scramble.ts` holds the works-list scramble helper,
+  extracted during that iteration — WorksList consumes it.)
 
 ## Responsive (mobile / tablet)
 

@@ -1,16 +1,11 @@
 import { Link, useLocation } from "react-router-dom"
-import { useEffect, useRef, type MouseEvent } from "react"
-import gsap from "gsap"
+import { type MouseEvent } from "react"
 import { useCurrentProject } from "../routes/useCurrentProject"
 import { useTransition } from "../transition/TransitionProvider"
-import { useStore } from "../scroll/store"
 import { PROJECTS } from "../config/projects"
 import { ABOUT } from "../config/aboutContent"
 import { Decode } from "../components/Decode"
 import { CornerHud } from "../components/CornerHud"
-
-/** Copies of the marquee phrase per half — enough to exceed any viewport width. */
-const MARQUEE_REPEATS = 4
 
 /** Strip protocol + trailing slash for a clean display label (tagorodive.com). */
 function prettyUrl(url: string): string {
@@ -21,30 +16,6 @@ export function Footer() {
   const { content } = useCurrentProject()
   const { go } = useTransition()
   const isAbout = useLocation().pathname.startsWith("/about")
-  const reducedMotion = useStore((s) => s.reducedMotion)
-
-  // "Sobre mí" marquee (case studies only): an infinite band — the track holds
-  // TWO identical halves and loops xPercent 0→-50, so the wrap lands exactly on
-  // the seam and never jumps. Compositor-only (transform), killed on unmount;
-  // reduced-motion never starts it (static band, still clickable).
-  const marqueeTrack = useRef<HTMLDivElement | null>(null)
-  const marqueeTween = useRef<gsap.core.Tween | null>(null)
-  useEffect(() => {
-    const track = marqueeTrack.current
-    if (!track || reducedMotion) return
-    marqueeTween.current = gsap.to(track, { xPercent: -50, ease: "none", duration: 22, repeat: -1 })
-    return () => {
-      marqueeTween.current?.kill()
-      marqueeTween.current = null
-      gsap.set(track, { xPercent: 0 })
-    }
-  }, [reducedMotion, content])
-
-  // Hover slows the band to a crawl (readable + "it noticed you"), leave restores.
-  const setMarqueeSpeed = (scale: number) => {
-    const tween = marqueeTween.current
-    if (tween) gsap.to(tween, { timeScale: scale, duration: 0.5, ease: "power2.out", overwrite: true })
-  }
 
   // Case study: live-site CTA → next project → shared footer HUD.
   if (content) {
@@ -98,37 +69,21 @@ export function Footer() {
           </section>
         )}
 
-        {/* About teaser — an infinite MARQUEE band: full-bleed, bordered top and
-            bottom, "SOBRE MÍ →" looping right-to-left in giant display type. The
-            whole band is one link to /about; hovering slows it to a crawl and
-            tints the words lime (the arrows are lime always). Louder than the
-            HUD's tiny About link, without the centered-hero look. */}
-        <section className="min-h-[36svh] flex flex-col justify-center py-24 pointer-events-none">
-          <p className="px-6 md:px-16 text-xs font-mono tracking-[0.35em] uppercase text-white/60">
+        {/* About teaser — small, LEFT-aligned, the "Siguiente proyecto" language
+            one size down: overline + display link + arrow. Quiet in the layout
+            but still a real headline gesture (lime hover + glow), vs the HUD's
+            tiny mono link. */}
+        <section className="px-6 md:px-16 py-24 pointer-events-none">
+          <p className="text-xs font-mono tracking-[0.35em] uppercase text-white/60">
             <Decode>Quién hay detrás</Decode>
           </p>
-          <Link
-            to="/about"
-            onClick={onAbout}
-            onMouseEnter={() => setMarqueeSpeed(0.15)}
-            onMouseLeave={() => setMarqueeSpeed(1)}
-            aria-label="Sobre mí — quién hay detrás"
-            className="group pointer-events-auto mt-6 block overflow-hidden border-y border-white/10 py-5 md:py-7"
-          >
-            <div ref={marqueeTrack} className="flex w-max whitespace-nowrap will-change-transform" aria-hidden="true">
-              {[0, 1].map((half) => (
-                <div key={half} className="flex items-baseline">
-                  {Array.from({ length: MARQUEE_REPEATS }, (_, i) => (
-                    <span key={i} className="flex items-baseline gap-5 md:gap-9 mr-5 md:mr-9">
-                      <span className="font-display uppercase leading-none tracking-tight text-white text-[clamp(2.75rem,8vw,5.5rem)] transition-colors duration-300 hover-neon-b">
-                        Sobre mí
-                      </span>
-                      <span className="font-display leading-none text-[clamp(1.75rem,5vw,3.5rem)] text-[var(--color-accent-b)]">→</span>
-                    </span>
-                  ))}
-                </div>
-              ))}
-            </div>
+          <Link to="/about" onClick={onAbout} className="group pointer-events-auto mt-4 flex items-baseline gap-3 md:gap-4">
+            <span className="font-display uppercase text-white text-[clamp(1.5rem,4vw,2.75rem)] leading-none hover-neon-b">
+              <Decode delay={0.06}>Sobre mí</Decode>
+            </span>
+            <span aria-hidden="true" className="font-display text-[clamp(1rem,2.5vw,1.75rem)] text-white/40 transition-all group-hover:translate-x-1 group-hover:text-[var(--color-accent-b)]">
+              →
+            </span>
           </Link>
         </section>
 
