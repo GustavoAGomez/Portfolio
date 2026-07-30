@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react"
 import gsap from "gsap"
 import { lenisRef } from "../scroll/useLenis"
 import { Decode } from "../components/Decode"
+import { useT } from "../i18n/ui"
 
 /**
  * Hero DOM: small semantic text only. The big GUSGQ headline is rendered in 3D
@@ -10,6 +11,7 @@ import { Decode } from "../components/Decode"
  */
 export function Hero() {
   const meta = useRef<HTMLDivElement>(null)
+  const t = useT()
   const [hasScrolled, setHasScrolled] = useState(false)
 
   useEffect(() => {
@@ -58,7 +60,7 @@ export function Hero() {
     <div className="content-max relative min-h-svh flex flex-col justify-between px-6 md:px-16 py-16 pointer-events-none">
       <div ref={meta} className="max-w-xl">
         <p className="text-xs font-mono tracking-[0.35em] uppercase text-white/60">
-          <Decode>Creative Technologist — Portfolio</Decode>
+          <Decode>{t.heroOverline}</Decode>
         </p>
       </div>
 

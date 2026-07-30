@@ -5,11 +5,13 @@ import { ScrambleTextPlugin } from "gsap/ScrambleTextPlugin"
 import { useStore } from "../scroll/store"
 import { useTransition } from "../transition/TransitionProvider"
 import { Decode } from "./Decode"
+import type { L10n } from "../config/projects"
 
 gsap.registerPlugin(ScrambleTextPlugin)
 
 export interface HudLink {
-  label: string
+  /** Per-locale label (brand names are simply identical in both). */
+  label: L10n
   href: string
   /** External links open in a new tab; mailto/internal links do not. */
   external?: boolean
@@ -23,9 +25,9 @@ export interface HudLink {
  * About link is hidden while already on /about (a self-link reads as noise).
  */
 export const SITE_LINKS: HudLink[] = [
-  { label: "About", href: "/about", internal: true },
-  { label: "LinkedIn", href: "https://www.linkedin.com/in/gustavoagomez93/", external: true },
-  { label: "Gmail", href: "mailto:stgustavo.gomez@gmail.com" }
+  { label: { es: "Sobre mí", en: "About" }, href: "/about", internal: true },
+  { label: { es: "LinkedIn", en: "LinkedIn" }, href: "https://www.linkedin.com/in/gustavoagomez93/", external: true },
+  { label: { es: "Gmail", en: "Gmail" }, href: "mailto:stgustavo.gomez@gmail.com" }
 ]
 
 function formatMadrid(): string {
@@ -60,6 +62,7 @@ interface CornerHudProps {
  */
 export function CornerHud({ links = SITE_LINKS, variant = "overlay" }: CornerHudProps) {
   const reducedMotion = useStore((s) => s.reducedMotion)
+  const locale = useStore((s) => s.locale)
   const { go } = useTransition()
   const { pathname } = useLocation()
   // Hide an internal link that points at the page we're already on.
@@ -134,13 +137,13 @@ export function CornerHud({ links = SITE_LINKS, variant = "overlay" }: CornerHud
             : undefined
           return (
             <a
-              key={l.label}
+              key={l.href}
               href={l.href}
               onClick={onClick}
               {...(l.external ? { target: "_blank", rel: "noreferrer" } : {})}
               className="hover-neon-b"
             >
-              <Decode delay={0.1 + i * 0.08}>{l.label}</Decode>
+              <Decode delay={0.1 + i * 0.08}>{l.label[locale]}</Decode>
             </a>
           )
         })}

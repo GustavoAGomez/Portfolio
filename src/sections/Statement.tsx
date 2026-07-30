@@ -2,11 +2,13 @@ import { useRef } from "react"
 import { useDomParallax } from "../scroll/useDomParallax"
 import { useCurrentProject } from "../routes/useCurrentProject"
 import { Decode } from "../components/Decode"
+import { useT } from "../i18n/ui"
 
 export function Statement() {
   const line = useRef<HTMLHeadingElement>(null)
   useDomParallax(line, 0.08)
   const { content } = useCurrentProject()
+  const t = useT()
 
   // Case study: project title + tagline.
   if (content) {
@@ -34,11 +36,11 @@ export function Statement() {
     <div className="min-h-svh flex items-center justify-center px-6 pointer-events-none">
       {/* Inline lineHeight: this one always wraps (3 lines) — see note above. */}
       <h2 ref={line} className="font-display text-center text-[13vw] md:text-[min(9vw,8.1rem)]" style={{ lineHeight: 1 }}>
-        <span className="text-white">CULTURE IS</span>
+        <span className="text-white">{t.stGeneric1}</span>
         <br />
-        <span className="neon-b">NOT YOUR</span>
+        <span className="neon-b">{t.stGeneric2}</span>
         <br />
-        <span className="text-white">FRIEND.</span>
+        <span className="text-white">{t.stGeneric3}</span>
       </h2>
     </div>
   )

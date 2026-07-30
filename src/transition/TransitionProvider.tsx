@@ -2,6 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useLayoutEffect, use
 import { useLocation, useNavigate } from "react-router-dom"
 import gsap from "gsap"
 import { useStore } from "../scroll/store"
+import { useT } from "../i18n/ui"
 
 // ── Intensity / timing (tune here) ──────────────────────────────────────────
 const DEFORM_OUT_S = 0.32 // liquify + cover, abrupt
@@ -327,6 +328,7 @@ export function TransitionProvider({ children }: { children: ReactNode }) {
 export function RouteBackButton() {
   const { go } = useTransition()
   const { pathname } = useLocation()
+  const t = useT()
   if (pathname === "/") return null
   return (
     <button
@@ -341,7 +343,7 @@ export function RouteBackButton() {
       // the plain 4rem gutter).
       className="fixed left-[max(1.5rem,env(safe-area-inset-left))] top-[max(1.5rem,env(safe-area-inset-top))] z-40 pointer-events-auto rounded-full border border-white/15 bg-[var(--color-bg)]/40 backdrop-blur-md px-3.5 py-1.5 text-[10px] font-mono uppercase tracking-[0.35em] text-white/70 transition-colors hover-neon-b hover:border-white/30 md:left-[max(4rem,calc((100vw_-_1440px)/2_+_4rem))] md:top-8 md:text-xs"
     >
-      ← Index
+      ← {t.index}
     </button>
   )
 }

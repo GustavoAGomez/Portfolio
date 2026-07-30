@@ -44,9 +44,11 @@ export function About() {
   return (
     <div className="content-max min-h-svh flex items-center px-6 md:px-16 pointer-events-none">
       <div className="max-w-lg">
-        <p className="text-xs font-mono tracking-[0.35em] uppercase text-white/60">About</p>
+        <p className="text-xs font-mono tracking-[0.35em] uppercase text-white/60">{t.aboutMe}</p>
         <p className="mt-6 font-display text-white text-3xl md:text-5xl" style={{ lineHeight: 1.08 }}>
-          I build <span className="neon-b">immersive</span> web experiences where interaction, motion and real-time graphics meet.
+          {t.genericAboutPre}
+          <span className="neon-b">{t.genericAboutHighlight}</span>
+          {t.genericAboutPost}
         </p>
       </div>
     </div>

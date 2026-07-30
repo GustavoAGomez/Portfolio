@@ -8,6 +8,7 @@ import { useStore } from "../scroll/store"
 import { useTransition } from "../transition/TransitionProvider"
 import { CornerHud } from "../components/CornerHud"
 import { Decode } from "../components/Decode"
+import { useT } from "../i18n/ui"
 
 gsap.registerPlugin(ScrambleTextPlugin)
 
@@ -30,6 +31,7 @@ interface RowRect {
  */
 export function WorksList() {
   const reducedMotion = useStore((s) => s.reducedMotion)
+  const t = useT()
   const [activeId, setActiveId] = useState<string | null>(null)
 
   const rowRefs = useRef<Record<string, HTMLAnchorElement | null>>({})
@@ -180,7 +182,7 @@ export function WorksList() {
       <div className="content-max relative z-10 flex min-h-svh flex-col px-6 md:px-16 py-16">
         <header className="flex items-baseline justify-between">
           <p className="text-xs font-mono tracking-[0.35em] uppercase text-white/60">
-            <Decode>Selected Work</Decode>
+            <Decode>{t.selectedWork}</Decode>
           </p>
           {/* <p className="text-xs font-mono tracking-[0.35em] uppercase text-white/35">{String(PROJECTS.length).padStart(3, "0")} —</p> */}
         </header>

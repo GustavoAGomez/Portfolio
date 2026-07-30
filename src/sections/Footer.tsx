@@ -178,11 +178,11 @@ export function Footer() {
     <div className="relative flex flex-col justify-end">
       <div className="diagonal-stripe absolute inset-0" />
       <div className="content-max relative px-6 md:px-16 pt-24 pb-10">
-        <p className="text-xs font-mono tracking-[0.35em] uppercase text-white/60">Contact</p>
-        <a href="mailto:stgustavo.gomez@gmail.com" className="pointer-events-auto inline-block font-display text-white text-[clamp(2.5rem,9vw,6rem)] mt-4 hover-neon-b">
-          SAY HELLO
+        <p className="text-xs font-mono tracking-[0.35em] uppercase text-white/60">{t.contact}</p>
+        <a href="mailto:stgustavo.gomez@gmail.com" className="pointer-events-auto inline-block font-display uppercase text-white text-[clamp(2.5rem,9vw,6rem)] mt-4 hover-neon-b">
+          {t.sayHello}
         </a>
-        <p className="mt-8 text-xs text-white/40">© {new Date().getFullYear()} — Built with three.js, R3F &amp; Lenis.</p>
+        <p className="mt-8 text-xs text-white/40">© {new Date().getFullYear()} — {t.builtWith}</p>
       </div>
       <CornerHud variant="block" />
     </div>
