@@ -322,20 +322,24 @@ export function TransitionProvider({ children }: { children: ReactNode }) {
   )
 }
 
-/** "Back to index" control for detail + about routes — navigates home with the transition. */
+/** "Back to index" control for every non-home route (details, about, 404) —
+ *  navigates home with the transition. */
 export function RouteBackButton() {
   const { go } = useTransition()
   const { pathname } = useLocation()
-  if (!pathname.startsWith("/work/") && !pathname.startsWith("/about")) return null
+  if (pathname === "/") return null
   return (
     <button
       type="button"
       onClick={() => go("/")}
       // Chip treatment (same language as the credits' stack chips): thin border +
       // translucent bg + backdrop blur so it stays legible over ANY content that
-      // scrolls under it (story media, light UI screenshots). md:left-16 aligns
-      // it with the sections' px-16 gutter.
-      className="fixed left-[max(1.5rem,env(safe-area-inset-left))] top-[max(1.5rem,env(safe-area-inset-top))] z-40 pointer-events-auto rounded-full border border-white/15 bg-[var(--color-bg)]/40 backdrop-blur-md px-3.5 py-1.5 text-[10px] font-mono uppercase tracking-[0.35em] text-white/70 transition-colors hover-neon-b hover:border-white/30 md:left-16 md:top-8 md:text-xs"
+      // scrolls under it (story media, light UI screenshots). The md `left` is
+      // the sections' px-16 gutter INSIDE the 1440px content cap: fixed elements
+      // can't sit in a .content-max box, so the calc mirrors it — (100vw-1440)/2
+      // is the centered box's edge (negative below 1440, where the max() keeps
+      // the plain 4rem gutter).
+      className="fixed left-[max(1.5rem,env(safe-area-inset-left))] top-[max(1.5rem,env(safe-area-inset-top))] z-40 pointer-events-auto rounded-full border border-white/15 bg-[var(--color-bg)]/40 backdrop-blur-md px-3.5 py-1.5 text-[10px] font-mono uppercase tracking-[0.35em] text-white/70 transition-colors hover-neon-b hover:border-white/30 md:left-[max(4rem,calc((100vw_-_1440px)/2_+_4rem))] md:top-8 md:text-xs"
     >
       ← Index
     </button>

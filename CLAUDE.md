@@ -67,8 +67,8 @@ Lenis drives everything; the DOM only provides scroll height + accessible text.
   so R3F auto-render is off. Scale is viewport-relative (`s = contentMaxWidth/35 * scale`). FBOs
   are recreated + disposed on resize (`useMemo` on size). The shiny fresnel makes camera-facing
   facets bright — that's the gem look, intended. Two perf valves (GLSL untouched):
-  - **When NO gem instance is visible** (all hidden or faded to ~0 — e.g. deep in a case study
-    after `fadeOutAt`), the frame skips the whole multipass and does ONE manual scene render
+  - **When NO gem instance is visible** (all hidden or collapsed to ~0 — e.g. deep in a case study
+    after `shrinkPastHero`), the frame skips the whole multipass and does ONE manual scene render
     (same clear, so the background tone doesn't shift). 4 scene renders/frame → 1 exactly where
     the story videos + chromatic planes live.
   - **Below 1024px the FBOs render at a capped pixel ratio (≤1.5)** — their content is only seen
@@ -93,7 +93,7 @@ only which sections are active changes.
   not per page). There is no `App.tsx`; SiteShell replaced it. It also wraps everything in
   `TransitionProvider` and mounts the `RouteBackButton`.
 - **The URL is the single source of truth for the active section set.**
-  `routes/activeSections.ts#activeSectionsFor(pathname)` returns one of FOUR sets; SiteShell feeds
+  `routes/activeSections.ts#activeSectionsFor(pathname)` returns one of FIVE sets; SiteShell feeds
   it to BOTH `<main>` (DOM) and `<Scene sections>` (WebGL). No global `enabled` flag.
 - **`src/config/sections.ts`** holds the section REGISTRY (`Record<SectionId, SectionConfig>` — every
   id must have an entry) and composes four disjoint route sets:
@@ -103,14 +103,17 @@ only which sections are active changes.
   - `CASE_STUDY_SECTIONS = [statement, description, about, story, footer]` — a real case study; `story`
     (media walkthrough) replaces the generic `gallery`, and `description` (the brief) is inserted.
   - `ABOUT_SECTIONS = [profile, footer]` — `/about`, the personal About Me (see below).
-  - **`activeSectionsFor`**: `/about` → ABOUT; an invalid or non-`/work` path → HOME; a valid
-    `/work/:id` → CASE_STUDY if `getProjectContent(id)` exists, else DETAIL. Invalid ids fall back to
-    HOME so there's no flash before the route's `<Navigate>` redirect lands.
+  - `NOT_FOUND_SECTIONS = [notFound]` — the 404 page: statement-style message (`sections/NotFound`)
+    + a giant dim ambient "404" behind it (`NotFoundScene`, statement recipe; no diamond → R3F
+    auto-render). CTA back home with the warp.
+  - **`activeSectionsFor`**: `/` → HOME; `/about` → ABOUT; a valid `/work/:id` → CASE_STUDY if
+    `getProjectContent(id)` exists, else DETAIL; **anything else — unknown path OR unknown /work id
+    — → NOT_FOUND. There are NO redirects**: the wrong URL stays in the bar and the 404 set renders
+    in place (SiteShell has no `<Routes>` block anymore; route matching had no job left).
   - **To move a section between routes, move it between those arrays.** Sets are disjoint, so
     navigation unmounts one set and mounts the other cleanly (bounds re-register, no orphans).
-- **Routes** (`SiteShell`): `/` → Home; `/about` → About Me; `/work/:id` → detail (a `DetailGuard`
-  `<Navigate to="/"/>`s on an unknown id); `*` → redirect home. Rows in `WorksList` navigate with
-  the transition (below).
+- Rows in `WorksList` navigate with the transition (below). `RouteBackButton` shows on every
+  non-home route (details, /about, 404).
 - **On navigation**, SiteShell resets scroll (`lenis.scrollTo(0,{immediate,force})` + `scrollY=0` +
   `lenis.resize()`) **and zeroes `rawVelocity`/`velocity` AFTER the jump** — the immediate scrollTo
   emits a scroll event whose delta saturates the velocity, and every chromatic plane on the new
@@ -191,14 +194,16 @@ shared detail sections, which **branch on whether `content` exists**.
 ### The oversized diamond behind the case-study hero
 The Home hero gem is so large it reads as a glassy refraction **background**. The same effect sits
 behind the case-study `statement`: `DIAMONDS` in `Diamonds.tsx` has a `{ section: "statement",
-scale: 20, factor: 0.6, fadeOutAt: "story" }` instance. Key points:
+scale: 20, factor: 0.6, shrinkPastHero: true }` instance. Key points:
 - It warps the ambient 3D word `StatementScene` renders behind the title (currently "PROJECT",
   drawn with its OWN lighter colour `BEYOND_COLOR` in `StatementScene.tsx`, not `BRAND.numberDim` —
   numberDim stays dark for the works numbers / hero stripe).
-- **`fadeOutAt`** shrinks the gem to scale 0 over the viewport-height BEFORE that section's top
-  reaches the **bottom** of the screen (measured on `scrollY + size.height`, not the centre) — so it
-  is fully gone before the first `story` image can appear and **never warps the media**. Full behind
-  the statement, gradually gone by "Detalles".
+- **`shrinkPastHero`** (shared with /about, same timings) collapses the gem via a TRIGGER, not a
+  scroll scrub: crossing ~45% of the hero's viewport launches a fixed-time smoothstep collapse to 0
+  (`SHRINK_DURATION` 0.7s, delta-based); scrolling back above ~30% re-grows it at the same speed
+  (asymmetric hysteresis so the boundary never thrashes; reduced-motion snaps). Long gone before the
+  first `story` image can appear — **never warps the media**. (It replaced a scroll-scrubbed
+  `fadeOutAt: "story"` option, removed with it.)
 
 ### Case-study background plane (`DescriptionScene`)
 Because the manual diamond loop draws the clear colour darker (rgb ~6–7), the case study would look
@@ -240,23 +245,34 @@ stay fast); the hero pins explicit durations so it keeps its deliberate pace.
 ## About Me (`/about`)
 
 Personal CV-light page, deliberately NOT a LinkedIn-style CV (researched against top creative-dev
-portfolios — Payot/Bizarro/Miranda pattern): short first-person bio, numbered areas (01–04) instead
-of a skills wall, a 3-line mini-timeline, and a brands list that credits agency/team work (Santander,
-Toyota, Netflix…) without exposing NDA'd projects. Detailed stacks stay in each case study's
+portfolios — Payot/Bizarro/Miranda pattern): short first-person bio, numbered areas (01–05) instead
+of a skills wall, a 4-line mini-timeline (incl. the AI-development máster at The Big School), and a
+brands list that credits agency/team work (Santander, Getnet, Mutua, Mazda, Toyota, Netflix…) without
+exposing NDA'd projects. Gustavo is a front-end / UI developer, NOT a designer — the copy must never
+claim design-systems authorship; his thing is component LIBRARIES (PagoNxt, Mutua), animation
+(GSAP/canvas/Three.js) and pixel-perfect UI. Detailed stacks stay in each case study's
 `credits.stack`. No downloadable CV (LinkedIn in the HUD covers it).
 
 - **Data-driven** from `src/config/aboutContent.ts` (same i18n-ready pattern as projectContent).
 - **`Profile`** (`sections/Profile.tsx`) is the whole DOM; **`ProfileScene`** renders the portrait
-  photo as a **chromatic plane** (RGB-split + parallax — the photo is a graphic piece, not an <img>)
-  plus a giant dim `GUSGQ` behind it. Anchoring copies the Story technique: Profile MEASURES the
+  photo as a **chromatic plane** (RGB-split + parallax — the photo is a graphic piece, not an <img>).
+  (It briefly had a giant dim `GUSGQ` behind the photo — removed: the photo covers it and it read
+  broken.) Anchoring copies the Story technique: Profile MEASURES the
   photo slot (`[data-plane-slot]` <lg, the `article` ≥lg) into **`store.profileAnchors`**; the
   stacked plane fraction (0.58) must stay in sync between both files. Both are code-split with the
   detail modules (`preloadDetailModules`).
-- No diamond on `/about` → R3F auto-render mode (same as generic DETAIL).
+- **The /about hero replays the case-study statement effect**: the oversized gem (`profile` instance
+  in `DIAMONDS`) refracts an ambient dim `ABOUT` word (statement recipe in ProfileScene, fontSize
+  fraction ×7/5 so 5 letters bleed like PROJECT's 7). It uses the same **`shrinkPastHero`** trigger
+  as the statement gem (see above), plus one /about-specific twist: because the `profile` section
+  spans the WHOLE page (unlike `statement` = one svh box), **`heroAnchor`** pins the gem to the
+  section's first viewport (top + vh/2, not the section centre).
+  Diamond present → manual render loop → ProfileScene also
+  mounts the same fixed `BRAND.bg` background plane as DescriptionScene (else /about reads darker).
 - The HUD's `SITE_LINKS` gained an **internal** About link (warp navigation via `useTransition`,
   hidden while already on `/about`); `Footer` has an about branch (Spanish "Hablemos" close **+ a
   `tel:` pill with the phone number** — tapping opens the device dialer) and `RouteBackButton`
-  shows on `/about` too. Photo asset: `public/images/about/gustavo.jpg`.
+  shows there too (it shows on every non-home route). Photo asset: `public/images/about/gustavo.jpg`.
 - Every case-study `Footer` also carries a small **"Sobre mí →" teaser**: left-aligned, the
   "Siguiente proyecto" language one size down (overline + display link + arrow, lime hover +
   glow), between the live-site CTA and the next-project headline. Iterated through centered
@@ -291,6 +307,16 @@ The whole site is responsive with **two aligned DOM↔canvas breakpoints** (keep
 - **World-unit sizes are viewport fractions with desktop caps** — `Math.min(cap, worldWidth * f)`
   everywhere (story planes, works planes/numbers, statement ambient word), with `f` tuned so
   **≥1440px reproduces the previous fixed layout exactly**. Never reintroduce fixed world sizes.
+- **Site-wide 1440px CONTENT CAP (ultra-wide)** — past 1440px the layout stops growing and centers,
+  so a 27"+ screen reads exactly like the tuned desktop instead of pushing copy to the viewport
+  edges (away from the world-unit-capped planes). Three mirrored pieces, keep in sync:
+  `.content-max` (index.css — width:100% + max-width:1440px + margin-inline:auto, applied to every
+  section's content container, paddings inside; full-bleed backdrops like the works hover image and
+  the diagonal stripe stay full-bleed) · `SCENE.contentMaxPx` (tokens.ts) → **`layoutWidth`** in
+  `useBlock` (worldWidth capped in world units — used by whatever LACKS a Math.min cap of its own:
+  the hero GUSGQ fontSize and the gem's `contentMaxWidth` in Diamonds) · DOM display titles sized in
+  vw carry a `min(Nvw, Xrem)` cap (statement `min(10vw,9rem)`, profile name `min(9vw,8.1rem)`) —
+  Xrem = Nvw at 1440. New sections/scenes must follow all three.
 - **`min-h-svh` (never `min-h-screen`/`vh`)** for full-viewport sections (mobile URL bar), fluid
   `clamp()` type for the works titles / footer headlines, `viewport-fit=cover` + safe-area insets
   (`max(…, env(safe-area-inset-*))`) on fixed UI: RouteBackButton, CornerHud, hero scroll cue.
@@ -371,7 +397,11 @@ the dashboard:
   fires on the element, on its `.group`, and on `:focus-visible`; glow dropped under reduced-motion).
   Applied to the works-list title + meta, footer next-project/mailto, HUD links and the back button.
   Note plain `hover:neon-b` in a Tailwind class does NOT work (`neon-b` is raw CSS, not a registered
-  utility) — that's what `.hover-neon-b` is for.
+  utility) — that's what `.hover-neon-b` is for. EXCEPTION — **pill/chip BORDERS stay dim white on
+  hover (`hover:border-white/30`), never accent-b**: dim white sits below the cursor's luminance
+  threshold, so inside the cursor disc the border inverts to lime-on-lime and VANISHES (the intended
+  effect, per Gustavo); a lime border sits above the threshold and reads dark through the disc.
+  Applies to ← Index, "Visitar la web" and "Llámame". Text still goes lime.
 - **The works-list selection re-runs on scroll** (`WorksList`): position-based hover goes stale when
   the cursor sits still and the page scrolls under it (no mousemove fires) — the row never activated
   and its title stayed white. A window `pointermove` ref + `scroll` listener re-tests the last mouse

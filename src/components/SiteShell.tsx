@@ -1,9 +1,9 @@
 import { Suspense, useEffect } from "react"
-import { Navigate, Route, Routes, useLocation, useParams } from "react-router-dom"
+import { useLocation } from "react-router-dom"
 import { Scene } from "../canvas/Scene"
 import { Section } from "./Section"
 import { CanvasErrorBoundary } from "./CanvasErrorBoundary"
-import { activeSectionsFor, isValidProject, workIdFromPath } from "../routes/activeSections"
+import { activeSectionsFor, workIdFromPath } from "../routes/activeSections"
 import { getProjectContent } from "../config/projectContent"
 import { preloadDetailModules } from "../config/sections"
 import { useLenis, lenisRef } from "../scroll/useLenis"
@@ -11,13 +11,6 @@ import { useHomeSnap } from "../scroll/useHomeSnap"
 import { useStore } from "../scroll/store"
 import { TransitionProvider, RouteBackButton } from "../transition/TransitionProvider"
 import { Cursor } from "./Cursor"
-
-/** Route logic only: an invalid `/work/:id` redirects home. Renders no content
- *  (the section content is owned by the shell's <main>, driven by the URL). */
-function DetailGuard() {
-  const { id } = useParams<{ id: string }>()
-  return isValidProject(id) ? null : <Navigate to="/" replace />
-}
 
 /**
  * The persistent shell — mounted ONCE above the router. It owns the single fixed
@@ -99,13 +92,9 @@ export function SiteShell() {
           warp layers so their transition filter can't trap its blend mode. */}
       <Cursor />
 
-      {/* Route logic (validation / redirects) — no visible content of its own. */}
-      <Routes>
-        <Route path="/" element={null} />
-        <Route path="/about" element={null} />
-        <Route path="/work/:id" element={<DetailGuard />} />
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
+      {/* No <Routes> block: nothing redirects anymore. activeSectionsFor maps
+          EVERY pathname to a section set (unknown URLs → the 404 set, keeping
+          the wrong URL in the bar), so route matching has no job left here. */}
     </TransitionProvider>
   )
 }

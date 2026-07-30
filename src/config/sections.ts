@@ -8,11 +8,13 @@ import { Story } from "../sections/Story"
 import { WorksList } from "../sections/WorksList"
 import { About } from "../sections/About"
 import { Footer } from "../sections/Footer"
+import { NotFound } from "../sections/NotFound"
 
 import { HeroScene } from "../canvas/modules/HeroScene"
 import { StatementScene } from "../canvas/modules/StatementScene"
 import { DescriptionScene } from "../canvas/modules/DescriptionScene"
 import { StoryScene } from "../canvas/modules/StoryScene"
+import { NotFoundScene } from "../canvas/modules/NotFoundScene"
 
 // Detail-only heavy modules — code-split so the Home bundle skips them.
 // (`as unknown as ComponentType` bridges React.lazy's LazyExoticComponent to the
@@ -65,7 +67,8 @@ const REGISTRY: Record<SectionId, SectionConfig> = {
   gallery: { id: "gallery", Dom: Gallery, Scene: WorksScene },
   about: { id: "about", Dom: About },
   profile: { id: "profile", anchor: true, Dom: Profile, Scene: ProfileScene }, // /about: CV-light bio + chromatic photo plane
-  footer: { id: "footer", Dom: Footer }
+  footer: { id: "footer", Dom: Footer },
+  notFound: { id: "notFound", anchor: true, Dom: NotFound, Scene: NotFoundScene } // 404: message + giant dim "404" behind
 }
 
 /**
@@ -87,3 +90,5 @@ export const DETAIL_SECTIONS: SectionConfig[] = [REGISTRY.statement, REGISTRY.ga
 export const CASE_STUDY_SECTIONS: SectionConfig[] = [REGISTRY.statement, REGISTRY.description, REGISTRY.about, REGISTRY.story, REGISTRY.footer]
 /** /about — the personal About Me page (CV-light profile + shared footer). */
 export const ABOUT_SECTIONS: SectionConfig[] = [REGISTRY.profile, REGISTRY.footer]
+/** Any unknown URL (no redirect — the wrong URL stays in the bar). */
+export const NOT_FOUND_SECTIONS: SectionConfig[] = [REGISTRY.notFound]

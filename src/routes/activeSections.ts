@@ -1,4 +1,4 @@
-import { HOME_SECTIONS, DETAIL_SECTIONS, CASE_STUDY_SECTIONS, ABOUT_SECTIONS, type SectionConfig } from "../config/sections"
+import { HOME_SECTIONS, DETAIL_SECTIONS, CASE_STUDY_SECTIONS, ABOUT_SECTIONS, NOT_FOUND_SECTIONS, type SectionConfig } from "../config/sections"
 import { PROJECTS } from "../config/projects"
 import { getProjectContent } from "../config/projectContent"
 
@@ -15,15 +15,19 @@ export function isValidProject(id: string | null | undefined): boolean {
 }
 
 /**
- * The URL is the single source of truth for which section set is live. A valid
- * `/work/:id` → DETAIL; everything else (home, invalid id, unknown) → HOME.
- * Invalid ids fall back to HOME here so there's no DETAIL flash before the
- * route's <Navigate> redirect lands.
+ * The URL is the single source of truth for which section set is live. Home →
+ * HOME; /about → ABOUT; a valid `/work/:id` → CASE_STUDY (if it has content) or
+ * DETAIL; ANYTHING else — an unknown path or an unknown /work id — is the 404
+ * page. No redirect: the wrong URL stays in the bar and NOT_FOUND_SECTIONS
+ * renders in place.
  */
 export function activeSectionsFor(pathname: string): SectionConfig[] {
+  if (pathname === "/") return HOME_SECTIONS
   if (/^\/about\/?$/.test(pathname)) return ABOUT_SECTIONS
   const id = workIdFromPath(pathname)
-  if (!id || !isValidProject(id)) return HOME_SECTIONS
-  // Projects with case-study content get the story layout; the rest stay generic.
-  return getProjectContent(id) ? CASE_STUDY_SECTIONS : DETAIL_SECTIONS
+  if (id && isValidProject(id)) {
+    // Projects with case-study content get the story layout; the rest stay generic.
+    return getProjectContent(id) ? CASE_STUDY_SECTIONS : DETAIL_SECTIONS
+  }
+  return NOT_FOUND_SECTIONS
 }
