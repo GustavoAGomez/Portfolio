@@ -6,6 +6,7 @@ import { PROJECTS } from "../config/projects"
 import { ABOUT } from "../config/aboutContent"
 import { Decode } from "../components/Decode"
 import { CornerHud } from "../components/CornerHud"
+import { useT } from "../i18n/ui"
 
 /** Strip protocol + trailing slash for a clean display label (tagorodive.com). */
 function prettyUrl(url: string): string {
@@ -14,6 +15,7 @@ function prettyUrl(url: string): string {
 
 export function Footer() {
   const { content } = useCurrentProject()
+  const t = useT()
   const { go } = useTransition()
   const isAbout = useLocation().pathname.startsWith("/about")
 
@@ -50,10 +52,10 @@ export function Footer() {
         {(content.url || content.urlPending) && (
           <section className="content-max min-h-[45svh] flex flex-col items-end justify-center px-6 md:px-16 py-24 text-right pointer-events-none">
             <p className="text-xs font-mono tracking-[0.35em] uppercase text-white/60">
-              <Decode>Sitio en vivo</Decode>
+              <Decode>{t.liveSite}</Decode>
             </p>
             <h2 className="mt-6 font-display uppercase text-white text-3xl md:text-5xl" style={{ lineHeight: 1.05 }}>
-              <Decode delay={0.06}>{content.url ? prettyUrl(content.url) : "Próximamente"}</Decode>
+              <Decode delay={0.06}>{content.url ? prettyUrl(content.url) : t.comingSoon}</Decode>
             </h2>
             {content.url ? (
               <a
@@ -62,14 +64,14 @@ export function Footer() {
                 rel="noreferrer"
                 className="group pointer-events-auto mt-8 inline-flex items-center gap-3 rounded-full border border-white/20 px-6 py-3 text-xs font-mono tracking-[0.3em] uppercase text-white/80 transition-colors hover:border-white/30 hover:text-[var(--color-accent-b)]"
               >
-                <Decode delay={0.12}>Visitar la web</Decode>
+                <Decode delay={0.12}>{t.visitSite}</Decode>
                 <span aria-hidden="true" className="text-base transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5">
                   ↗
                 </span>
               </a>
             ) : (
               <span className="mt-8 inline-flex items-center gap-3 rounded-full border border-white/10 px-6 py-3 text-xs font-mono tracking-[0.3em] uppercase text-white/40">
-                <Decode delay={0.12}>En desarrollo</Decode>
+                <Decode delay={0.12}>{t.inDevelopment}</Decode>
               </span>
             )}
           </section>
@@ -81,11 +83,11 @@ export function Footer() {
             tiny mono link. */}
         <section className="content-max px-6 md:px-16 py-24 pointer-events-none">
           <p className="text-xs font-mono tracking-[0.35em] uppercase text-white/60">
-            <Decode>Quién hay detrás</Decode>
+            <Decode>{t.whoIsBehind}</Decode>
           </p>
           <Link to="/about" onClick={onAbout} className="group pointer-events-auto mt-4 flex items-baseline gap-3 md:gap-4">
             <span className="font-display uppercase text-white text-[clamp(1.5rem,4vw,2.75rem)] leading-none hover-neon-b">
-              <Decode delay={0.06}>Sobre mí</Decode>
+              <Decode delay={0.06}>{t.aboutMe}</Decode>
             </span>
             <span aria-hidden="true" className="font-display text-[clamp(1rem,2.5vw,1.75rem)] text-white/40 transition-all group-hover:translate-x-1 group-hover:text-[var(--color-accent-b)]">
               →
@@ -101,7 +103,7 @@ export function Footer() {
             {next && nextTo ? (
               <>
                 <p className="text-xs font-mono tracking-[0.35em] uppercase text-white/60">
-                  <Decode>Siguiente proyecto</Decode>
+                  <Decode>{t.nextProject}</Decode>
                 </p>
                 <Link to={nextTo} onClick={onNext} className="group pointer-events-auto mt-4 flex items-baseline gap-4 md:gap-6">
                   <span className="font-display uppercase text-white text-[clamp(2.25rem,9vw,6rem)] leading-none hover-neon-b">
@@ -115,11 +117,11 @@ export function Footer() {
             ) : (
               <>
                 <p className="text-xs font-mono tracking-[0.35em] uppercase text-white/60">
-                  <Decode>Contacto</Decode>
+                  <Decode>{t.contact}</Decode>
                 </p>
                 <a href="mailto:stgustavo.gomez@gmail.com" className="group pointer-events-auto mt-4 flex items-baseline gap-4 md:gap-6">
                   <span className="font-display uppercase text-white text-[clamp(2.25rem,9vw,6rem)] leading-none hover-neon-b">
-                    <Decode delay={0.06}>Hablemos</Decode>
+                    <Decode delay={0.06}>{t.letsTalk}</Decode>
                   </span>
                   <span aria-hidden="true" className="font-display text-[clamp(1.5rem,5vw,3.75rem)] text-white/40 transition-all group-hover:translate-x-1 group-hover:text-[var(--color-accent-b)]">
                     →
@@ -143,11 +145,11 @@ export function Footer() {
         <div className="diagonal-stripe absolute inset-0" />
         <div className="content-max relative px-6 md:px-16 pt-24 pb-10">
           <p className="text-xs font-mono tracking-[0.35em] uppercase text-white/60">
-            <Decode>Contacto</Decode>
+            <Decode>{t.contact}</Decode>
           </p>
           <a href="mailto:stgustavo.gomez@gmail.com" className="group pointer-events-auto mt-4 flex items-baseline gap-4 md:gap-6">
             <span className="font-display uppercase text-white text-[clamp(2.25rem,9vw,6rem)] leading-none hover-neon-b">
-              <Decode delay={0.06}>Hablemos</Decode>
+              <Decode delay={0.06}>{t.letsTalk}</Decode>
             </span>
             <span aria-hidden="true" className="font-display text-[clamp(1.5rem,5vw,3.75rem)] text-white/40 transition-all group-hover:translate-x-1 group-hover:text-[var(--color-accent-b)]">
               →
@@ -160,7 +162,7 @@ export function Footer() {
             href={ABOUT.phone.href}
             className="group pointer-events-auto mt-8 inline-flex items-center gap-3 rounded-full border border-white/20 px-6 py-3 text-xs font-mono tracking-[0.3em] uppercase text-white/80 transition-colors hover:border-white/30 hover:text-[var(--color-accent-b)]"
           >
-            <Decode delay={0.12}>{`Llámame · ${ABOUT.phone.display}`}</Decode>
+            <Decode delay={0.12}>{`${t.callMe} · ${ABOUT.phone.display}`}</Decode>
             <span aria-hidden="true" className="text-base transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5">
               ↗
             </span>

@@ -2,6 +2,7 @@ import { useLocation } from "react-router-dom"
 import { workIdFromPath } from "./activeSections"
 import { PROJECTS, type Project } from "../config/projects"
 import { getProjectContent, type ProjectContent } from "../config/projectContent"
+import { useStore } from "../scroll/store"
 
 export interface CurrentProject {
   id: string | null
@@ -16,7 +17,8 @@ export interface CurrentProject {
  */
 export function useCurrentProject(): CurrentProject {
   const { pathname } = useLocation()
+  const locale = useStore((s) => s.locale)
   const id = workIdFromPath(pathname)
   const project = id ? PROJECTS.find((p) => p.id === id) : undefined
-  return { id, project, content: getProjectContent(id) }
+  return { id, project, content: getProjectContent(id, locale) }
 }

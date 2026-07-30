@@ -1,8 +1,10 @@
 import { useCurrentProject } from "../routes/useCurrentProject"
 import { Decode } from "../components/Decode"
+import { useT } from "../i18n/ui"
 
 export function About() {
   const { content } = useCurrentProject()
+  const t = useT()
 
   // Case study: credits (role + summary + stack chips + client/year).
   if (content) {
@@ -13,7 +15,7 @@ export function About() {
       <div className="content-max min-h-[72svh] py-[12svh] flex items-center px-6 md:px-16 pointer-events-none">
         <div className="max-w-2xl">
           <p className="text-xs font-mono tracking-[0.35em] uppercase text-white/60">
-            <Decode>Trabajo</Decode>
+            <Decode>{t.credits}</Decode>
           </p>
           <p className="mt-6 font-display uppercase text-white text-2xl md:text-4xl" style={{ lineHeight: 1.15 }}>
             <Decode delay={0.06}>{c.role}</Decode>

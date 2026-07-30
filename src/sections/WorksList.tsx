@@ -283,6 +283,9 @@ interface WorkRowProps {
 
 function WorkRow({ project, active, dimmed, reducedMotion, refCb, onActivate }: WorkRowProps) {
   const { go } = useTransition()
+  const locale = useStore((s) => s.locale)
+  const role = project.role[locale]
+  const category = project.category?.[locale]
   const to = `/work/${project.id}`
   const rowRef = useRef<HTMLAnchorElement | null>(null)
 
@@ -325,7 +328,7 @@ function WorkRow({ project, active, dimmed, reducedMotion, refCb, onActivate }: 
           refCb(el)
         }}
         to={to}
-        aria-label={`${project.title} — ${project.role}, ${project.year}`}
+        aria-label={`${project.title} — ${role}, ${project.year}`}
         // Touch feedback comes from focus (a tap focuses the anchor), NOT from
         // pointerdown: a finger landing on a row to SCROLL also fires pointerdown,
         // and activating there would flash the backdrop video on every scroll drag.
@@ -358,14 +361,14 @@ function WorkRow({ project, active, dimmed, reducedMotion, refCb, onActivate }: 
             y sólo bajan de opacidad), para que el cursor no caiga nunca sobre
             texto blanco dentro de un elemento hovereado. */}
         <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1 text-[10px] md:text-xs font-mono tracking-[0.3em] uppercase text-white/60 transition-colors duration-300 group-hover:text-[var(--color-accent-b)] group-focus-visible:text-[var(--color-accent-b)] lg:max-w-[50%] lg:justify-end">
-          <span data-scramble data-text={project.role} className="whitespace-nowrap">
-            {project.role}
+          <span data-scramble data-text={role} className="whitespace-nowrap">
+            {role}
           </span>
-          {project.category && (
+          {category && (
             <>
               <span className="opacity-30">/</span>
-              <span data-scramble data-text={project.category} className="whitespace-nowrap">
-                {project.category}
+              <span data-scramble data-text={category} className="whitespace-nowrap">
+                {category}
               </span>
             </>
           )}

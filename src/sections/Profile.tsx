@@ -2,7 +2,8 @@ import { useLayoutEffect, useRef } from "react"
 import { useDomParallax } from "../scroll/useDomParallax"
 import { useStore } from "../scroll/store"
 import { Decode } from "../components/Decode"
-import { ABOUT } from "../config/aboutContent"
+import { getAbout } from "../config/aboutContent"
+import { useT } from "../i18n/ui"
 
 /**
  * About-me DOM (route /about). CV-light by design — short first-person bio,
@@ -17,6 +18,8 @@ export function Profile() {
   const line = useRef<HTMLHeadingElement>(null)
   useDomParallax(line, 0.08)
   const setProfileAnchors = useStore((s) => s.setProfileAnchors)
+  const ABOUT = getAbout(useStore((s) => s.locale))
+  const t = useT()
 
   // Measure the photo slot's document-space center for ProfileScene (mount,
   // resize, reflow) — layout effect so the anchor is right before first paint.
@@ -51,7 +54,7 @@ export function Profile() {
       {/* ── Identity — statement-style hero ─────────────────────────────── */}
       <div className="min-h-svh flex flex-col items-center justify-center px-6 text-center">
         <p className="text-xs font-mono tracking-[0.35em] uppercase text-white/60">
-          <Decode>Sobre mí</Decode>
+          <Decode>{t.aboutMe}</Decode>
         </p>
         {/* Inline lineHeight — same reason as Statement: .font-display's 0.86
             collides wrapped lines; 1 keeps the two words readable on mobile. */}
@@ -72,7 +75,7 @@ export function Profile() {
         <div data-plane-slot aria-hidden="true" className="self-center lg:hidden" style={{ width: "58vw", aspectRatio: String(ABOUT.photo.aspect) }} />
         <div className="max-w-sm text-left mt-7 lg:mt-0 lg:text-right">
           <h3 className="font-display uppercase tracking-tight text-white text-2xl md:text-3xl lg:text-5xl" style={{ lineHeight: 1.05 }}>
-            <Decode>Hola</Decode>
+            <Decode>{t.hi}</Decode>
           </h3>
           {ABOUT.bio.map((p, i) => (
             <p key={p.slice(0, 24)} className="mt-5 text-sm md:text-base leading-relaxed text-white/70">
@@ -86,7 +89,7 @@ export function Profile() {
       <div className="content-max min-h-[72svh] py-[12svh] flex items-center justify-start md:justify-end px-6 md:px-16">
         <div className="max-w-2xl text-left md:text-right">
           <p className="text-xs font-mono tracking-[0.35em] uppercase text-white/60">
-            <Decode>Qué hago</Decode>
+            <Decode>{t.whatIDo}</Decode>
           </p>
           <ol className="mt-8 space-y-7">
             {ABOUT.areas.map((a, i) => (
@@ -110,7 +113,7 @@ export function Profile() {
       <div className="content-max min-h-[72svh] py-[12svh] flex items-center px-6 md:px-16">
         <div className="w-full max-w-3xl">
           <p className="text-xs font-mono tracking-[0.35em] uppercase text-white/60">
-            <Decode>Trayectoria</Decode>
+            <Decode>{t.trajectory}</Decode>
           </p>
           <ol className="mt-8 divide-y divide-white/10 border-y border-white/10">
             {ABOUT.stints.map((s, i) => (
@@ -129,7 +132,7 @@ export function Profile() {
           </ol>
 
           <p className="mt-14 text-xs font-mono tracking-[0.35em] uppercase text-white/60">
-            <Decode>He puesto código para</Decode>
+            <Decode>{t.codeFor}</Decode>
           </p>
           <div className="mt-6 flex flex-wrap gap-2">
             {ABOUT.brands.map((b, i) => (

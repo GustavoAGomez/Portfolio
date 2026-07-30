@@ -11,6 +11,7 @@ import { useHomeSnap } from "../scroll/useHomeSnap"
 import { useStore } from "../scroll/store"
 import { TransitionProvider, RouteBackButton } from "../transition/TransitionProvider"
 import { Cursor } from "./Cursor"
+import { LangSwitch } from "./LangSwitch"
 
 /**
  * The persistent shell — mounted ONCE above the router. It owns the single fixed
@@ -23,6 +24,12 @@ export function SiteShell() {
   useLenis()
   const { pathname } = useLocation()
   const active = activeSectionsFor(pathname)
+  const locale = useStore((s) => s.locale)
+
+  // Mirror the active language on <html lang> (screen readers, translators).
+  useEffect(() => {
+    document.documentElement.lang = locale
+  }, [locale])
 
   // Anchor snap hero↔list, Home only (detail scrolls normally).
   useHomeSnap(pathname === "/")
@@ -77,8 +84,13 @@ export function SiteShell() {
           filter directly during a transition (it's not fixed → no reposition). */}
       <main id="warp-main" className="relative z-10" style={{ pointerEvents: "none" }}>
         <Suspense fallback={<div style={{ minHeight: "100svh", background: "var(--color-bg)" }} />}>
+          {/* Keyed by locale ON PURPOSE: switching language remounts the DOM
+              sections, so every <Decode> replays the binary scramble toward the
+              new text — the language switch IS the site's decode transition.
+              (Section bounds re-register on remount; the WebGL modules are NOT
+              keyed — planes keep their textures, only reactive text swaps.) */}
           {active.map(({ id, anchor, Dom }) => (
-            <Section key={id} id={id} anchor={anchor}>
+            <Section key={`${id}:${locale}`} id={id} anchor={anchor}>
               <Dom />
             </Section>
           ))}
@@ -87,6 +99,9 @@ export function SiteShell() {
 
       {/* Back-to-home control on detail routes (navigates with the iris). */}
       <RouteBackButton />
+
+      {/* Language switch — fixed top-right chip on every route. */}
+      <LangSwitch />
 
       {/* Inverting circular cursor — desktop (fine pointer) only. Outside the
           warp layers so their transition filter can't trap its blend mode. */}

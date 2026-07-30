@@ -2,6 +2,7 @@ import { useLayoutEffect, useRef, type CSSProperties } from "react"
 import { useCurrentProject } from "../routes/useCurrentProject"
 import { useStore } from "../scroll/store"
 import { Decode } from "../components/Decode"
+import { useT } from "../i18n/ui"
 
 /**
  * Case-study story: the project's blocks stacked down the page. The REAL UI
@@ -23,6 +24,7 @@ import { Decode } from "../components/Decode"
  */
 export function Story() {
   const { content } = useCurrentProject()
+  const t = useT()
   const rootRef = useRef<HTMLDivElement>(null)
   const setStoryAnchors = useStore((s) => s.setStoryAnchors)
 
@@ -65,7 +67,7 @@ export function Story() {
           the section into equal fraction slots. */}
       <div className="content-max px-6 md:px-16 pt-24 pb-6">
         <p className="text-xs font-mono tracking-[0.35em] uppercase text-white/60">
-          <Decode>Detalles</Decode>
+          <Decode>{t.details}</Decode>
         </p>
       </div>
 

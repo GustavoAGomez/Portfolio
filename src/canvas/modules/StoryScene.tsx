@@ -29,7 +29,11 @@ const X_OFFSET = 2.6
  */
 export function StoryScene({ id }: { id: SectionId }) {
   const caseStudyId = useStore((s) => s.caseStudyId)
-  const content = caseStudyId ? getProjectContent(caseStudyId) : undefined
+  // Locale only swaps heading/copy (DOM); media/aspect/leadGap are duplicated
+  // verbatim across locales, so the planes' keys (src) and layout never change
+  // on a language switch — no texture reload, no visual jump.
+  const locale = useStore((s) => s.locale)
+  const content = caseStudyId ? getProjectContent(caseStudyId, locale) : undefined
   if (!content) return null
 
   // Weighted vertical layout: each block is a 1-unit slot plus its optional

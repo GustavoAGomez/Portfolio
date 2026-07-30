@@ -3,6 +3,19 @@ import { clamp01 } from "../lib/math"
 
 export type SectionId = "hero" | "statement" | "description" | "story" | "works" | "gallery" | "about" | "profile" | "footer" | "notFound"
 
+/** Site locale. Spanish is the source copy; English is the translation. */
+export type Locale = "es" | "en"
+
+const LOCALE_KEY = "locale"
+
+function initialLocale(): Locale {
+  try {
+    return localStorage.getItem(LOCALE_KEY) === "en" ? "en" : "es"
+  } catch {
+    return "es"
+  }
+}
+
 export interface SectionBounds {
   /** Document-space top (px), independent of current scroll. */
   top: number
@@ -55,12 +68,20 @@ interface AppState {
    * during a route swap.
    */
   profileAnchors: number[]
+  /**
+   * Reactive: active UI language ("es" default, persisted in localStorage).
+   * Changing it re-keys every DOM section (SiteShell), so all <Decode> texts
+   * replay the binary scramble toward the new language — the switch IS the
+   * site's decode transition.
+   */
+  locale: Locale
   registerSection: (id: SectionId, bounds: SectionBounds) => void
   unregisterSection: (id: SectionId) => void
   setReducedMotion: (v: boolean) => void
   setCaseStudyId: (id: string | null) => void
   setStoryAnchors: (centers: number[]) => void
   setProfileAnchors: (centers: number[]) => void
+  setLocale: (l: Locale) => void
 }
 
 export const useStore = create<AppState>((set) => ({
@@ -77,10 +98,20 @@ export const useStore = create<AppState>((set) => ({
     }),
   storyAnchors: [],
   profileAnchors: [],
+  locale: initialLocale(),
   setReducedMotion: (v) => set({ reducedMotion: v }),
   setCaseStudyId: (id) => set((s) => (s.caseStudyId === id ? s : { caseStudyId: id })),
   setStoryAnchors: (centers) => set({ storyAnchors: centers }),
-  setProfileAnchors: (centers) => set({ profileAnchors: centers })
+  setProfileAnchors: (centers) => set({ profileAnchors: centers }),
+  setLocale: (l) =>
+    set(() => {
+      try {
+        localStorage.setItem(LOCALE_KEY, l)
+      } catch {
+        /* private mode etc. — the choice just won't persist */
+      }
+      return { locale: l }
+    })
 }))
 
 /**

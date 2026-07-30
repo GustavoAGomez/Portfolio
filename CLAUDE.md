@@ -280,6 +280,30 @@ claim design-systems authorship; his thing is component LIBRARIES (PagoNxt, Mutu
   wanted it eye-catching but SMALL. (`lib/scramble.ts` holds the works-list scramble helper,
   extracted during that iteration — WorksList consumes it.)
 
+## i18n (ES source / EN translation)
+
+Hand-rolled, data-driven — NO i18n library (the content was already locale-shaped data files):
+
+- **`store.locale`** (`"es" | "en"`, Spanish default, persisted in localStorage) is the single
+  reactive source; `setLocale` writes both. SiteShell mirrors it onto `<html lang>`.
+- **The language switch IS the decode transition**: SiteShell keys every DOM section with
+  `key={id + locale}`, so switching remounts them and every `<Decode>` replays the binary scramble
+  toward the new language (in-view elements decode immediately; the rest on scroll-in). The WebGL
+  modules are NOT keyed — StoryScene reads `getProjectContent(caseStudyId, locale)` reactively and
+  media/aspect/leadGap are duplicated VERBATIM across locales, so plane keys (src) never change on
+  a switch: no texture reload, no layout jump. When editing case-study media fields, edit both
+  locale entries.
+- **Where the strings live**: long-form content with its data, per locale —
+  `projectContent.ts` (`getProjectContent(id, locale)`), `aboutContent.ts` (`getAbout(locale)`;
+  phone/photo/brands are shared constants), `projects.ts` (`role`/`category` are `L10n =
+  Record<Locale, string>`). UI microcopy (overlines, buttons, 404) in **`i18n/ui.ts`** via the
+  reactive `useT()`. Brand-English labels of the Spanish site (Selected Work, Scroll, ← Index, HUD
+  links, "Creative Technologist — Portfolio") are identical in both locales and stay hardcoded.
+- **`LangSwitch`** (`components/`): fixed TOP-RIGHT chip ("ES / EN", active in lime), mirroring the
+  ← Index chip's blur-pill treatment and its 1440px content-cap `right` calc. Top-right per
+  language-selector research (NN/g eye-tracking; Smartling/Weglot guides) — the corner this site
+  keeps free on every route.
+
 ## Responsive (mobile / tablet)
 
 The whole site is responsive with **two aligned DOM↔canvas breakpoints** (keep both sides in sync):
