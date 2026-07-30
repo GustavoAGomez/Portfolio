@@ -26,6 +26,8 @@ export interface AboutContent {
   /** Big display name (statement-style hero). */
   title: string
   tagline: string
+  /** Direct call CTA — `href` is a tel: URI so tapping opens the device dialer. */
+  phone: { display: string; href: string }
   photo: { src: string; aspect: number }
   /** First-person bio — 2 SHORT paragraphs max (decode makes long text tedious). */
   bio: string[]
@@ -40,6 +42,7 @@ export interface AboutContent {
 export const ABOUT: AboutContent = {
   title: "GUSTAVO GÓMEZ",
   tagline: "Creative front-end — Madrid",
+  phone: { display: "657 163 577", href: "tel:+34657163577" },
   photo: { src: "/images/about/gustavo.jpg", aspect: 0.666 },
   bio: [
     "Llevo más de ocho años convirtiendo diseños complejos en interfaces vivas: animación, scroll y 3D en tiempo real, con la tipografía como material.",

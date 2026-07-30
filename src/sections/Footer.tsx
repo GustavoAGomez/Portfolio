@@ -3,6 +3,7 @@ import { type MouseEvent } from "react"
 import { useCurrentProject } from "../routes/useCurrentProject"
 import { useTransition } from "../transition/TransitionProvider"
 import { PROJECTS } from "../config/projects"
+import { ABOUT } from "../config/aboutContent"
 import { Decode } from "../components/Decode"
 import { CornerHud } from "../components/CornerHud"
 
@@ -26,6 +27,11 @@ export function Footer() {
       if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return
       e.preventDefault()
       go(nextTo)
+    }
+    const onAbout = (e: MouseEvent<HTMLAnchorElement>) => {
+      if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return
+      e.preventDefault()
+      go("/about")
     }
 
     return (
@@ -62,6 +68,25 @@ export function Footer() {
             )}
           </section>
         )}
+
+        {/* About teaser — CENTERED big link to /about, between the right-aligned
+            live-site CTA and the left-aligned next-project headline, so the three
+            closing gestures alternate across the page. Louder than the HUD's tiny
+            About link on purpose: after reading what was built, "who built it" is
+            the natural next question. */}
+        <section className="min-h-[40svh] flex flex-col items-center justify-center px-6 md:px-16 py-24 text-center pointer-events-none">
+          <p className="text-xs font-mono tracking-[0.35em] uppercase text-white/60">
+            <Decode>Quién hay detrás</Decode>
+          </p>
+          <Link to="/about" onClick={onAbout} className="group pointer-events-auto mt-6 flex items-baseline gap-4 md:gap-6">
+            <span className="font-display uppercase text-white text-[clamp(2rem,7vw,4.5rem)] leading-none hover-neon-b">
+              <Decode delay={0.06}>Sobre mí</Decode>
+            </span>
+            <span aria-hidden="true" className="font-display text-[clamp(1.25rem,4vw,3rem)] text-white/40 transition-all group-hover:translate-x-1 group-hover:text-[var(--color-accent-b)]">
+              →
+            </span>
+          </Link>
+        </section>
 
         {/* Next project + footer HUD share the diagonal-stripe backdrop. LEFT-aligned
             giant headline — the primary navigation gesture. */}
@@ -121,6 +146,18 @@ export function Footer() {
             </span>
             <span aria-hidden="true" className="font-display text-[clamp(1.5rem,5vw,3.75rem)] text-white/40 transition-all group-hover:translate-x-1 group-hover:text-[var(--color-accent-b)]">
               →
+            </span>
+          </a>
+          {/* Direct call — tel: opens the device's dialer. The number is spelled
+              out in the label (the pill is the same outlined language as the
+              live-site CTA), so it's readable even without tapping. */}
+          <a
+            href={ABOUT.phone.href}
+            className="group pointer-events-auto mt-8 inline-flex items-center gap-3 rounded-full border border-white/20 px-6 py-3 text-xs font-mono tracking-[0.3em] uppercase text-white/80 transition-colors hover:border-[var(--color-accent-b)] hover:text-[var(--color-accent-b)]"
+          >
+            <Decode delay={0.12}>{`Llámame · ${ABOUT.phone.display}`}</Decode>
+            <span aria-hidden="true" className="text-base transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5">
+              ↗
             </span>
           </a>
         </div>

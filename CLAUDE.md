@@ -254,8 +254,12 @@ Toyota, Netflix…) without exposing NDA'd projects. Detailed stacks stay in eac
   detail modules (`preloadDetailModules`).
 - No diamond on `/about` → R3F auto-render mode (same as generic DETAIL).
 - The HUD's `SITE_LINKS` gained an **internal** About link (warp navigation via `useTransition`,
-  hidden while already on `/about`); `Footer` has an about branch (Spanish "Hablemos" close) and
-  `RouteBackButton` shows on `/about` too. Photo asset: `public/images/about/gustavo.jpg`.
+  hidden while already on `/about`); `Footer` has an about branch (Spanish "Hablemos" close **+ a
+  `tel:` pill with the phone number** — tapping opens the device dialer) and `RouteBackButton`
+  shows on `/about` too. Photo asset: `public/images/about/gustavo.jpg`.
+- Every case-study `Footer` also carries a **centered "Sobre mí →" teaser** (between the
+  right-aligned live-site CTA and the left-aligned next-project headline, so the closing gestures
+  alternate) — the loud route to `/about`, vs the HUD's small link.
 
 ## Responsive (mobile / tablet)
 
