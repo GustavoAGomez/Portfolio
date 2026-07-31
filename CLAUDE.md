@@ -397,6 +397,25 @@ the dashboard:
   never change); `videos|images|models|env/*` a week + `must-revalidate` since those names are stable
   and get replaced in place.
 
+## Brand mark & favicon
+
+A rhombus split down the middle — left half `accentB` (lime), right half `accentA` (violet) — with
+the two halves **vertically displaced**: the site's own gem/refraction gesture as a static mark. It
+self-simplifies: the ±1.5 offset (of a 64 viewBox) is sub-pixel at 16px, so the favicon reads as a
+clean two-tone rhombus while the displacement only shows at logo size.
+
+- **Two sources, same geometry — change both together**: `components/Logo.tsx` (in-site, colours via
+  CSS vars so a palette swap reskins it) and `public/favicon.svg` (static, hex baked in). The
+  resting offset + the hover widening live in `.logo-half-l/-r` (index.css, `@media (hover:hover)`).
+- **PNG fallbacks** are generated from the SVG, not hand-drawn: `favicon-32.png` (transparent) and
+  `apple-touch-icon.png` (180px, on `BRAND.bg` — iOS composites transparency badly). Regenerate with
+  a headless screenshot of the same paths if the mark changes.
+- **Placement — the identity corner**: `SiteLogo` is fixed top-left, **Home only**, and fades out
+  past the hero exactly as `LangSwitch` fades in (same 50%-viewport threshold): the corners hand
+  over, and the mark never crowds the works-list overline. Every other route puts `← Index` in that
+  same slot, so the corner always holds either identity or the way back. Its md offset mirrors the
+  1440px content cap like the rest of the fixed chrome.
+
 ## Conventions specific to this repo
 
 - **Brand tokens live in two mirrored places**: CSS `@theme` in `src/styles/index.css` (DOM side)

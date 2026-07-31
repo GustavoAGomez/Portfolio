@@ -12,6 +12,7 @@ import { useStore } from "../scroll/store"
 import { TransitionProvider, RouteBackButton } from "../transition/TransitionProvider"
 import { Cursor } from "./Cursor"
 import { LangSwitch } from "./LangSwitch"
+import { SiteLogo } from "./Logo"
 import { playSectionFlip } from "../lib/sectionFlip"
 
 export function SiteShell() {
@@ -76,6 +77,7 @@ export function SiteShell() {
       </main>
 
       <RouteBackButton />
+      <SiteLogo />
 
       <LangSwitch />
 
