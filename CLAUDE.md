@@ -71,11 +71,16 @@ Lenis drives everything; the DOM only provides scroll height + accessible text.
     after `shrinkPastHero`), the frame skips the whole multipass and does ONE manual scene render
     (same clear, so the background tone doesn't shift). 4 scene renders/frame → 1 exactly where
     the story videos + chromatic planes live.
-  - **The FBOs render at a capped pixel ratio (≤1.5) on every viewport** — their content is only
-    seen through the gem's warp, and two full-retina RGBA buffers were the biggest GPU-memory cost
-    (2026-07-31 RAM audit; it used to be mobile-only). The `resolution` uniform stays the SCREEN
-    buffer size (it's the `gl_FragCoord` domain); the maps are sampled at normalized UVs, so FBO
-    size is independent.
+  - **The FBOs are the refraction SOURCE and must never render below the screen buffer.** The gem
+    MAGNIFIES what it samples, so any resolution cap here is magnified into visible stair-steps —
+    that is exactly what an earlier ≤1.5 cap did on phones (moksha, which looks right on mobile,
+    renders them at the full pixel ratio). Measured on a fixed phone frame: parity = +10% edge
+    sharpness over that cap, 1.5× supersampling = +38%. So `fboSupersample()` samples 1.5× FINER
+    than the screen (1× on `deviceMemory ≤ 4`, still parity), and `FBO_MAX_TEXELS` may only trim
+    the SUPERSAMPLING — `Math.max(ratio, …)` keeps the parity floor, since on a big laptop parity
+    alone already exceeds the ceiling. The `resolution` uniform stays the SCREEN buffer size (it's
+    the `gl_FragCoord` domain); the maps are sampled at normalized UVs, so FBO size is independent
+    of it. Quality knob: `FBO_MAX_TEXELS` / the supersample factor in `Diamonds.tsx`.
   - **CRITICAL: no EffectComposer.** A postprocessing composer would fight the manual multipass
     and kill the lens. Grain + vignette are a **CSS overlay** (`.fx-overlay` in `index.css`,
     mounted in `SiteShell`) instead. Background is a **clear color** (`onCreated → gl.setClearColor`),

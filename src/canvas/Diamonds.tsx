@@ -40,6 +40,16 @@ const DIAMONDS: DiamondDef[] = [
 /** shrinkPastHero collapse/re-grow duration, seconds — identical both ways. */
 const SHRINK_DURATION = 0.7
 
+/** Refraction FBO sampling, relative to the screen buffer. The gem MAGNIFIES what
+ *  it samples, so sampling FINER than the screen is what actually removes the
+ *  stair-steps on its facet seams (measured on a phone frame: 1 → +10% edge
+ *  sharpness over the old 1.5 cap, 1.5 → +38%). Quadratic fill-rate cost, so
+ *  low-memory devices stay at parity — still sharper than the old cap. */
+const fboSupersample = (): number => (((navigator as { deviceMemory?: number }).deviceMemory ?? 8) <= 4 ? 1 : 1.5)
+/** Ceiling per FBO so an ultra-wide/5K canvas can't allocate absurd buffers.
+ *  ~4K worth of texels: phones supersample fully, big desktops get scaled back. */
+const FBO_MAX_TEXELS = 8_300_000
+
 const dummy = new Object3D()
 
 /**
@@ -70,9 +80,18 @@ export function Diamonds() {
   const [envFbo, backfaceFbo, backfaceMaterial, refractionMaterial] = useMemo(() => {
     const w = size.width * ratio
     const h = size.height * ratio
-    // FBO pixel ratio capped at 1.5 — content is only seen THROUGH the gem's warp.
-    // `resolution` must stay the SCREEN buffer size (gl_FragCoord domain).
-    const fboRatio = Math.min(ratio, 1.5)
+    // The refraction SOURCE must match the screen buffer (moksha parity). The gem
+    // MAGNIFIES what it samples, so any cap here is magnified into visible pixels
+    // — that's what the old 1.5 cap did on phones. Raise SUPERSAMPLE above 1 to
+    // sample finer than the screen; the texel ceiling only guards huge displays.
+    // `resolution` must stay the SCREEN buffer size (gl_FragCoord domain); the
+    // maps are sampled at normalized UVs, so FBO size is independent of it.
+    const ss = fboSupersample()
+    const budget = Math.min(1, Math.sqrt(FBO_MAX_TEXELS / (w * h * ss * ss)))
+    // NEVER below `ratio`: the ceiling may only trim the supersampling, never the
+    // screen-parity floor (on a big laptop, parity alone already exceeds the
+    // budget — clamping there would bring the pixelation straight back).
+    const fboRatio = Math.max(ratio, ratio * ss * budget)
     const fw = Math.round(size.width * fboRatio)
     const fh = Math.round(size.height * fboRatio)
     const env = new WebGLRenderTarget(fw, fh)
