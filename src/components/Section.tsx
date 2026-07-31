@@ -25,8 +25,21 @@ export function Section({ id, anchor, className, children }: SectionProps) {
     if (!el) return
 
     const measure = () => {
+      // The debounced call can fire AFTER this section unmounted (its timeout
+      // survives the cleanup — with rapid language switches a section lives
+      // < 150ms): the detached element measures a ZERO rect and would register
+      // top = 0 + scrollY, CLOBBERING the new section's correct bounds. That
+      // corrupt top made the case-study gem's shrinkPastHero latch read "hero
+      // not passed" and the diamond flashed mid-page. Same guard covers a
+      // Suspense-hidden (display:none) element, which also measures zero.
+      if (!el.isConnected) return
       const rect = el.getBoundingClientRect()
-      register(id, { top: rect.top + useStore.getState().scroll.scrollY, height: rect.height })
+      if (rect.height === 0) return
+      // window.scrollY, not store.scroll.scrollY: rect.top comes from the DOM,
+      // so the scroll added back must be the DOM's too — the sum is the
+      // document-space top exactly, even if Lenis and the browser diverge for
+      // an instant during the switch remount.
+      register(id, { top: rect.top + window.scrollY, height: rect.height })
     }
     measure()
 
