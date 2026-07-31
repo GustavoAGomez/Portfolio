@@ -4,6 +4,9 @@ import { useStore, type Locale } from "../scroll/store"
 const UI = {
   es: {
     heroOverline: "Tecnólogo creativo — Portfolio",
+    // sr-only <h1>: the visible headline is WebGL text a crawler can't read, so
+    // this is both the accessible label and the page's indexable heading.
+    heroH1: "GUSGQ — Gustavo Gómez, front-end y UI developer en Madrid",
     selectedWork: "Destacados",
     index: "Index",
     details: "Detalles",
@@ -38,6 +41,7 @@ const UI = {
   },
   en: {
     heroOverline: "Creative Technologist — Portfolio",
+    heroH1: "GUSGQ — Gustavo Gómez, front-end and UI developer in Madrid",
     selectedWork: "Selected Work",
     index: "Index",
     details: "Details",

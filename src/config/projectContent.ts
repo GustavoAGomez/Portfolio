@@ -119,7 +119,7 @@ const PROJECT_CONTENT_ES: Record<string, ProjectContent> = {
       heading: "Un escaparate para un entrenador de baloncesto",
       paragraphs: [
         "Daniel es entrenador y coordinador de baloncesto con quince años de recorrido —clubes y colegios de referencia, incluido Movistar Estudiantes—. Necesitaba un portfolio que funcionara como escaparate: captar clientes para entrenamientos individuales y abrir puertas a nuevas oportunidades profesionales.",
-        "Diseñé y desarrollé una landing de una sola página centrada en su trayectoria: un hero en vídeo, secciones de información organizada y una galería animada. El proyecto está en desarrollo activo."
+        "Desarrollé una landing de una sola página centrada en su trayectoria: un hero en vídeo, secciones de información organizada y una galería animada. El proyecto está en desarrollo activo."
       ]
     },
     blocks: [
@@ -249,7 +249,7 @@ const PROJECT_CONTENT_EN: Record<string, ProjectContent> = {
       heading: "A showcase for a basketball coach",
       paragraphs: [
         "Daniel is a basketball coach and coordinator with fifteen years behind him — top clubs and schools, including Movistar Estudiantes. He needed a portfolio that worked as a showcase: winning clients for one-on-one training and opening doors to new professional opportunities.",
-        "I designed and built a single-page landing centered on his career: a video hero, clearly organized information sections and an animated gallery. The project is under active development."
+        "Developed a single-page landing centered on his career: a video hero, clearly organized information sections and an animated gallery. The project is under active development."
       ]
     },
     blocks: [

@@ -16,9 +16,11 @@ import { LangSwitch } from "./LangSwitch"
 // (tsc corre con noUnusedLocals y el import muerto tumba el build de Netlify).
 // import { SiteLogo } from "./Logo"
 import { playSectionFlip } from "../lib/sectionFlip"
+import { useSeo } from "../seo/useSeo"
 
 export function SiteShell() {
   useLenis()
+  useSeo()
   const { pathname } = useLocation()
   const active = activeSectionsFor(pathname)
   const locale = useStore((s) => s.locale)

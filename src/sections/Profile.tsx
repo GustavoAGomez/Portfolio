@@ -46,9 +46,9 @@ export function Profile() {
           <Decode>{t.aboutMe}</Decode>
         </p>
         {/* Inline lineHeight — .font-display's 0.86 collides wrapped lines. */}
-        <h2 ref={line} className="mt-6 font-display uppercase tracking-tight text-white text-[14vw] md:text-[min(9vw,8.1rem)]" style={{ lineHeight: 1 }}>
+        <h1 ref={line} className="mt-6 font-display uppercase tracking-tight text-white text-[14vw] md:text-[min(9vw,8.1rem)]" style={{ lineHeight: 1 }}>
           <Decode duration={0.6}>{ABOUT.title}</Decode>
-        </h2>
+        </h1>
         <p className="mt-6 text-xs md:text-sm font-mono tracking-[0.35em] uppercase text-[var(--color-accent-b)]">
           <Decode delay={0.15} duration={1.0}>
             {ABOUT.tagline}

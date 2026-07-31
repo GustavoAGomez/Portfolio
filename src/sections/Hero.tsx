@@ -1,9 +1,11 @@
 import { useEffect, useRef, useState } from "react"
 import gsap from "gsap"
 import { lenisRef } from "../scroll/useLenis"
+import { useT } from "../i18n/ui"
 
 export function Hero() {
   const meta = useRef<HTMLDivElement>(null)
+  const t = useT()
   const [hasScrolled, setHasScrolled] = useState(false)
 
   useEffect(() => {
@@ -54,7 +56,7 @@ export function Hero() {
         </p> */}
       </div>
 
-      <h1 className="sr-only">GUSGQ</h1>
+      <h1 className="sr-only">{t.heroH1}</h1>
 
       <div
         aria-hidden="true"

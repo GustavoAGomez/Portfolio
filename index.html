@@ -4,12 +4,81 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>GUSGQ — Portfolio</title>
-  <meta name="description" content="Gustavo Gómez — front-end &amp; UI developer en Madrid. Animación, WebGL y UI al detalle." />
+
+  <!-- Defaults = Home. useSeo() rewrites title/description/canonical/OG per route. -->
+  <title>GUSGQ — Gustavo Gómez · Front-end &amp; UI Developer en Madrid</title>
+  <meta name="description" content="Portfolio de Gustavo Gómez (GUSGQ), front-end y UI developer en Madrid: animación con GSAP, canvas y Three.js, interfaces al detalle y responsive pixel-perfect." />
+  <link rel="canonical" href="https://gustavo-gomez-portfolio.netlify.app/" />
+  <meta name="robots" content="index, follow, max-image-preview:large" />
+  <meta name="author" content="Gustavo Gómez" />
   <meta name="theme-color" content="#090711" />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="GUSGQ — Gustavo Gómez" />
+  <meta property="og:locale" content="es_ES" />
+  <meta property="og:title" content="GUSGQ — Gustavo Gómez · Front-end &amp; UI Developer en Madrid" />
+  <meta property="og:description" content="Portfolio de Gustavo Gómez (GUSGQ), front-end y UI developer en Madrid: animación con GSAP, canvas y Three.js, interfaces al detalle y responsive pixel-perfect." />
+  <meta property="og:url" content="https://gustavo-gomez-portfolio.netlify.app/" />
+  <meta property="og:image" content="https://gustavo-gomez-portfolio.netlify.app/og.jpg" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="GUSGQ — portfolio de Gustavo Gómez" />
+
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="GUSGQ — Gustavo Gómez · Front-end &amp; UI Developer en Madrid" />
+  <meta name="twitter:description" content="Portfolio de Gustavo Gómez (GUSGQ), front-end y UI developer en Madrid." />
+  <meta name="twitter:image" content="https://gustavo-gomez-portfolio.netlify.app/og.jpg" />
+
   <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
   <link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png" />
   <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+
+  <!-- Structured data: this is what ties the handle "GUSGQ" to the person, which
+       is the whole point of ranking for that query. -->
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "Person",
+          "@id": "https://gustavo-gomez-portfolio.netlify.app/#gustavo",
+          "name": "Gustavo Gómez",
+          "alternateName": ["GUSGQ", "Gusgq", "Gustavo A. Gómez"],
+          "url": "https://gustavo-gomez-portfolio.netlify.app/",
+          "image": "https://gustavo-gomez-portfolio.netlify.app/images/about/gustavo.jpg",
+          "jobTitle": "Front-end & UI Developer",
+          "email": "mailto:stgustavo.gomez@gmail.com",
+          "telephone": "+34657163577",
+          "address": {
+            "@type": "PostalAddress",
+            "addressLocality": "Madrid",
+            "addressCountry": "ES"
+          },
+          "knowsAbout": [
+            "Front-end development",
+            "UI development",
+            "GSAP",
+            "Three.js",
+            "WebGL",
+            "React",
+            "Angular",
+            "Vue",
+            "TypeScript",
+            "Responsive design"
+          ],
+          "sameAs": ["https://www.linkedin.com/in/gustavoagomez93/"]
+        },
+        {
+          "@type": "WebSite",
+          "@id": "https://gustavo-gomez-portfolio.netlify.app/#website",
+          "url": "https://gustavo-gomez-portfolio.netlify.app/",
+          "name": "GUSGQ — Gustavo Gómez",
+          "inLanguage": "es-ES",
+          "publisher": { "@id": "https://gustavo-gomez-portfolio.netlify.app/#gustavo" }
+        }
+      ]
+    }
+  </script>
 </head>
 
 <body>

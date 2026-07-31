@@ -431,6 +431,26 @@ clean two-tone rhombus while the displacement only shows at logo size.
   the hero as `LangSwitch` fades in, so the corners hand over and the mark never crowds the
   works-list overline; every other route puts `← Index` in that slot.
 
+## SEO (mínimo viable, 2026-07-31)
+
+Client-rendered SPA: the server sends ONE index.html for every URL, so without per-route `<head>`
+work Google indexes every page with the same title. Two layers:
+
+- **Static in `index.html`** (defaults = Home): title/description, canonical, robots, Open Graph +
+  Twitter card pointing at `/og.jpg` (1200×630, generated from the brand — regenerate with a
+  headless screenshot, never hand-edit), and **JSON-LD** `Person` + `WebSite`. The Person node
+  carries `alternateName: ["GUSGQ", "Gusgq", …]` — that association between the handle and the
+  name is the whole point of ranking for "gusgq".
+- **Per route via `seo/useSeo.ts`** (called once in SiteShell): rewrites title, description,
+  canonical, `og:*` and `robots` on every navigation AND on locale change. Case-study copy comes
+  from `projectContent` (tagline + role reads like a real snippet). Unknown URLs render the 404
+  page and are marked **noindex, follow** so they never enter the index as content.
+- **Every route needs a real `<h1>`**: the Home's is `sr-only` (its visible headline is WebGL text
+  a crawler can't read — the sr-only h1 is both the accessible label and the indexable heading);
+  statement/profile titles were promoted from `h2` to `h1` for this. Don't add a second one.
+- `public/robots.txt` + `public/sitemap.xml` (static, 4 URLs — **add new case studies by hand**).
+  Netlify serves real static files before the `/*` SPA rewrite, so both resolve.
+
 ## Conventions specific to this repo
 
 - **Brand tokens live in two mirrored places**: CSS `@theme` in `src/styles/index.css` (DOM side)
