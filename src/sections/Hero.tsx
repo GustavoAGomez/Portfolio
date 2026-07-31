@@ -1,8 +1,6 @@
 import { useEffect, useRef, useState } from "react"
 import gsap from "gsap"
 import { lenisRef } from "../scroll/useLenis"
-import { Decode } from "../components/Decode"
-import { useT } from "../i18n/ui"
 
 /**
  * Hero DOM: small semantic text only. The big GUSGQ headline is rendered in 3D
@@ -11,7 +9,6 @@ import { useT } from "../i18n/ui"
  */
 export function Hero() {
   const meta = useRef<HTMLDivElement>(null)
-  const t = useT()
   const [hasScrolled, setHasScrolled] = useState(false)
 
   useEffect(() => {
@@ -59,9 +56,12 @@ export function Hero() {
   return (
     <div className="content-max relative min-h-svh flex flex-col justify-between px-6 md:px-16 py-16 pointer-events-none">
       <div ref={meta} className="max-w-xl">
+        {/* Overline desactivado (decisión de Gustavo). Para reactivarlo hay que
+            volver a importar Decode + useT y declarar `const t = useT()` — tsc
+            corre con noUnusedLocals y el build falla con imports muertos.
         <p className="text-xs font-mono tracking-[0.35em] uppercase text-white/60">
           <Decode>{t.heroOverline}</Decode>
-        </p>
+        </p> */}
       </div>
 
       <h1 className="sr-only">GUSGQ</h1>

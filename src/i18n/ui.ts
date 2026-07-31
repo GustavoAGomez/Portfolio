@@ -12,8 +12,8 @@ const UI = {
   es: {
     // Global chrome
     heroOverline: "Tecnólogo creativo — Portfolio",
-    selectedWork: "Trabajos seleccionados",
-    index: "Índice",
+    selectedWork: "Destacados",
+    index: "Index",
     // Case study
     details: "Detalles",
     brief: "Encargo",
