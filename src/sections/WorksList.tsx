@@ -140,7 +140,9 @@ export function WorksList() {
           ].join(" ")}
         >
           <div className="absolute inset-0 bg-[var(--color-accent-b)] opacity-[0.06] mix-blend-overlay" />
-          <div className="absolute inset-0 bg-[var(--color-bg)]/80" />
+          {/* Legibility scrim. Together with the backdrop's brightness() it sets how
+              much of the hover clip shows — lighten one, lighten both. */}
+          <div className="absolute inset-0 bg-[var(--color-bg)]/70" />
         </div>
       </div>
 
@@ -201,7 +203,7 @@ function WorkBackdrop({ project, visible, reducedMotion }: WorkBackdropProps) {
   }, [visible])
 
   const style: CSSProperties = {
-    filter: "grayscale(1) contrast(1.15) brightness(0.6)",
+    filter: "grayscale(1) contrast(1.15) brightness(0.75)",
     opacity: visible ? 1 : 0,
     transform: reducedMotion ? undefined : `scale(${visible ? 1.18 : 1})`,
     transition: reducedMotion ? undefined : "opacity 600ms ease-out, transform 1400ms cubic-bezier(0.22, 0.61, 0.36, 1)"

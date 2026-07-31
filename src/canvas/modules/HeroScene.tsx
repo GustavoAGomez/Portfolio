@@ -17,8 +17,10 @@ const FONT = ACTIVE_TYPO.displayFontUrl
  *  purple fills their whole field — the Home had none and read flat black.
  *  0.3125 is StatementScene's fraction for 7 letters; normalized by length so
  *  any word bleeds the same width. Change the word here. */
-const AMBIENT_WORD = "PORTFOLIO"
-const AMBIENT_FRACTION = (0.3125 * 7) / AMBIENT_WORD.length
+// Desactivada: al reactivar el <Text> de abajo hay que descomentar estas dos
+// (tsc corre con noUnusedLocals y una constante muerta tumba el build).
+// const AMBIENT_WORD = "PORTFOLIO"
+// const AMBIENT_FRACTION = (0.3125 * 7) / AMBIENT_WORD.length
 
 /** Hero headline as 3D <Text> on layer 0, behind the diamond so its refraction warps it. */
 export function HeroScene({ id }: { id: SectionId }) {
@@ -39,7 +41,7 @@ export function HeroScene({ id }: { id: SectionId }) {
   return (
     <group ref={pointer}>
       <Block factor={0.45} anchor={getCenter}>
-        <Text
+        {/* <Text
           font={FONT}
           fontSize={Math.min(6, layoutWidth * AMBIENT_FRACTION)}
           color={BRAND.textDim}
@@ -49,7 +51,7 @@ export function HeroScene({ id }: { id: SectionId }) {
           letterSpacing={-0.04}
         >
           {AMBIENT_WORD}
-        </Text>
+        </Text> */}
       </Block>
       <Block factor={1} anchor={getCenter}>
         <Text
