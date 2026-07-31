@@ -316,22 +316,40 @@ body {
  * Un hover que se queda en blanco rompe el look. `.hover-neon-b` aplica el
  * glow de .neon-b al pasar por encima — en el propio elemento o en su `group`
  * (fila / link con varios spans), y también en :focus-visible (teclado + tap,
- * que es como se activa la lista en táctil). */
+ * que es como se activa la lista en táctil).
+ *
+ * Los selectores :hover viven DENTRO de `@media (hover: hover)`: en táctil el
+ * navegador deja el elemento en :hover pegado tras el tap (no hay puntero que
+ * "salga"), y eso encendía en lima cosas que ya no estaban bajo ningún dedo —
+ * el caso visible era el toggle de idioma, con AMBOS idiomas en lima tras
+ * cambiar. OJO: las variantes `hover:` de Tailwind en este build compilan a
+ * `:hover` SIN esta condición (verificado en el CSS de dist) — si algún día un
+ * hover de Tailwind molesta en táctil, este es el patrón a aplicar. Los
+ * :focus-visible se quedan globales (teclado). */
 .hover-neon-b {
   transition:
     color 300ms ease,
     text-shadow 300ms ease;
 }
 
-.hover-neon-b:hover,
 .hover-neon-b:focus-visible,
-.group:hover .hover-neon-b,
 .group:focus-visible .hover-neon-b {
   color: var(--color-accent-b);
   text-shadow:
     0 0 0.03em rgba(var(--accent-b-rgb), 0.55),
     0 0 0.35em rgba(var(--accent-b-rgb), 0.35),
     0 0 1.1em rgba(var(--accent-b-rgb), 0.18);
+}
+
+@media (hover: hover) {
+  .hover-neon-b:hover,
+  .group:hover .hover-neon-b {
+    color: var(--color-accent-b);
+    text-shadow:
+      0 0 0.03em rgba(var(--accent-b-rgb), 0.55),
+      0 0 0.35em rgba(var(--accent-b-rgb), 0.35),
+      0 0 1.1em rgba(var(--accent-b-rgb), 0.18);
+  }
 }
 
 /* Site-wide CONTENT CAP: past 1440px the content box stops growing and centers,
