@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://gustavo-gomez-portfolio.netlify.app/</loc>
+    <loc>https://gusgq.es/</loc>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://gustavo-gomez-portfolio.netlify.app/about</loc>
+    <loc>https://gusgq.es/about</loc>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://gustavo-gomez-portfolio.netlify.app/work/tagorodive</loc>
+    <loc>https://gusgq.es/work/tagorodive</loc>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://gustavo-gomez-portfolio.netlify.app/work/basket-portfolio</loc>
+    <loc>https://gusgq.es/work/basket-portfolio</loc>
     <priority>0.7</priority>
   </url>
 </urlset>

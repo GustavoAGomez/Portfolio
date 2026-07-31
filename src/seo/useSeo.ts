@@ -10,7 +10,7 @@ import { getProjectContent } from "../config/projectContent"
  * Google executes JS, so rewriting these on navigation is what actually gets
  * each route its own search result. Values track the active locale.
  */
-export const SITE_URL = "https://gustavo-gomez-portfolio.netlify.app"
+export const SITE_URL = "https://gusgq.es"
 
 const HOME = {
   es: {

@@ -398,7 +398,10 @@ The whole site is responsive with **two aligned DOM↔canvas breakpoints** (keep
 ## Deploy (Netlify)
 
 Hosted on Netlify with its Git integration: **every push to `main` builds and publishes**, and every
-PR / non-main branch gets its own preview URL. Production: **https://gustavo-gomez-portfolio.netlify.app**.
+PR / non-main branch gets its own preview URL. Production: **https://gusgq.es** (custom domain, DNS at
+DonDominio; `gustavo-gomez-portfolio.netlify.app` still resolves — it must 301 to the apex or the two
+compete as duplicate content). Every canonical/OG/JSON-LD/sitemap URL uses the apex — if the domain
+ever changes, `index.html`, `seo/useSeo.ts` (`SITE_URL`), `robots.txt` and `sitemap.xml` all move.
 
 `netlify.toml` (repo root) is the whole config — Netlify reads it, so build settings are NOT edited in
 the dashboard:
