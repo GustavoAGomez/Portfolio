@@ -47,7 +47,7 @@ const ABOUT_ES: AboutContent = {
   photo: PHOTO,
   bio: [
     "Soy front-end y UI developer: mimo cada interacción y cuido que el diseño encaje a la perfección en cualquier dispositivo. Mi punto fuerte es la animación — JavaScript, canvas y Three.js.",
-    "Me gustan las webs con un aspecto visual único, que no se parecen a ninguna otra, y llevo ese mismo cuidado al producto a gran escala: desarrollo de webs y aplicaciones corporativas. Ahora estudio un máster de desarrollo de aplicaciones con IA."
+    "Me gusta crear webs con un aspecto visual único, que destaquen en su apartado artístico e interactivo, y llevo ese mismo cuidado al producto a gran escala: desarrollo de webs y aplicaciones corporativas. Ahora estudio un máster de desarrollo de aplicaciones con IA."
   ],
   areas: [
     { title: "Animación & 3D", detail: "GSAP · Canvas · Three.js · scroll" },
@@ -72,7 +72,7 @@ const ABOUT_EN: AboutContent = {
   photo: PHOTO,
   bio: [
     "I'm a front-end and UI developer: I obsess over every interaction and make sure the design fits pixel-perfect on any device. My strong suit is animation — JavaScript, canvas and Three.js.",
-    "I love websites with a unique visual identity, unlike any other, and I bring that same care to product at scale: corporate websites and web applications. I'm currently studying a master's in AI-powered application development."
+    "I love building websites with a unique visual identity, ones that stand out for their artistic and interactive side, and I bring that same care to product at scale: corporate websites and web applications. I'm currently studying a master's in AI-powered application development."
   ],
   areas: [
     { title: "Animation & 3D", detail: "GSAP · Canvas · Three.js · scroll" },
