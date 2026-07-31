@@ -1,4 +1,4 @@
-import { Suspense, useEffect } from "react"
+import { Suspense, useEffect, useLayoutEffect } from "react"
 import { useLocation } from "react-router-dom"
 import { Scene } from "../canvas/Scene"
 import { Section } from "./Section"
@@ -12,6 +12,7 @@ import { useStore } from "../scroll/store"
 import { TransitionProvider, RouteBackButton } from "../transition/TransitionProvider"
 import { Cursor } from "./Cursor"
 import { LangSwitch } from "./LangSwitch"
+import { playSectionFlip } from "../lib/sectionFlip"
 
 /**
  * The persistent shell — mounted ONCE above the router. It owns the single fixed
@@ -29,6 +30,14 @@ export function SiteShell() {
   // Mirror the active language on <html lang> (screen readers, translators).
   useEffect(() => {
     document.documentElement.lang = locale
+  }, [locale])
+
+  // FLIP the language switch's layout shift: the remounted sections have new
+  // text lengths, so heights change and everything below would jump one frame.
+  // Runs AFTER the remount commit but BEFORE paint (layout effect), gliding
+  // each section from its captured old position (see lib/sectionFlip).
+  useLayoutEffect(() => {
+    playSectionFlip(useStore.getState().reducedMotion)
   }, [locale])
 
   // Anchor snap hero↔list, Home only (detail scrolls normally).

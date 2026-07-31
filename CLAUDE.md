@@ -293,7 +293,15 @@ Hand-rolled, data-driven — NO i18n library (the content was already locale-sha
   reactive source; `setLocale` writes both. SiteShell mirrors it onto `<html lang>`.
 - **The language switch IS the decode transition**: SiteShell keys every DOM section with
   `key={id + locale}`, so switching remounts them and every `<Decode>` replays the binary scramble
-  toward the new language (in-view elements decode immediately; the rest on scroll-in). The WebGL
+  toward the new language (in-view elements decode immediately; the rest on scroll-in).
+- **The switch's layout shift is FLIPped, not jumped** (`lib/sectionFlip.ts`): new text lengths
+  change section heights on remount (worst on mobile, where copy outgrows the min-h boxes), which
+  used to shift everything below the reader in one frame. LangSwitch captures each
+  `[data-section]`'s viewport top BEFORE setLocale; SiteShell's layout effect on `locale` offsets
+  every moved section back and glides it to its new place (0.65s power2.inOut). A window `resize`
+  is dispatched per frame so Story/Profile re-measure and the stacked WebGL planes travel glued to
+  their DOM slots. CSS transitions can't do this — the elements are new and the shift is reflow.
+  reduced-motion skips it (instant, consistent). The WebGL
   modules are NOT keyed — StoryScene reads `getProjectContent(caseStudyId, locale)` reactively and
   media/aspect/leadGap are duplicated VERBATIM across locales, so plane keys (src) never change on
   a switch: no texture reload, no layout jump. When editing case-study media fields, edit both

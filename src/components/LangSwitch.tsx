@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react"
 import { useLocation } from "react-router-dom"
 import { useStore, type Locale } from "../scroll/store"
+import { captureSectionTops } from "../lib/sectionFlip"
 
 /**
  * Language switch — fixed TOP-RIGHT chip, mirroring the ← Index chip top-left
@@ -40,7 +41,12 @@ export function LangSwitch() {
   return (
     <button
       type="button"
-      onClick={() => setLocale(next)}
+      onClick={() => {
+        // Snapshot section positions BEFORE the remount, so SiteShell can FLIP
+        // the layout shift (new text lengths) instead of letting it jump.
+        captureSectionTops()
+        setLocale(next)
+      }}
       aria-label={next === "en" ? "Switch to English" : "Cambiar a español"}
       aria-hidden={!visible}
       tabIndex={visible ? 0 : -1}
