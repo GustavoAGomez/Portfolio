@@ -296,12 +296,18 @@ Hand-rolled, data-driven — NO i18n library (the content was already locale-sha
   toward the new language (in-view elements decode immediately; the rest on scroll-in).
 - **The switch's layout shift is FLIPped, not jumped** (`lib/sectionFlip.ts`): new text lengths
   change section heights on remount (worst on mobile, where copy outgrows the min-h boxes), which
-  used to shift everything below the reader in one frame. LangSwitch captures each
-  `[data-section]`'s viewport top BEFORE setLocale; SiteShell's layout effect on `locale` offsets
-  every moved section back and glides it to its new place (0.65s power2.inOut). A window `resize`
-  is dispatched per frame so Story/Profile re-measure and the stacked WebGL planes travel glued to
-  their DOM slots. CSS transitions can't do this — the elements are new and the shift is reflow.
-  reduced-motion skips it (instant, consistent). The WebGL
+  used to shift everything below the reader in one frame. LangSwitch captures viewport tops BEFORE
+  setLocale; SiteShell's layout effect on `locale` offsets everything back and glides it to its new
+  place (0.65s power2.inOut). TWO levels, matched by structural index (both locales render the same
+  tree): `[data-section]` tops AND the content blocks inside (`h1,h2,h3,p,ol,ul` — a centered hero
+  re-centers when its tagline wraps differently WITHOUT the section top moving; block deltas are
+  relative to their section's). Headlines owned by `useDomParallax` can't take a gsap transform
+  (the rAF loop overwrites it every frame) — the flip tweens their `data-flip-y` instead, which the
+  hook ADDS to its translate3d; the hook tags them `data-dom-parallax` in a LAYOUT effect so the
+  tag exists before SiteShell's flip runs. A window `resize` is dispatched per frame so
+  Story/Profile re-measure and the stacked WebGL planes travel glued to their DOM slots. CSS
+  transitions can't do any of this — the elements are new and the shift is reflow. reduced-motion
+  skips it (instant, consistent). The WebGL
   modules are NOT keyed — StoryScene reads `getProjectContent(caseStudyId, locale)` reactively and
   media/aspect/leadGap are duplicated VERBATIM across locales, so plane keys (src) never change on
   a switch: no texture reload, no layout jump. When editing case-study media fields, edit both
