@@ -139,6 +139,12 @@ const PROJECT_CONTENT_ES: Record<string, ProjectContent> = {
         aspect: 1.778 // 16:9
       },
       {
+        heading: "Vídeo fotograma a fotograma con el scroll",
+        copy: "En «El método» la sección se queda fija y el scroll manda: el progreso se mapea al currentTime del vídeo —el balón entra al aro a tu ritmo— mientras los pasos se relevan en pantalla. Un bucle rAF con guarda de seeking evita encolar búsquedas sobre el decodificador, y el clip se sirve a 720p (360p en móvil) porque el coste de cada seek lo marca la distancia al keyframe.",
+        video: "/videos/basket/metodo.mp4",
+        aspect: 1.778 // 16:9
+      },
+      {
         heading: "Galería con pin y parallax",
         copy: "Con GSAP ScrollTrigger fijo (pin) el bloque central mientras dos columnas de fotos se desplazan a distinta velocidad (scrub). Toda la sección se desactiva bajo prefers-reduced-motion, donde el pin y el parallax dejarían de tener sentido.",
         video: "/videos/basket/parallax.mp4",
@@ -259,6 +265,12 @@ const PROJECT_CONTENT_EN: Record<string, ProjectContent> = {
         heading: "A full-screen video hero",
         copy: "The landing opens with a muted looping video, served locally and optimized, with a poster extracted from the clip itself so the section never flashes black while it loads. The framing uses responsive object-position so the hoop is never cropped in portrait.",
         video: "/videos/basket/hero.mp4",
+        aspect: 1.778 // 16:9
+      },
+      {
+        heading: "Frame-by-frame video on scroll",
+        copy: "In \"The method\" the section pins and scroll takes over: progress maps to the video's currentTime — the ball sinks through the hoop at your pace — while the steps relay on screen. A rAF loop with a seeking guard keeps seeks from piling up on the decoder, and the clip is served at 720p (360p on mobile) because each seek's cost is set by the distance to the keyframe.",
+        video: "/videos/basket/metodo.mp4",
         aspect: 1.778 // 16:9
       },
       {
