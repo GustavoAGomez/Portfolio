@@ -424,11 +424,12 @@ clean two-tone rhombus while the displacement only shows at logo size.
 - **PNG fallbacks** are generated from the SVG, not hand-drawn: `favicon-32.png` (transparent) and
   `apple-touch-icon.png` (180px, on `BRAND.bg` — iOS composites transparency badly). Regenerate with
   a headless screenshot of the same paths if the mark changes.
-- **Placement — the identity corner**: `SiteLogo` is fixed top-left, **Home only**, and fades out
-  past the hero exactly as `LangSwitch` fades in (same 50%-viewport threshold): the corners hand
-  over, and the mark never crowds the works-list overline. Every other route puts `← Index` in that
-  same slot, so the corner always holds either identity or the way back. Its md offset mirrors the
-  1440px content cap like the rest of the fixed chrome.
+- **In the site: only the favicon is live.** `SiteLogo` (the fixed top-left corner mark) is built
+  and documented but **commented out in `SiteShell` — Gustavo didn't want it on the Home**. Don't
+  re-enable it without asking; if you do, uncomment BOTH the import and the tag (a dead import
+  fails `noUnusedLocals` and takes the whole build down). Its design: Home only, fading out past
+  the hero as `LangSwitch` fades in, so the corners hand over and the mark never crowds the
+  works-list overline; every other route puts `← Index` in that slot.
 
 ## Conventions specific to this repo
 
