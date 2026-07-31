@@ -139,10 +139,10 @@ const PROJECT_CONTENT_ES: Record<string, ProjectContent> = {
         aspect: 1.778 // 16:9
       },
       {
-        heading: "Vídeo fotograma a fotograma con el scroll",
-        copy: "En «El método» la sección se queda fija y el scroll manda: el progreso se mapea al currentTime del vídeo —el balón entra al aro a tu ritmo— mientras los pasos se relevan en pantalla. Un bucle rAF con guarda de seeking evita encolar búsquedas sobre el decodificador, y el clip se sirve a 720p (360p en móvil) porque el coste de cada seek lo marca la distancia al keyframe.",
-        video: "/videos/basket/metodo.mp4",
-        aspect: 1.778 // 16:9
+        heading: "Interfaz modular y contenido centralizado",
+        copy: "Cada sección es un componente autónomo —un bento grid con spans alternos, una línea de tiempo, tarjetas— y todo el copy (textos, cifras, listas) se sirve desde un único módulo de datos. Cambiar el contenido no toca la interfaz.",
+        image: "/images/basket/bento.jpg",
+        aspect: 1.6
       },
       {
         heading: "Galería con pin y parallax",
@@ -151,10 +151,10 @@ const PROJECT_CONTENT_ES: Record<string, ProjectContent> = {
         aspect: 1.778 // 16:9
       },
       {
-        heading: "Interfaz modular y contenido centralizado",
-        copy: "Cada sección es un componente autónomo —un bento grid con spans alternos, una línea de tiempo, tarjetas— y todo el copy (textos, cifras, listas) se sirve desde un único módulo de datos. Cambiar el contenido no toca la interfaz.",
-        image: "/images/basket/bento.jpg",
-        aspect: 1.6
+        heading: "Vídeo fotograma a fotograma con el scroll",
+        copy: "En «El método» la sección se queda fija y el scroll manda: el progreso se mapea al currentTime del vídeo —el balón entra al aro a tu ritmo— mientras los pasos se relevan en pantalla. Un bucle rAF con guarda de seeking evita encolar búsquedas sobre el decodificador, y el clip se sirve a 720p (360p en móvil) porque el coste de cada seek lo marca la distancia al keyframe.",
+        video: "/videos/basket/metodo.mp4",
+        aspect: 1.778 // 16:9
       },
       {
         heading: "Secciones claras con contraste accesible",
@@ -268,10 +268,10 @@ const PROJECT_CONTENT_EN: Record<string, ProjectContent> = {
         aspect: 1.778 // 16:9
       },
       {
-        heading: "Frame-by-frame video on scroll",
-        copy: "In \"The method\" the section pins and scroll takes over: progress maps to the video's currentTime — the ball sinks through the hoop at your pace — while the steps relay on screen. A rAF loop with a seeking guard keeps seeks from piling up on the decoder, and the clip is served at 720p (360p on mobile) because each seek's cost is set by the distance to the keyframe.",
-        video: "/videos/basket/metodo.mp4",
-        aspect: 1.778 // 16:9
+        heading: "Modular UI, centralized content",
+        copy: "Every section is a self-contained component — a bento grid with alternating spans, a timeline, cards — and all the copy (text, figures, lists) is served from a single data module. Changing the content never touches the interface.",
+        image: "/images/basket/bento.jpg",
+        aspect: 1.6
       },
       {
         heading: "A pinned parallax gallery",
@@ -280,10 +280,10 @@ const PROJECT_CONTENT_EN: Record<string, ProjectContent> = {
         aspect: 1.778 // 16:9
       },
       {
-        heading: "Modular UI, centralized content",
-        copy: "Every section is a self-contained component — a bento grid with alternating spans, a timeline, cards — and all the copy (text, figures, lists) is served from a single data module. Changing the content never touches the interface.",
-        image: "/images/basket/bento.jpg",
-        aspect: 1.6
+        heading: "Frame-by-frame video on scroll",
+        copy: "In \"The method\" the section pins and scroll takes over: progress maps to the video's currentTime — the ball sinks through the hoop at your pace — while the steps relay on screen. A rAF loop with a seeking guard keeps seeks from piling up on the decoder, and the clip is served at 720p (360p on mobile) because each seek's cost is set by the distance to the keyframe.",
+        video: "/videos/basket/metodo.mp4",
+        aspect: 1.778 // 16:9
       },
       {
         heading: "Light sections with accessible contrast",
