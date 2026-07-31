@@ -101,6 +101,12 @@ const PROJECT_CONTENT_ES: Record<string, ProjectContent> = {
         aspect: 3.165 // filmstrip (fila de tarjetas)
       },
       {
+        heading: "Inmersiones a pantalla completa",
+        copy: "Las inmersiones destacadas viven en un slider full-bleed: cada punto entra con su imagen a toda pantalla y un titular editorial en fundido, con doble navegación —flechas y pestañas numeradas— y autoplay con barra de progreso que avanza al ritmo de lectura.",
+        video: "/videos/tagoro/profundidades.mp4",
+        aspect: 1.778 // 16:9
+      },
+      {
         heading: "Responsive y microanimaciones",
         copy: "Toda la interfaz se adapta hasta móvil, con revelados al hacer scroll y transiciones entre secciones animadas con GSAP.",
         image: "/images/tagoro/05-la-isla-v.jpg",
@@ -228,6 +234,12 @@ const PROJECT_CONTENT_EN: Record<string, ProjectContent> = {
         copy: "Hand-rolled sliders for the courses and experiences: dragging, per-card snapping, tabs (recreational / professional) and animated transitions.",
         video: "/videos/tagoro/carousel.mp4",
         aspect: 3.165 // filmstrip (row of cards)
+      },
+      {
+        heading: "Full-screen dive sites",
+        copy: "The featured dive sites live in a full-bleed slider: each spot comes in with a full-screen image and an editorial headline on a crossfade, with double navigation — arrows and numbered tabs — and an autoplay progress bar pacing itself to reading speed.",
+        video: "/videos/tagoro/profundidades.mp4",
+        aspect: 1.778 // 16:9
       },
       {
         heading: "Responsive with micro-animations",
