@@ -6,10 +6,35 @@
   NODE_VERSION = "20"
   PNPM_VERSION = "9"
 
+# Dominio canonico: gusgq.es. Marcar el dominio como "primary" en Netlify NO
+# deja de servir el subdominio *.netlify.app (comprobado: devolvia 200 con el
+# sitio entero), y dos URLs con el mismo contenido compiten como duplicado.
+# Este 301 explicito lo resuelve. Va ANTES del fallback SPA porque Netlify
+# aplica la primera regla que casa. Los deploy previews usan otro host
+# (deploy-preview-N--...) y no los afecta.
+[[redirects]]
+  from = "https://gustavo-gomez-portfolio.netlify.app/*"
+  to = "https://gusgq.es/:splat"
+  status = 301
+  force = true
+
+# Los deploy de rama y las previews sirven el sitio entero en otro host y
+# tampoco deben indexarse (comprobado: Netlify no les pone cabecera propia).
+# Solo aplican a esos contextos, produccion queda intacta.
+[context.branch-deploy]
+  [[context.branch-deploy.headers]]
+    for = "/*"
+    [context.branch-deploy.headers.values]
+      X-Robots-Tag = "noindex"
+
+[context.deploy-preview]
+  [[context.deploy-preview.headers]]
+    for = "/*"
+    [context.deploy-preview.headers.values]
+      X-Robots-Tag = "noindex"
+
 # SPA fallback: el routing es client-side (react-router), asi que cualquier
 # deep link (/work/tagorodive) tiene que servir index.html con 200, no un 404.
-# Va al final del archivo por orden de precedencia (Netlify aplica la primera
-# regla que casa), pero como es la unica no hay conflicto.
 [[redirects]]
   from = "/*"
   to = "/index.html"
