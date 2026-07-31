@@ -10,11 +10,8 @@ export interface CurrentProject {
   content: ProjectContent | undefined
 }
 
-/**
- * Resolves the project for the current `/work/:id` route. Uses `useLocation`
- * (not `useParams`) because the detail sections render inside the shell's <main>,
- * outside <Routes> — so they have no route-match context, only the URL.
- */
+// useLocation, NOT useParams: the detail sections render outside <Routes>,
+// so there is no route-match context — only the URL.
 export function useCurrentProject(): CurrentProject {
   const { pathname } = useLocation()
   const locale = useStore((s) => s.locale)

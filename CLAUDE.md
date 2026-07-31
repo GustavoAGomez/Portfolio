@@ -71,16 +71,19 @@ Lenis drives everything; the DOM only provides scroll height + accessible text.
     after `shrinkPastHero`), the frame skips the whole multipass and does ONE manual scene render
     (same clear, so the background tone doesn't shift). 4 scene renders/frame → 1 exactly where
     the story videos + chromatic planes live.
-  - **Below 1024px the FBOs render at a capped pixel ratio (≤1.5)** — their content is only seen
-    through the gem's warp. The `resolution` uniform stays the SCREEN buffer size (it's the
-    `gl_FragCoord` domain); the maps are sampled at normalized UVs, so FBO size is independent.
+  - **The FBOs render at a capped pixel ratio (≤1.5) on every viewport** — their content is only
+    seen through the gem's warp, and two full-retina RGBA buffers were the biggest GPU-memory cost
+    (2026-07-31 RAM audit; it used to be mobile-only). The `resolution` uniform stays the SCREEN
+    buffer size (it's the `gl_FragCoord` domain); the maps are sampled at normalized UVs, so FBO
+    size is independent.
   - **CRITICAL: no EffectComposer.** A postprocessing composer would fight the manual multipass
     and kill the lens. Grain + vignette are a **CSS overlay** (`.fx-overlay` in `index.css`,
     mounted in `SiteShell`) instead. Background is a **clear color** (`onCreated → gl.setClearColor`),
     not `scene.background` (which repaints every pass and would wipe the scene render).
   - The Home headline MUST stay a 3D `<Text>` on layer 0 (`canvas/modules/HeroScene.tsx`) for the
-    gem to refract it; the DOM keeps only an `sr-only` `<h1>`. `@react-three/postprocessing` +
-    `postprocessing` are unused deps.
+    gem to refract it; the DOM keeps only an `sr-only` `<h1>`. Debug tooling (leva/r3f-perf) is
+    lazy-imported behind the `?debug` dev flag — leva injects CSS on import, so a static import
+    would survive tree-shaking into the prod bundle.
 
 ## Routing & section sets (ONE persistent canvas)
 

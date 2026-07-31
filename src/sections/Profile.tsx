@@ -5,14 +5,8 @@ import { Decode } from "../components/Decode"
 import { getAbout } from "../config/aboutContent"
 import { useT } from "../i18n/ui"
 
-/**
- * About-me DOM (route /about). CV-light by design — short first-person bio,
- * numbered areas, a 3-line mini-timeline and a brands list (see aboutContent.ts
- * for the rationale). The portrait photo is NOT an <img>: it renders as a WebGL
- * chromatic plane in ProfileScene (same RGB-split + parallax as the case-study
- * media), anchored to the slot this component measures — the same DOM-is-truth
- * technique as Story.tsx/StoryScene.
- */
+// The DOM is the anchor source of truth: the photo slot's center is measured into
+// store.profileAnchors; the stacked 0.58 width fraction must stay in sync with ProfileScene.
 export function Profile() {
   const rootRef = useRef<HTMLDivElement>(null)
   const line = useRef<HTMLHeadingElement>(null)
@@ -21,10 +15,6 @@ export function Profile() {
   const ABOUT = getAbout(useStore((s) => s.locale))
   const t = useT()
 
-  // Measure the photo slot's document-space center for ProfileScene (mount,
-  // resize, reflow) — layout effect so the anchor is right before first paint.
-  // Stacked (<lg) the plane fills the reserved spacer; ≥lg it sits beside the
-  // copy, so the whole article's center is the anchor (mirrors Story.tsx).
   useLayoutEffect(() => {
     const root = rootRef.current
     if (!root) return
@@ -51,14 +41,11 @@ export function Profile() {
 
   return (
     <div ref={rootRef} className="pointer-events-none relative">
-      {/* ── Identity — statement-style hero ─────────────────────────────── */}
       <div className="min-h-svh flex flex-col items-center justify-center px-6 text-center">
         <p className="text-xs font-mono tracking-[0.35em] uppercase text-white/60">
           <Decode>{t.aboutMe}</Decode>
         </p>
-        {/* Inline lineHeight — same reason as Statement: .font-display's 0.86
-            collides wrapped lines; 1 keeps the two words readable on mobile. */}
-        {/* min(9vw, 8.1rem): 9vw stops growing at the 1440px content cap. */}
+        {/* Inline lineHeight — .font-display's 0.86 collides wrapped lines. */}
         <h2 ref={line} className="mt-6 font-display uppercase tracking-tight text-white text-[14vw] md:text-[min(9vw,8.1rem)]" style={{ lineHeight: 1 }}>
           <Decode duration={0.6}>{ABOUT.title}</Decode>
         </h2>
@@ -69,7 +56,6 @@ export function Profile() {
         </p>
       </div>
 
-      {/* ── Photo (WebGL plane) + bio — plane left, copy right on ≥lg ────── */}
       <article className="content-max flex flex-col pt-[10svh] pb-[6svh] px-6 md:px-16 lg:min-h-svh lg:flex-row lg:items-center lg:justify-end lg:py-0">
         {/* Plane box (stacked only) — mirrors ProfileScene's 0.58 fraction. */}
         <div data-plane-slot aria-hidden="true" className="self-center lg:hidden" style={{ width: "58vw", aspectRatio: String(ABOUT.photo.aspect) }} />
@@ -85,7 +71,6 @@ export function Profile() {
         </div>
       </article>
 
-      {/* ── Areas — numbered 01–05, right-aligned (alternates the page) ──── */}
       <div className="content-max min-h-[72svh] py-[12svh] flex items-center justify-start md:justify-end px-6 md:px-16">
         <div className="max-w-2xl text-left md:text-right">
           <p className="text-xs font-mono tracking-[0.35em] uppercase text-white/60">
@@ -109,7 +94,6 @@ export function Profile() {
         </div>
       </div>
 
-      {/* ── Trajectory (mini-timeline) + brands — left-aligned ───────────── */}
       <div className="content-max min-h-[72svh] py-[12svh] flex items-center px-6 md:px-16">
         <div className="w-full max-w-3xl">
           <p className="text-xs font-mono tracking-[0.35em] uppercase text-white/60">

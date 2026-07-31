@@ -1,10 +1,4 @@
-/**
- * WebGL-side view of the palette. The colours are NOT declared here — they derive
- * from the single source of truth (config/palette.ts → ACTIVE), the same object
- * that `applyPalette` pushes into the DOM's CSS variables. This file feeds shader
- * uniforms, material colours and the canvas clear colour; change the palette in
- * palette.ts and both DOM + WebGL reskin together.
- */
+/** WebGL-side view of the palette — derives from palette.ts ACTIVE; change colours there. */
 
 import { ACTIVE } from "./palette"
 
@@ -26,24 +20,10 @@ export const SCENE = {
   far: 2000,
   /** DPR clamp — never render above 2x, keeps the refraction affordable. */
   dpr: [1, 2] as [number, number],
-  /** Recurring diagonal stripe angle. */
-  stripeAngle: Math.PI / 8,
-  /**
-   * Scroll velocity normalization reference (Lenis px/frame that maps to ~1.0).
-   * Raw Lenis velocity is divided by this before being damped in the store.
-   */
+  /** Scroll velocity normalization reference (Lenis px/frame that maps to ~1.0). */
   velocityRef: 40,
-  /**
-   * Below this viewport width the WebGL side switches to its mobile layout
-   * (centered planes, wider content fraction). Matches Tailwind's `md:` (768px)
-   * so DOM and canvas always flip together.
-   */
+  /** WebGL mobile-layout breakpoint — matches Tailwind's `md:` (768px). */
   mobileBreakpoint: 768,
-  /**
-   * Site-wide content cap in px — past this the layout stops growing and
-   * centers (ultra-wide screens read like a normal desktop). MIRRORS the DOM's
-   * `.content-max` class in styles/index.css — change both together. Exposed to
-   * the canvas as useBlock's `layoutWidth` (world units).
-   */
+  /** Site-wide content cap — MIRRORS `.content-max` in styles/index.css, change together. */
   contentMaxPx: 1440
 } as const

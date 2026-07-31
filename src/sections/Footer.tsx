@@ -8,7 +8,6 @@ import { Decode } from "../components/Decode"
 import { CornerHud } from "../components/CornerHud"
 import { useT } from "../i18n/ui"
 
-/** Strip protocol + trailing slash for a clean display label (tagorodive.com). */
 function prettyUrl(url: string): string {
   return url.replace(/^https?:\/\//, "").replace(/\/$/, "")
 }
@@ -19,7 +18,6 @@ export function Footer() {
   const { go } = useTransition()
   const isAbout = useLocation().pathname.startsWith("/about")
 
-  // Case study: live-site CTA → next project → shared footer HUD.
   if (content) {
     const nextId = content.nextId
     const next = nextId ? PROJECTS.find((p) => p.id === nextId) : undefined
@@ -38,17 +36,8 @@ export function Footer() {
 
     return (
       <>
-        {/* Visit the live site — RIGHT-aligned, domain as a mid headline + an
-            outlined pill button (the stack-chip border language). Reads as a CTA,
-            not a list row, and its alignment opposes the LEFT-aligned next block.
-            When the site is still in development (`urlPending`), the domain is
-            replaced by "Próximamente" and the CTA becomes a non-clickable pill. */}
-        {/* PILL hover rule (all interactive pills: this, Llámame, ← Index): the
-            border stays DIM WHITE on hover — never accent-b. Dim white sits
-            BELOW the cursor's luminance threshold, so inside the cursor disc it
-            inverts to lime-on-lime and VANISHES (the effect Gustavo wants);
-            a lime border sits above the threshold and reads dark through the
-            disc instead. Text still goes lime. */}
+        {/* Pill hover rule (all interactive pills): border stays DIM WHITE on hover,
+            never accent-b — a lime border reads dark inside the cursor disc instead of vanishing. */}
         {(content.url || content.urlPending) && (
           <section className="content-max min-h-[45svh] flex flex-col items-end justify-center px-6 md:px-16 py-24 text-right pointer-events-none">
             <p className="text-xs font-mono tracking-[0.35em] uppercase text-white/60">
@@ -77,10 +66,6 @@ export function Footer() {
           </section>
         )}
 
-        {/* About teaser — small, LEFT-aligned, the "Siguiente proyecto" language
-            one size down: overline + display link + arrow. Quiet in the layout
-            but still a real headline gesture (lime hover + glow), vs the HUD's
-            tiny mono link. */}
         <section className="content-max px-6 md:px-16 py-24 pointer-events-none">
           <p className="text-xs font-mono tracking-[0.35em] uppercase text-white/60">
             <Decode>{t.whoIsBehind}</Decode>
@@ -95,8 +80,6 @@ export function Footer() {
           </Link>
         </section>
 
-        {/* Next project + footer HUD share the diagonal-stripe backdrop. LEFT-aligned
-            giant headline — the primary navigation gesture. */}
         <div className="relative flex flex-col justify-end">
           <div className="diagonal-stripe absolute inset-0" />
           <div className="content-max relative px-6 md:px-16 pt-24 pb-10">
@@ -131,14 +114,12 @@ export function Footer() {
             )}
           </div>
 
-          {/* Same footer as the Home, below the works list. */}
           <CornerHud variant="block" />
         </div>
       </>
     )
   }
 
-  // About page: Spanish contact close (same language as the case studies).
   if (isAbout) {
     return (
       <div className="relative flex flex-col justify-end">
@@ -155,9 +136,6 @@ export function Footer() {
               →
             </span>
           </a>
-          {/* Direct call — tel: opens the device's dialer. The number is spelled
-              out in the label (the pill is the same outlined language as the
-              live-site CTA), so it's readable even without tapping. */}
           <a
             href={ABOUT.phone.href}
             className="group pointer-events-auto mt-8 inline-flex items-center gap-3 rounded-full border border-white/20 px-6 py-3 text-xs font-mono tracking-[0.3em] uppercase text-white/80 transition-colors hover:border-white/30 hover:text-[var(--color-accent-b)]"
@@ -173,7 +151,6 @@ export function Footer() {
     )
   }
 
-  // Generic detail (placeholder projects).
   return (
     <div className="relative flex flex-col justify-end">
       <div className="diagonal-stripe absolute inset-0" />

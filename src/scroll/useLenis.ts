@@ -4,19 +4,12 @@ import { useStore } from "./store"
 import { SCENE } from "../config/tokens"
 import { clamp, debounce } from "../lib/math"
 
-/**
- * Live Lenis instance, exposed so the router shell can reset scroll on navigation
- * (`lenisRef.current?.scrollTo(0, { immediate: true })`). Null while unmounted.
- */
+/** Live Lenis instance, exposed so the router shell can reset scroll on navigation. */
 export const lenisRef: { current: Lenis | null } = { current: null }
 
 /**
- * Lenis is the single source of truth for scroll. On every scroll event it
- * pushes raw values straight into the store's live `scroll` object (mutated in
- * place — no React churn). Velocity is normalized here; damping to rest happens
- * in ScrollBridge inside the render loop.
- *
- * Mount once (in the persistent SiteShell).
+ * Lenis is the single source of truth for scroll: each event writes into the
+ * store's live `scroll` object. Mount once (persistent SiteShell).
  */
 export function useLenis(): void {
   const setReducedMotion = useStore((s) => s.setReducedMotion)
@@ -26,10 +19,7 @@ export function useLenis(): void {
     const applyReduced = () => setReducedMotion(mq.matches)
     applyReduced()
 
-    // Touch devices: native touch scrolling bypasses Lenis entirely (it only
-    // tracks it), so its speed can't be tuned. syncTouch hands the gesture to
-    // Lenis → touchMultiplier applies (faster flicks) and scroll velocity feeds
-    // the chromatic effect on touch too. Desktop wheel behaviour is untouched.
+    // syncTouch: native touch scrolling bypasses Lenis (untunable, no velocity for the chromatic effect).
     const coarse = window.matchMedia("(pointer: coarse)").matches
     const lenis = new Lenis({
       lerp: mq.matches ? 1 : 0.1,
@@ -37,14 +27,9 @@ export function useLenis(): void {
       smoothWheel: !mq.matches,
       wheelMultiplier: 1,
       syncTouch: coarse && !mq.matches,
-      // 1:1 finger tracking. touchMultiplier scales the DRAG too (not just the
-      // flick) and any value ≠ 1 reads as robotic on iOS — content must move
-      // exactly with the finger. Speed comes from the flick inertia instead.
+      // MUST stay 1 — it scales the DRAG too; anything ≠1 breaks 1:1 finger tracking on iOS.
       touchMultiplier: 1,
-      // Slippery flick (syncTouch): on touchend Lenis glides |velocity|^exponent
-      // px — raising the default 1.7 makes fast flicks slide much further, and a
-      // softer syncTouchLerp (default 0.075) stretches the ease-out of that
-      // glide. Tune these two for the skatey feel.
+      // Flick glide: touchend slides |velocity|^exponent px; syncTouchLerp eases it out.
       touchInertiaExponent: 1.8,
       syncTouchLerp: 0.06,
       autoRaf: false

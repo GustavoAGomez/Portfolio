@@ -9,18 +9,8 @@ const SNAP_DURATION = 0.9 // s
 const COOLDOWN = 160 // ms after a snap before another gesture is accepted
 
 /**
- * Gesture-driven anchor snap for the HOME only (two screens: hero + works list).
- * One scroll gesture = one full jump to the next/previous anchor (hero = doc top,
- * works = the works section's document top). Direction-driven, not nearest-based.
- *
- * Lenis binds wheel/touch in the CAPTURE phase (registered first), so we can't
- * out-order it — instead we `lenis.stop()` while on the Home (Lenis then ignores
- * all input) and `preventDefault()` the native scroll ourselves. The jump goes
- * through Lenis (`scrollTo`, force:true so it runs while stopped), so the store
- * keeps receiving scrollY/velocity as usual. Disabled entirely under reduced-motion.
- *
- * Mount only when the active route is the Home (`enabled`). On detail it never
- * runs, so that route scrolls normally.
+ * Gesture-driven anchor snap for the Home (hero ↔ works). Lenis is stopped while
+ * active; jumps go through lenis.scrollTo(force:true) so the store keeps feeding.
  */
 export function useHomeSnap(enabled: boolean): void {
   const reducedMotion = useStore((s) => s.reducedMotion)
@@ -87,9 +77,7 @@ export function useHomeSnap(enabled: boolean): void {
       touchStartY = null
     }
 
-    // On very short viewports (landscape phones) the works list can be taller
-    // than the screen — a full-jump snap would leave its bottom unreachable, so
-    // the snap only engages while the viewport is tall enough (free scroll below).
+    // Snap only engages while the viewport is ≥560px tall — short viewports scroll freely.
     const tallEnough = window.matchMedia("(min-height: 560px)")
     let attached = false
 

@@ -10,15 +10,10 @@ export function Statement() {
   const { content } = useCurrentProject()
   const t = useT()
 
-  // Case study: project title + tagline.
   if (content) {
     return (
       <div className="min-h-svh flex flex-col items-center justify-center px-6 text-center pointer-events-none">
-        {/* Inline lineHeight (like Story's h3): .font-display hard-sets 0.86 —
-            tuned for SINGLE-line display text — and beats any leading-* utility
-            in the cascade; at 0.86 a wrapped title (mobile) collides its lines
-            (Anton caps span ~0.87em). Inline style wins over the class. */}
-        {/* min(10vw, 9rem): 10vw stops growing at the 1440px content cap. */}
+        {/* Inline lineHeight — .font-display's 0.86 collides wrapped lines. */}
         <h2 ref={line} className="font-display uppercase tracking-tight text-white text-[14vw] md:text-[min(10vw,9rem)]" style={{ lineHeight: 1 }}>
           <Decode duration={0.6}>{content.title}</Decode>
         </h2>
@@ -31,10 +26,8 @@ export function Statement() {
     )
   }
 
-  // Generic detail (placeholder projects).
   return (
     <div className="min-h-svh flex items-center justify-center px-6 pointer-events-none">
-      {/* Inline lineHeight: this one always wraps (3 lines) — see note above. */}
       <h2 ref={line} className="font-display text-center text-[13vw] md:text-[min(9vw,8.1rem)]" style={{ lineHeight: 1 }}>
         <span className="text-white">{t.stGeneric1}</span>
         <br />

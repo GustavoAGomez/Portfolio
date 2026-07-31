@@ -10,20 +10,12 @@ import type { L10n } from "../config/projects"
 gsap.registerPlugin(ScrambleTextPlugin)
 
 export interface HudLink {
-  /** Per-locale label (brand names are simply identical in both). */
   label: L10n
   href: string
-  /** External links open in a new tab; mailto/internal links do not. */
   external?: boolean
-  /** In-app route — navigated with the warp transition instead of a page load. */
   internal?: boolean
 }
 
-/**
- * Canonical site links (About + LinkedIn + Gmail). Default for every page's HUD,
- * so the footer stays identical across Home and the case studies. The internal
- * About link is hidden while already on /about (a self-link reads as noise).
- */
 export const SITE_LINKS: HudLink[] = [
   { label: { es: "Sobre mí", en: "About" }, href: "/about", internal: true },
   { label: { es: "LinkedIn", en: "LinkedIn" }, href: "https://www.linkedin.com/in/gustavoagomez93/", external: true },
@@ -42,34 +34,18 @@ function formatMadrid(): string {
 
 interface CornerHudProps {
   links?: HudLink[]
-  /**
-   * `overlay` pins it to the bottom of its (relative) container — used on the
-   * Home over the works list. `block` flows in normal document order — used at
-   * the bottom of every case study, below "Siguiente proyecto".
-   */
   variant?: "overlay" | "block"
 }
 
-/**
- * Live clock + location + contact links. Shared footer HUD, componentized so the
- * same strip renders on every page (Home works list + case-study footers).
- * Absolute inside its section on the Home; static in flow everywhere else.
- *
- * All text plays the binary `01` decode the first time the HUD scrolls into view:
- * the static pieces (timezone label, location, link labels) via <Decode>; the
- * live clock via a ONE-SHOT scramble (a <Decode> would re-fire every second as
- * the time ticks), after which the per-second tick starts.
- */
 export function CornerHud({ links = SITE_LINKS, variant = "overlay" }: CornerHudProps) {
   const reducedMotion = useStore((s) => s.reducedMotion)
   const locale = useStore((s) => s.locale)
   const { go } = useTransition()
   const { pathname } = useLocation()
-  // Hide an internal link that points at the page we're already on.
   const visibleLinks = links.filter((l) => !(l.internal && pathname === l.href))
   const [time, setTime] = useState(() => formatMadrid())
-  // Hold the tick until the clock has decoded once, so the scramble isn't
-  // overwritten mid-play by a setState. Reduced-motion ticks immediately.
+  // Hold the tick until the clock has decoded once — a setState mid-play would
+  // overwrite the scramble.
   const [ticking, setTicking] = useState(reducedMotion)
   const clockRef = useRef<HTMLSpanElement>(null)
 
@@ -79,7 +55,6 @@ export function CornerHud({ links = SITE_LINKS, variant = "overlay" }: CornerHud
     return () => window.clearInterval(id)
   }, [ticking])
 
-  // First-view one-shot decode of the live clock, then start ticking.
   useEffect(() => {
     const el = clockRef.current
     if (!el || reducedMotion) return
@@ -87,7 +62,7 @@ export function CornerHud({ links = SITE_LINKS, variant = "overlay" }: CornerHud
       (entries) => {
         const entry = entries[0]
         if (!entry?.isIntersecting) return
-        io.disconnect() // decode once
+        io.disconnect()
         gsap.set(el, { autoAlpha: 1 })
         gsap.to(el, {
           duration: 0.7,
@@ -126,8 +101,6 @@ export function CornerHud({ links = SITE_LINKS, variant = "overlay" }: CornerHud
       </div>
       <nav className="pointer-events-auto flex gap-4 md:gap-6">
         {visibleLinks.map((l, i) => {
-          // Internal routes navigate with the warp transition (modified clicks
-          // keep native behavior: new tab / middle button).
           const onClick = l.internal
             ? (e: MouseEvent<HTMLAnchorElement>) => {
                 if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return

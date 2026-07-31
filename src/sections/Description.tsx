@@ -2,12 +2,6 @@ import { useCurrentProject } from "../routes/useCurrentProject"
 import { Decode } from "../components/Decode"
 import { useT } from "../i18n/ui"
 
-/**
- * Case-study brief, shown right after the hero: the client need + what the
- * development was asked to solve. Pure DOM text (no WebGL) — concise and quick
- * to read before the tech credits and the media walkthrough. Data-driven from
- * `content.intro`, so it degrades to nothing for projects without a brief.
- */
 export function Description() {
   const { content } = useCurrentProject()
   const t = useT()
@@ -15,11 +9,6 @@ export function Description() {
   if (!intro) return null
 
   return (
-    // py: when the copy is TALLER than the min-h (long briefs on phones) the
-    // flex box grows to exactly the content and the next section starts glued
-    // to the last line — the padding guarantees breathing room in that case
-    // (with short content the min-h + centering dominates, so desktop is
-    // untouched).
     <div className="content-max min-h-[78svh] py-[12svh] flex items-center justify-start md:justify-end px-6 md:px-16 pointer-events-none">
       <div className="max-w-3xl text-left md:text-right">
         <p className="text-xs font-mono tracking-[0.35em] uppercase text-white/60">

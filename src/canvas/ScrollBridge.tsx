@@ -3,17 +3,8 @@ import { useStore } from "../scroll/store"
 import { damp } from "../lib/math"
 
 /**
- * The bridge between the Lenis-fed store and the render loop. Mounted once inside
- * <Canvas>. Each frame it integrates the damped scroll velocity that every
- * chromatic material and parallax block reads:
- *
- *   - velocity  follows rawVelocity (smoothing)
- *   - rawVelocity decays toward 0, so once Lenis stops emitting events the
- *     RGB-split settles back to rest.
- *
- * This is WHY the canvas runs frameloop="always": the decay must keep advancing
- * even while React state is idle. Under "demand" the aberration would freeze
- * mid-decay instead of easing out.
+ * Damps scroll velocity each frame (velocity → rawVelocity → 0). This decay is
+ * why the canvas runs frameloop="always" — it must advance while React is idle.
  */
 export function ScrollBridge() {
   useFrame((_, dt) => {

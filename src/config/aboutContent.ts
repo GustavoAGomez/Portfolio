@@ -1,15 +1,8 @@
 import type { Locale } from "../scroll/store"
 
 /**
- * About-me page content, PER LOCALE (`getAbout(locale)`; Spanish is the source
- * copy). Kept in DATA (not JSX) like projectContent.ts, so the copy can be
- * tuned without touching layout. The structure
- * follows how top creative-dev portfolios present themselves (Payot / Bizarro /
- * Miranda): a short first-person bio, the trajectory as a mini-timeline
- * (NOT a LinkedIn-style CV), a few numbered areas instead of a skills wall, and a
- * brands list that credits agency/team work without exposing NDA'd projects.
- * The detailed per-project stack stays where it belongs: in each case study's
- * `credits.stack`.
+ * About-me content, PER LOCALE (`getAbout`) — Spanish is the source copy.
+ * Photo/phone/brands are shared constants — edit both locales when touching copy.
  */
 
 export interface AboutArea {
@@ -34,9 +27,9 @@ export interface AboutContent {
   photo: { src: string; aspect: number }
   /** First-person bio — 2 SHORT paragraphs max (decode makes long text tedious). */
   bio: string[]
-  /** Numbered areas (01–05) — what I do, not every tool I've touched. */
+  /** Numbered areas (01–05). */
   areas: AboutArea[]
-  /** Mini-timeline, newest first — one line per stage, no bullet lists. */
+  /** Mini-timeline, newest first. */
   stints: AboutStint[]
   /** Brands reached through agency/team work (credit without NDA'd visuals). */
   brands: string[]

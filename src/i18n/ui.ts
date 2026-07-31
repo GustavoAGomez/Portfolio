@@ -1,20 +1,11 @@
 import { useStore, type Locale } from "../scroll/store"
 
-/**
- * UI microcopy dictionary (overlines, buttons, labels). Long-form CONTENT lives
- * with its data (projectContent / aboutContent / projects — each keyed by
- * locale); this file only holds the scattered interface strings. Spanish is the
- * source copy — the ONLY English kept in the Spanish site is vocabulary Spanish
- * actually uses (front-end, UI, scroll, portfolio, los ambient words 3D como
- * PROJECT/ABOUT). `useT()` is reactive: switching locale re-renders consumers.
- */
+// Spanish is the source copy; brand-English words stay identical in both locales.
 const UI = {
   es: {
-    // Global chrome
     heroOverline: "Tecnólogo creativo — Portfolio",
     selectedWork: "Destacados",
     index: "Index",
-    // Case study
     details: "Detalles",
     brief: "Encargo",
     credits: "Trabajo",
@@ -25,21 +16,17 @@ const UI = {
     whoIsBehind: "Quién hay detrás",
     aboutMe: "Sobre mí",
     nextProject: "Siguiente proyecto",
-    // Contact
     contact: "Contacto",
     letsTalk: "Hablemos",
     callMe: "Llámame",
-    // About page
     hi: "Hola",
     whatIDo: "Qué hago",
     trajectory: "Trayectoria",
     codeFor: "He puesto código para",
-    // 404
     error404: "Error 404",
     nothingHere: "Nada por aquí",
     notFoundCopy: "Esta URL no existe o se ha movido. Vuelve al índice para seguir navegando.",
     backToIndex: "Volver al índice",
-    // Generic detail placeholder (projects without case-study content)
     stGeneric1: "LA CULTURA",
     stGeneric2: "NO ES",
     stGeneric3: "TU AMIGA.",
@@ -87,7 +74,6 @@ const UI = {
 
 export type UIStrings = (typeof UI)[Locale]
 
-/** Reactive UI strings for the active locale. */
 export function useT(): UIStrings {
   const locale = useStore((s) => s.locale)
   return UI[locale]

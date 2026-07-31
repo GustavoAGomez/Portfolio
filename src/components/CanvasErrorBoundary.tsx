@@ -7,11 +7,6 @@ interface State {
   failed: boolean
 }
 
-/**
- * Isolates the WebGL <Canvas>. If the GPU/context can't be created (locked-down
- * browser, driver failure, headless), the 3D layer is dropped and the semantic
- * DOM keeps working — instead of the whole app going blank.
- */
 export class CanvasErrorBoundary extends Component<Props, State> {
   state: State = { failed: false }
 

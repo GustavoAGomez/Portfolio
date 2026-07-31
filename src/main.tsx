@@ -6,9 +6,7 @@ import { applyPalette } from "./config/palette"
 import { applyTypography } from "./config/typography"
 import "./styles/index.css"
 
-// Theme the DOM from the single sources of truth (config/palette.ts +
-// config/typography.ts) BEFORE the first render, so the very first paint is
-// already on the active palette + type system.
+// Apply palette + typography BEFORE the first render.
 applyPalette()
 applyTypography()
 

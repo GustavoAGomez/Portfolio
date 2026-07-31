@@ -2,23 +2,13 @@ import { PROJECTS } from "../config/projects"
 import { useStore } from "../scroll/store"
 import { useT } from "../i18n/ui"
 
-/**
- * Semantic list of projects for the 3D chromatic-plane GALLERY. Each item is
- * ~one viewport tall so the section height matches the WebGL slots in WorksScene
- * (one slot per project). The chromatic image planes + giant numbers render
- * behind this text.
- *
- * NOTE: kept off the Home for now (sections.ts → `gallery` is enabled:false).
- * Reused later for per-project detail pages. The interactive DOM works list on
- * the Home lives in sections/WorksList.tsx instead.
- */
 export function Gallery() {
   const locale = useStore((s) => s.locale)
   const t = useT()
   return (
     <div className="pointer-events-none relative">
-      {/* Out of flow — WorksScene splits the section height into equal slots;
-          in-flow header height would drift every plane anchor (cf. Story.tsx). */}
+      {/* Header must stay out of flow — WorksScene splits the section height into
+          equal slots; in-flow header height would drift every plane anchor. */}
       <div className="absolute top-0 inset-x-0">
         <div className="content-max px-6 md:px-16 pt-24">
           <p className="text-xs font-mono tracking-[0.35em] uppercase text-white/60">{t.selectedWork}</p>

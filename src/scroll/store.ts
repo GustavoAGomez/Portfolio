@@ -1,5 +1,4 @@
 import { create } from "zustand"
-import { clamp01 } from "../lib/math"
 
 export type SectionId = "hero" | "statement" | "description" | "story" | "works" | "gallery" | "about" | "profile" | "footer" | "notFound"
 
@@ -23,10 +22,8 @@ export interface SectionBounds {
 }
 
 /**
- * Live scroll values. This object identity is STABLE for the app lifetime and
- * its fields are mutated IN PLACE (never through `set`) by Lenis and the frame
- * loop. Consumers read it via `useStore.getState().scroll.*` inside useFrame /
- * rAF — so the ~60fps churn triggers ZERO React re-renders.
+ * Live scroll values — a stable object mutated IN PLACE (never via `set`), so 60fps
+ * churn triggers ZERO re-renders. Read via getState().scroll.* in useFrame/rAF.
  */
 export interface ScrollLive {
   scrollY: number
@@ -45,35 +42,13 @@ interface AppState {
   sections: Partial<Record<SectionId, SectionBounds>>
   /** Reactive: honored across parallax, velocity and reveals. */
   reducedMotion: boolean
-  /**
-   * Reactive: the active case-study project id (null off a case-study route).
-   * Set by SiteShell from the URL — the bridge that lets the WebGL StoryScene
-   * (which has NO React Router context inside the Canvas) know which project's
-   * block images to render. Changes only on navigation.
-   */
+  /** Active case-study id, set by SiteShell from the URL (the Canvas has no Router context). */
   caseStudyId: string | null
-  /**
-   * Reactive: MEASURED document-space center (px) of each story block's media
-   * slot, written by Story.tsx (mount / resize / reflow). StoryScene anchors its
-   * planes to these — the DOM is the source of truth for where a plane sits, so
-   * slot heights / gaps / copy length can change freely without canvas drift.
-   * Empty until Story measures (planes fall back to the even-split estimate).
-   */
+  /** Measured document-space centers of the story blocks' media slots (Story.tsx). */
   storyAnchors: number[]
-  /**
-   * Reactive: MEASURED document-space centers (px) of the About page's media
-   * slots, written by Profile.tsx exactly like storyAnchors — ProfileScene pins
-   * its chromatic planes to them. Disjoint route sets mean story/profile never
-   * coexist, but each keeps its own field so neither can clobber the other
-   * during a route swap.
-   */
+  /** Measured document-space centers of the About page's media slots (Profile.tsx). */
   profileAnchors: number[]
-  /**
-   * Reactive: active UI language ("es" default, persisted in localStorage).
-   * Changing it re-keys every DOM section (SiteShell), so all <Decode> texts
-   * replay the binary scramble toward the new language — the switch IS the
-   * site's decode transition.
-   */
+  /** Persisted UI language; switching re-keys sections so every <Decode> replays. */
   locale: Locale
   registerSection: (id: SectionId, bounds: SectionBounds) => void
   unregisterSection: (id: SectionId) => void
@@ -108,19 +83,8 @@ export const useStore = create<AppState>((set) => ({
       try {
         localStorage.setItem(LOCALE_KEY, l)
       } catch {
-        /* private mode etc. — the choice just won't persist */
+        /* private mode — the choice just won't persist */
       }
       return { locale: l }
     })
 }))
-
-/**
- * Local progress of a section (0 before it enters the viewport, 1 after it has
- * fully passed). Reads live scroll — call it inside a frame / rAF loop.
- */
-export function getLocalProgress(id: SectionId, viewportHeight: number): number {
-  const { scroll, sections } = useStore.getState()
-  const b = sections[id]
-  if (!b) return 0
-  return clamp01((scroll.scrollY + viewportHeight - b.top) / (b.height + viewportHeight))
-}

@@ -6,12 +6,9 @@ export function About() {
   const { content } = useCurrentProject()
   const t = useT()
 
-  // Case study: credits (role + summary + stack chips + client/year).
   if (content) {
     const c = content.credits
     return (
-      // py: same guarantee as Description — content taller than the min-h
-      // (small viewports) otherwise ends flush against the neighbouring section.
       <div className="content-max min-h-[72svh] py-[12svh] flex items-center px-6 md:px-16 pointer-events-none">
         <div className="max-w-2xl">
           <p className="text-xs font-mono tracking-[0.35em] uppercase text-white/60">
@@ -40,7 +37,6 @@ export function About() {
     )
   }
 
-  // Generic detail (placeholder projects).
   return (
     <div className="content-max min-h-svh flex items-center px-6 md:px-16 pointer-events-none">
       <div className="max-w-lg">

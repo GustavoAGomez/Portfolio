@@ -8,39 +8,26 @@ import { ChromaticPlane } from "../ChromaticPlane"
 import { useStore, type SectionId } from "../../scroll/store"
 import { getProjectContent, type StoryBlock } from "../../config/projectContent"
 
-// Desktop plane width CAPS in world units (reached at ~1440px wide). Below that,
-// planes are a FRACTION of the world width (moksha technique) so they never
-// bleed off narrower viewports. Landscape is deliberately large so the media
-// reads big; portrait is narrower because its height is already tall (w/aspect).
+// Desktop plane width caps in world units (reached ~1440px); below, viewport fractions.
 const LANDSCAPE_WIDTH = 9.6
 const PORTRAIT_WIDTH = 6.2
 // Max sideways offset of the plane (text sits on the opposite side in the DOM).
 const X_OFFSET = 2.6
 
 /**
- * Case-study story WebGL layer: one chromatic plane per block, laid out down the
- * (tall) story section — the SAME red/blue-trail + parallax treatment the works
- * gallery gives its images. A block's media is a looping VIDEO when `block.video`
- * is set (VideoTexture) or a still IMAGE otherwise; both feed the same
- * ChromaticPlane, so video blocks get the exact same scroll effect.
- *
- * Which project's blocks to render comes from the store (`caseStudyId`), set by
- * SiteShell from the URL — the Canvas gets no React Router context.
+ * Case-study media layer: one chromatic plane per block. Which project to render
+ * comes from store.caseStudyId — the Canvas has no React Router context.
  */
 export function StoryScene({ id }: { id: SectionId }) {
   const caseStudyId = useStore((s) => s.caseStudyId)
-  // Locale only swaps heading/copy (DOM); media/aspect/leadGap are duplicated
-  // verbatim across locales, so the planes' keys (src) and layout never change
-  // on a language switch — no texture reload, no visual jump.
+  // Media/aspect/leadGap are identical across locales, so plane keys/layout never
+  // change on a language switch (no texture reload).
   const locale = useStore((s) => s.locale)
   const content = caseStudyId ? getProjectContent(caseStudyId, locale) : undefined
   if (!content) return null
 
-  // Weighted vertical layout: each block is a 1-unit slot plus its optional
-  // `leadGap` (extra space BEFORE it). The SAME leadGap drives the DOM margin in
-  // Story.tsx, so plane and text stay aligned. `centerFraction` ∈ [0,1] locates a
-  // plane's center within the story section — with no leadGap it collapses to the
-  // former even split (index + 0.5) / count, so other projects are unaffected.
+  // Weighted slots: 1 unit per block + its leadGap before it — the SAME leadGap
+  // drives the DOM margin in Story.tsx, so plane and text stay aligned.
   const total = content.blocks.reduce((sum, b) => sum + 1 + (b.leadGap ?? 0), 0)
   let cursor = 0
 
@@ -56,21 +43,14 @@ export function StoryScene({ id }: { id: SectionId }) {
   )
 }
 
-/** One block's plane + parallax slot. Picks the video or image texture variant
- *  (each in its own <Suspense> so a loading video never blanks the others). */
+/** One block's plane + parallax slot (video or image, each in its own <Suspense>). */
 function StoryBlockPlane({ id, block, index, centerFraction }: { id: SectionId; block: StoryBlock; index: number; centerFraction: number }) {
   const { worldWidth, viewportPx } = useBlock()
-  // Stacked (centered plane, copy below) until 1024px — mirrors the DOM's `lg:`
-  // breakpoint in Story.tsx, NOT the 768px `mobile` flag: at md widths there is
-  // no room for the side-by-side layout without plane/text overlap.
+  // Mirrors the DOM's `lg:` breakpoint in Story.tsx (NOT the 768px mobile flag).
   const stacked = viewportPx.width < 1024
   const aspect = block.aspect ?? 1.6
   const portrait = aspect < 1
-  // Stacked: centered, near-full-bleed (moksha's 0.8 content fraction, a touch
-  // wider for landscape). Desktop: fraction of the world width, capped at the
-  // tuned sizes — at ≥1440px this is exactly the previous fixed layout.
-  // NOTE: the stacked fractions (0.86 / 0.58) size the DOM spacer in Story.tsx
-  // too — keep them in sync so the plane fills its reserved box exactly.
+  // Stacked fractions (0.86 / 0.58) size the DOM spacer in Story.tsx too — keep in sync.
   const width = portrait
     ? stacked
       ? worldWidth * 0.58
@@ -82,10 +62,8 @@ function StoryBlockPlane({ id, block, index, centerFraction }: { id: SectionId; 
   const left = index % 2 === 0
   const x = stacked ? 0 : (left ? -1 : 1) * Math.min(X_OFFSET, ((worldWidth - width) / 2) * 0.66)
 
-  // The DOM is the anchor source of truth: Story.tsx measures each block's media
-  // center (the stacked spacer, or the article on ≥lg) into store.storyAnchors —
-  // the plane renders exactly there, whatever the DOM layout does. The even-split
-  // estimate only covers the first frames before the measurement lands.
+  // DOM is the anchor source of truth (store.storyAnchors, measured by Story.tsx);
+  // the even-split estimate only covers the first frames.
   const anchor = () => {
     const st = useStore.getState()
     const measured = st.storyAnchors[index]
@@ -125,23 +103,17 @@ function ImagePlane({ src, args, position }: PlaneVariantProps) {
 }
 
 function VideoPlane({ src, args, position, playbackRate, anchor }: PlaneVariantProps & { playbackRate?: number; anchor: () => number }) {
-  // Muted + loop + playsInline so it autoplays everywhere; frameloop="always"
-  // keeps the VideoTexture advancing each frame.
+  // Muted + loop + playsInline so it autoplays everywhere.
   const texture = useVideoTexture(src, { muted: true, loop: true, start: true, playsInline: true, crossOrigin: "anonymous" }) as Texture
   const reducedMotion = useStore((s) => s.reducedMotion)
   const { size } = useThree()
-  // Proximity gate — decoding EVERY case-study video simultaneously for the whole
-  // scroll is the main non-render cost on mobile (decode + per-frame texture
-  // upload; a paused video produces no new frames, so pausing kills both). True
-  // while this block is near the viewport; starts true because `start: true`
-  // already autoplayed.
+  // Proximity gate: a paused video produces no frames, killing decode + per-frame
+  // texture upload (the main non-render cost on mobile).
   const nearRef = useRef(true)
   useEffect(() => {
     texture.colorSpace = SRGBColorSpace
   }, [texture])
-  // Honor reduced-motion: pause the video (shows a still frame) instead of looping.
-  // Otherwise play at the block's playbackRate (default 1) — some captured clips
-  // read too fast on the chromatic plane and want slowing down.
+  // reduced-motion pauses (still frame); otherwise honor the block's playbackRate.
   useEffect(() => {
     const video = texture.image as HTMLVideoElement | undefined
     if (!video) return
@@ -152,9 +124,8 @@ function VideoPlane({ src, args, position, playbackRate, anchor }: PlaneVariantP
       if (nearRef.current) void video.play().catch(() => {})
     }
   }, [texture, reducedMotion, playbackRate])
-  // Play only while the block is within ~a viewport of the screen (asymmetric
-  // hysteresis: resumes at 1.1·vh, pauses past 1.6·vh, so the boundary never
-  // thrashes). Reading the store + one compare per frame — effectively free.
+  // Play only near the viewport — asymmetric hysteresis (resume 1.1·vh, pause 1.6·vh)
+  // so the boundary never thrashes.
   useFrame(() => {
     const video = texture.image as HTMLVideoElement | undefined
     if (!video || reducedMotion) return

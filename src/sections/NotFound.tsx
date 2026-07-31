@@ -5,14 +5,6 @@ import { useTransition } from "../transition/TransitionProvider"
 import { Decode } from "../components/Decode"
 import { useT } from "../i18n/ui"
 
-/**
- * 404 — any unknown URL (including an unknown /work/:id) lands here WITHOUT a
- * redirect: activeSectionsFor returns NOT_FOUND_SECTIONS for it, so the wrong
- * URL stays in the bar (shareable/inspectable) and this page explains it.
- * Statement-style hero: mono overline + giant display line + short copy, with
- * the giant dim "404" parallaxing behind (NotFoundScene) and the site's display
- * -link CTA back home (warp navigation, lime hover).
- */
 export function NotFound() {
   const line = useRef<HTMLHeadingElement>(null)
   useDomParallax(line, 0.08)
@@ -30,8 +22,7 @@ export function NotFound() {
       <p className="text-xs font-mono tracking-[0.35em] uppercase text-white/60">
         <Decode>{t.error404}</Decode>
       </p>
-      {/* Inline lineHeight — .font-display's 0.86 collides wrapped lines (same
-          note as Statement); min(9vw,8.1rem) is the 1440px content-cap rule. */}
+      {/* Inline lineHeight — .font-display's 0.86 collides wrapped lines. */}
       <h1 ref={line} className="mt-6 font-display uppercase tracking-tight text-white text-[13vw] md:text-[min(9vw,8.1rem)]" style={{ lineHeight: 1 }}>
         <Decode duration={0.6}>{t.nothingHere}</Decode>
       </h1>

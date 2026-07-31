@@ -1,14 +1,6 @@
 /**
- * ── FOUNDATIONS · the palette is the SINGLE SOURCE OF TRUTH for colour ───────
- *
- * Every screen + component drinks from here:
- *  • DOM  → `applyPalette()` writes these into CSS custom properties on :root
- *           (`var(--color-*)`, used directly and by Tailwind utilities).
- *  • WebGL → `BRAND` in tokens.ts derives from `ACTIVE`, feeding shader uniforms,
- *           material colours and the canvas clear colour.
- *
- * To test a palette site-wide: add it to PALETTES and point ACTIVE at it — that
- * ONE change reskins the whole site (DOM + canvas), no per-file edits.
+ * SINGLE SOURCE OF TRUTH for colour: applyPalette() feeds the DOM's CSS vars and
+ * BRAND (tokens.ts) feeds WebGL — pointing ACTIVE at a set reskins both sides.
  */
 
 export interface Palette {
@@ -29,7 +21,6 @@ export interface Palette {
 }
 
 export const PALETTES = {
-  /** The original brand (crimson + spearmint) — kept for reference / rollback. */
   original: {
     bg: "#0e0e0f",
     surface: "#0f0f0f",
@@ -39,12 +30,6 @@ export const PALETTES = {
     accentA: "#d40749",
     accentB: "#2fe8c3"
   },
-  /**
-   * Batch 1 — "Neon Noir": the iconic cyberpunk pairing, hot magenta + electric
-   * cyan over an inky blue-black. Cyan is the interactive/neon highlight, magenta
-   * the primary-action accent (60-30-10). A clear step up in neon punch from the
-   * muted original crimson + mint.
-   */
   neonNoir: {
     bg: "#0a0b10",
     surface: "#12141c",
@@ -54,12 +39,6 @@ export const PALETTES = {
     accentA: "#ff2e63",
     accentB: "#4df3ff"
   },
-  // ── Batch 2 ────────────────────────────────────────────────────────────────
-  /**
-   * "Blade Runner" — cinematic amber + teal over a warm near-black. Teal is the
-   * interactive/glow, amber the primary-action accent. Sophisticated, less
-   * common than magenta/cyan; the 2049 noir look.
-   */
   bladeRunner: {
     bg: "#0b0b0d",
     surface: "#141216",
@@ -69,11 +48,6 @@ export const PALETTES = {
     accentA: "#ff9e2c",
     accentB: "#16dcc4"
   },
-  /**
-   * "Acid Terminal" — hacker/terminal acid green with a magenta pop over cool
-   * black. Acid green is the interactive/glow, magenta the primary action. The
-   * most aggressive, overtly-cyberpunk option.
-   */
   acidTerminal: {
     bg: "#07090a",
     surface: "#0f1315",
@@ -83,10 +57,6 @@ export const PALETTES = {
     accentA: "#ff2f6e",
     accentB: "#79ff3c"
   },
-  /**
-   * "Ultraviolet" — synthwave electric violet + neon pink over deep indigo. Pink
-   * is the interactive/glow, violet the primary action. Retro-futurist, moodier.
-   */
   ultraviolet: {
     bg: "#0a0714",
     surface: "#150f28",
@@ -96,12 +66,6 @@ export const PALETTES = {
     accentA: "#b026ff",
     accentB: "#ff54c6"
   },
-  /**
-   * "Coral Glitch" — electric-orange interactive/glow (hover + subtitles) with a
-   * magenta primary action, over warm near-black. accentB (orange) is the hover
-   * highlight; accentA (magenta) drives primary actions + the chromatic wash. A
-   * warm, non-blue take on the neon.
-   */
   coralGlitch: {
     bg: "#0b0a0c",
     surface: "#16131a",
@@ -111,12 +75,6 @@ export const PALETTES = {
     accentA: "#ff2f8f",
     accentB: "#ff6a2b"
   },
-  // ── Batch 3 ────────────────────────────────────────────────────────────────
-  /**
-   * "Neon Circuit" — yellow interactive/glow (hover + subtitles) + electric-orange
-   * primary action, over cool near-black. A warm analogous duo (amber→yellow); the
-   * chromatic split of the story media decomposes into orange + yellow.
-   */
   neonCircuit: {
     bg: "#080a0b",
     surface: "#101517",
@@ -126,13 +84,6 @@ export const PALETTES = {
     accentA: "#ff6a2b",
     accentB: "#ffdf00"
   },
-  // ── Batch 4 · refocus on the core cyberpunk look (1 primary + 1 secondary neon
-  //    over inky dark, max contrast; hover is never blue). ──────────────────────
-  /**
-   * "Hologram" — electric cyan primary + hot-magenta hover over inky navy-black.
-   * The iconic cyberpunk duo; cyan ↔ magenta are complementary, so the story split
-   * decomposes into two crisp colours. Hover (magenta) is the non-blue accent.
-   */
   hologram: {
     bg: "#070a12",
     surface: "#0f1320",
@@ -142,13 +93,7 @@ export const PALETTES = {
     accentA: "#12c8ff",
     accentB: "#ff2e88"
   },
-  /**
-   * "Volt" — electric violet primary + acid-lime hover over violet-black. High
-   * contrast (violet ↔ lime), fresh and aggressive. Lime is the non-blue hover.
-   * accentA sits at hue 261° — the EXACT complement of the lime (81°) — and a
-   * step darker than the original #7c4dff, so the chromatic fringe matches the
-   * violet family the difference-blend cursor produces over white type.
-   */
+  // "Volt": accentA hue 261° is the exact complement of the lime (81°).
   volt: {
     bg: "#090711",
     surface: "#141026",
@@ -158,11 +103,6 @@ export const PALETTES = {
     accentA: "#5606f0",
     accentB: "#b6ff2e"
   },
-  /**
-   * "Ember" — teal primary + smoldering-coral hover over steel-black (from the
-   * "Drone Dock Embers" reference). Warm hover ↔ cool primary read as two clear
-   * colours in the split. Coral is the non-blue hover.
-   */
   ember: {
     bg: "#060810",
     surface: "#111726",
@@ -185,12 +125,7 @@ function hexToRgbTriplet(hex: string): string {
   return `${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}`
 }
 
-/**
- * Push the active palette into CSS custom properties on :root. Call ONCE in
- * main.tsx BEFORE React renders, so the first paint is already themed (no flash;
- * inline :root styles also win over Tailwind's @theme fallbacks). WebGL reads the
- * same values via BRAND (tokens.ts), so DOM + canvas stay in lockstep.
- */
+/** Push the palette into :root CSS vars. Call ONCE in main.tsx BEFORE React renders. */
 export function applyPalette(p: Palette = ACTIVE): void {
   const root = document.documentElement
   const set = (k: string, v: string) => root.style.setProperty(k, v)

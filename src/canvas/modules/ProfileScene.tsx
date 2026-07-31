@@ -9,32 +9,24 @@ import { BRAND } from "../../config/tokens"
 import { ACTIVE_TYPO } from "../../config/typography"
 import { ABOUT } from "../../config/aboutContent"
 
-// Desktop cap in world units (reached ~1440px); below it the plane is a fraction
-// of the world width. Portrait photo → narrower than the story's landscape caps.
+// Desktop cap in world units (reached ~1440px); below it the plane is a viewport fraction.
 const PORTRAIT_WIDTH = 5.6
 const X_OFFSET = 2.6
 
-/**
- * About-me WebGL layer: the case-study hero language (oversized gem — mounted by
- * Scene via `profile` — refracting a dim ambient "ABOUT" word behind the name)
- * plus the portrait photo as a chromatic plane (same RGB-split trail + parallax
- * as the case-study media — the photo is a graphic piece of the system, not a
- * headshot <img>). Photo anchored to the slot Profile.tsx measures.
- */
+/** About-me WebGL layer: ambient ABOUT word + the portrait photo as a chromatic plane. */
 export function ProfileScene({ id }: { id: SectionId }) {
   const { worldWidth, viewportPx } = useBlock()
-  // Mirrors the DOM's `lg:` breakpoint in Profile.tsx (stacked below 1024).
+  // Mirrors the DOM's `lg:` breakpoint in Profile.tsx.
   const stacked = viewportPx.width < 1024
   const aspect = ABOUT.photo.aspect
 
-  // Stacked: fills the DOM spacer exactly (SAME 0.58 fraction — keep in sync
-  // with Profile.tsx's slot). Desktop: fraction of the world, capped.
+  // Stacked 0.58 fraction sizes the DOM spacer too — keep in sync with Profile.tsx.
   const width = stacked ? worldWidth * 0.58 : Math.min(PORTRAIT_WIDTH, worldWidth * 0.34)
   const height = width / aspect
   const x = stacked ? 0 : -Math.min(X_OFFSET, ((worldWidth - width) / 2) * 0.66)
 
-  // DOM is the anchor source of truth (store.profileAnchors, measured by
-  // Profile.tsx). The estimate only covers the first frames before it lands.
+  // DOM is the anchor source of truth (store.profileAnchors, measured by Profile.tsx);
+  // the estimate only covers the first frames.
   const anchor = () => {
     const st = useStore.getState()
     const measured = st.profileAnchors[0]
@@ -43,9 +35,7 @@ export function ProfileScene({ id }: { id: SectionId }) {
     return b ? b.top + b.height * 0.35 : 0
   }
 
-  // Ambient-word anchor: the profile section spans the whole /about page, so
-  // the statement-style word pins to its FIRST viewport (the hero), mirroring
-  // the gem's `heroAnchor` in Diamonds.tsx.
+  // Pins the ambient word to the section's FIRST viewport (mirrors the gem's heroAnchor).
   const heroAnchor = () => {
     const b = useStore.getState().sections[id]
     return (b ? b.top : 0) + viewportPx.height / 2
@@ -53,17 +43,12 @@ export function ProfileScene({ id }: { id: SectionId }) {
 
   return (
     <>
-      {/* /about runs in the diamond's manual-loop render mode (gem behind the
-          hero), which draws the clear colour darker than R3F auto-render — same
-          fix as the case study (DescriptionScene): a fixed full-screen plane so
-          the page stays exactly BRAND.bg. */}
+      {/* Manual-loop mode draws the clear colour darker — same bg-plane fix as DescriptionScene. */}
       <mesh position={[0, 0, -30]} frustumCulled={false}>
         <planeGeometry args={[140, 140]} />
         <meshBasicMaterial color={BRAND.bg} toneMapped={false} />
       </mesh>
-      {/* Statement-style ambient word behind the hero, warped by the gem.
-          0.4375 ≈ StatementScene's 0.3125 scaled by 7/5 chars, so the 5-letter
-          ABOUT bleeds the same width PROJECT does. */}
+      {/* 0.4375 ≈ StatementScene's 0.3125 × 7/5 chars, so ABOUT bleeds like PROJECT. */}
       <Block factor={0.45} anchor={heroAnchor}>
         <Text
           font={ACTIVE_TYPO.displayFontUrl}

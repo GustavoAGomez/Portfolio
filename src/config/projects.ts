@@ -13,15 +13,10 @@ export interface Project {
   image: string
   /** Image aspect (w/h) — planes are sized from this. */
   aspect: number
-  /**
-   * Optional looping clip for the works-list hover background. When present, the
-   * row shows this muted video (over `image` as a poster/fallback) while hovered;
-   * paused/hidden otherwise and under reduced-motion.
-   */
+  /** Optional looping clip for the works-list hover background (`image` is the poster/fallback). */
   hoverVideo?: string
 
-  // ── Optional metadata (used by the works list + the future detail page).
-  //    Everything below degrades gracefully when absent.
+  // Optional metadata — everything below degrades gracefully when absent.
   /** Short metadata label shown in the list row. */
   category?: L10n
   /** Long-form copy for the detail page. */
@@ -34,12 +29,7 @@ export interface Project {
   nextId?: string
 }
 
-/**
- * A project with an entry in config/projectContent.ts renders the case-study
- * detail; one without falls back to the generic detail layout (currently every
- * listed project has content — the generic layout stays as the degradation
- * path for future entries added before their case study is written).
- */
+/** A project with an entry in projectContent.ts renders the case study; without, the generic detail. */
 export const PROJECTS: Project[] = [
   {
     id: "tagorodive",

@@ -11,14 +11,10 @@ import { BRAND } from "../../config/tokens"
 const FONT = "/fonts/Anton-Regular.ttf"
 const PLANE_WIDTH = 6
 
-/**
- * Works WebGL layer: one chromatic image plane per project + a giant dim number
- * behind it. Projects are laid out down the (tall) works section — each gets its
- * own scroll slot so it centers as you reach it. Alternates left/right.
- */
+/** Works WebGL layer: one chromatic plane + giant dim number per project, alternating sides. */
 export function WorksScene({ id }: { id: SectionId }) {
   const { worldWidth, viewportPx } = useBlock()
-  // Mirrors the DOM's `lg:` breakpoint in Gallery.tsx (stacked text below 1024).
+  // Mirrors the DOM's `lg:` breakpoint in Gallery.tsx.
   const stacked = viewportPx.width < 1024
   const textures = useTexture(PROJECTS.map((p) => p.image)) as Texture[]
 
@@ -33,8 +29,6 @@ export function WorksScene({ id }: { id: SectionId }) {
     <>
       {PROJECTS.map((project, i) => {
         const left = i % 2 === 0
-        // Stacked: centered near-full-bleed plane (moksha); desktop: fraction of
-        // the world width capped at the tuned size (≥1440px = previous layout).
         const width = stacked ? worldWidth * 0.78 : Math.min(PLANE_WIDTH, worldWidth * 0.42)
         const height = width / project.aspect
         const x = stacked ? 0 : (left ? -1 : 1) * Math.min(3, (worldWidth - width) * 0.3)

@@ -1,12 +1,6 @@
 /**
- * Per-project case-study content, PER LOCALE. Kept in DATA (not JSX) and read
- * through `getProjectContent(id, locale)` — the locale map returns the SAME
- * shape, so components never branch on language. Spanish is the source copy
- * (the Tagorodive text is distilled from the live site); English is its
- * translation. Media/aspect/leadGap are duplicated verbatim across locales on
- * purpose (each entry is self-contained) — when touching one, touch both.
- * Everything here is optional/degradable: projects without an entry keep the
- * generic detail layout.
+ * Case-study content, PER LOCALE — Spanish is the source copy. Media/aspect/leadGap
+ * are duplicated verbatim across locales — when touching one, touch both.
  */
 
 import type { Locale } from "../scroll/store"
@@ -16,17 +10,13 @@ export interface StoryBlock {
   copy: string
   /** Static image source (used when `video` is absent). */
   image?: string
-  /** Looping video source. Takes precedence over `image` — rendered as a
-   *  VideoTexture on the same chromatic plane (same RGB-split + parallax). */
+  /** Looping video source — takes precedence over `image`. */
   video?: string
   /** Media aspect (w/h). */
   aspect?: number
-  /** Extra vertical space (in viewport heights) BEFORE this block, to loosen the
-   *  rhythm between two blocks. Mirrored in BOTH the DOM (Story margin) and the
-   *  WebGL plane anchor (StoryScene), so text and plane stay aligned. */
+  /** Extra space (vh) BEFORE this block — mirrored in the DOM margin and the WebGL anchor. */
   leadGap?: number
-  /** Playback speed for a `video` block (1 = normal). Values < 1 slow it down —
-   *  useful when a captured clip reads too fast on the chromatic plane. */
+  /** Playback speed for a `video` block (values < 1 slow it down). */
   playbackRate?: number
 }
 
@@ -55,8 +45,7 @@ export interface ProjectContent {
   credits: ProjectCredits
   /** Live site URL — the footer's "visit the site" CTA (absent → no CTA). */
   url?: string
-  /** Site still in development: the footer shows a non-clickable "Próximamente"
-   *  instead of the live-site CTA. Ignored when `url` is present. */
+  /** Site in development: footer shows "Próximamente" instead of the CTA. Ignored when `url` is set. */
   urlPending?: boolean
   /** Next project id (footer navigation). */
   nextId?: string
@@ -73,8 +62,6 @@ const PROJECT_CONTENT_ES: Record<string, ProjectContent> = {
         "Desarrollé el sitio sobre un CMS headless para que su equipo gestione el contenido por su cuenta, e implementé el SEO definido."
       ]
     },
-    // Blocks describe the DEVELOPMENT work (what I built + how), not the site's
-    // promotional copy. Images are captures of the features being described.
     blocks: [
       {
         heading: "Un hero en vídeo",
@@ -135,8 +122,6 @@ const PROJECT_CONTENT_ES: Record<string, ProjectContent> = {
         "Diseñé y desarrollé una landing de una sola página centrada en su trayectoria: un hero en vídeo, secciones de información organizada y una galería animada. El proyecto está en desarrollo activo."
       ]
     },
-    // Blocks describe the DEVELOPMENT work (what I built + how), not the site's
-    // promotional copy. Media are captures of the features being described.
     blocks: [
       {
         heading: "Un hero a pantalla completa en vídeo",
@@ -173,14 +158,14 @@ const PROJECT_CONTENT_ES: Record<string, ProjectContent> = {
         copy: "Toda la interfaz se adapta hasta 390px con variantes propias de Tailwind (incluida una para pantallas bajas): la navegación colapsa y los revelados al hacer scroll acompañan al recorrido.",
         image: "/images/basket/mobile.jpg",
         aspect: 0.462, // vista móvil (retrato)
-        leadGap: 0.5 // más aire respecto al bloque de contraste anterior
+        leadGap: 0.5
       },
       {
         heading: "Footer con vídeo de fondo y marquee",
         copy: "El cierre monta un vídeo de fondo con lazy-load —no pide un byte hasta que te acercas— teñido para respetar la gama del sitio, y encima un marquee infinito de frases motivacionales que corre en bucle sin salto: son dos mitades idénticas que GSAP desplaza un -50% exacto.",
         video: "/videos/basket/footer.mp4",
         aspect: 1.778, // 16:9
-        leadGap: 0.5 // más aire respecto al bloque responsive anterior
+        leadGap: 0.5
       }
     ],
     credits: {
@@ -192,7 +177,6 @@ const PROJECT_CONTENT_ES: Record<string, ProjectContent> = {
       client: "Dani Valero · Madrid"
     },
     urlPending: true,
-    // With only two projects the chain is circular: basket loops back to the first.
     nextId: "tagorodive"
   }
 }
@@ -208,8 +192,6 @@ const PROJECT_CONTENT_EN: Record<string, ProjectContent> = {
         "I built the site on a headless CMS so their team can manage the content on their own, and implemented the SEO plan."
       ]
     },
-    // Blocks describe the DEVELOPMENT work (what I built + how), not the site's
-    // promotional copy. Images are captures of the features being described.
     blocks: [
       {
         heading: "A video hero",
@@ -270,8 +252,6 @@ const PROJECT_CONTENT_EN: Record<string, ProjectContent> = {
         "I designed and built a single-page landing centered on his career: a video hero, clearly organized information sections and an animated gallery. The project is under active development."
       ]
     },
-    // Blocks describe the DEVELOPMENT work (what I built + how), not the site's
-    // promotional copy. Media are captures of the features being described.
     blocks: [
       {
         heading: "A full-screen video hero",
@@ -308,14 +288,14 @@ const PROJECT_CONTENT_EN: Record<string, ProjectContent> = {
         copy: "The whole interface adapts down to 390px with custom Tailwind variants (including one for short screens): the navigation collapses and scroll-driven reveals accompany the journey.",
         image: "/images/basket/mobile.jpg",
         aspect: 0.462, // mobile view (portrait)
-        leadGap: 0.5 // extra air after the contrast block
+        leadGap: 0.5
       },
       {
         heading: "A footer with background video and a marquee",
         copy: "The closing section mounts a lazy-loaded background video — it doesn't request a byte until you get close — tinted to match the site's palette, with an infinite marquee of motivational phrases running on top without a seam: two identical halves that GSAP shifts by exactly -50%.",
         video: "/videos/basket/footer.mp4",
         aspect: 1.778, // 16:9
-        leadGap: 0.5 // extra air after the responsive block
+        leadGap: 0.5
       }
     ],
     credits: {
@@ -327,7 +307,6 @@ const PROJECT_CONTENT_EN: Record<string, ProjectContent> = {
       client: "Dani Valero · Madrid"
     },
     urlPending: true,
-    // With only two projects the chain is circular: basket loops back to the first.
     nextId: "tagorodive"
   }
 }

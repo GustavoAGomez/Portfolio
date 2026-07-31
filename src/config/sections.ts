@@ -17,8 +17,6 @@ import { StoryScene } from "../canvas/modules/StoryScene"
 import { NotFoundScene } from "../canvas/modules/NotFoundScene"
 
 // Detail-only heavy modules — code-split so the Home bundle skips them.
-// (`as unknown as ComponentType` bridges React.lazy's LazyExoticComponent to the
-// plain ComponentType the config uses; keeps JSX rendering uniform, no `any`.)
 const loadGallery = () => import("../sections/Gallery")
 const loadWorksScene = () => import("../canvas/modules/WorksScene")
 const loadProfile = () => import("../sections/Profile")
@@ -32,10 +30,7 @@ const ProfileScene = lazy(() => loadProfileScene().then((m) => ({ default: m.Pro
   id: SectionId
 }>
 
-/**
- * Warm the detail-only chunks so a route transition captures a painted
- * destination (not the <Suspense> fallback). Call once early (SiteShell mount).
- */
+/** Warm the detail-only chunks so a transition lands on painted content. Call once early. */
 export function preloadDetailModules(): void {
   void loadGallery()
   void loadWorksScene()
@@ -53,11 +48,7 @@ export interface SectionConfig {
   Scene?: ComponentType<{ id: SectionId }>
 }
 
-/**
- * The section registry. Route-active SETS are composed from these below — there
- * is no global `enabled` flag anymore; what renders (DOM + WebGL) is whichever
- * set the current route selects (see routes/activeSections + SiteShell).
- */
+/** Section registry — what renders is whichever route set (below) is active. */
 const REGISTRY: Record<SectionId, SectionConfig> = {
   hero: { id: "hero", anchor: true, Dom: Hero, Scene: HeroScene },
   statement: { id: "statement", anchor: true, Dom: Statement, Scene: StatementScene },
@@ -71,18 +62,8 @@ const REGISTRY: Record<SectionId, SectionConfig> = {
   notFound: { id: "notFound", anchor: true, Dom: NotFound, Scene: NotFoundScene } // 404: message + giant dim "404" behind
 }
 
-/**
- * ── ROUTE SECTION SETS ─────────────────────────────────────────────────────
- * HOME    = the landing: hero (name + diamond lens) + the interactive works list.
- * DETAIL  = /work/:id — a clone of the Home MINUS hero/diamond: statement +
- *           chromatic-plane gallery + about + footer (same fixed copy for all ids).
- *
- * To move a section between routes, just move it between these two arrays — e.g.
- * add REGISTRY.footer to HOME_SECTIONS to keep the footer on the Home too. The
- * two sets are disjoint, so navigation unmounts one set and mounts the other
- * cleanly (bounds re-register, no orphans).
- * ───────────────────────────────────────────────────────────────────────────
- */
+// Route section sets — disjoint; move a section between routes by moving it between arrays.
+/** Landing: hero (name + diamond lens) + interactive works list. */
 export const HOME_SECTIONS: SectionConfig[] = [REGISTRY.hero, REGISTRY.works]
 /** Generic detail (placeholder projects with no case-study content). */
 export const DETAIL_SECTIONS: SectionConfig[] = [REGISTRY.statement, REGISTRY.gallery, REGISTRY.about, REGISTRY.footer]

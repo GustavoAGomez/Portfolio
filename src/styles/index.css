@@ -1,12 +1,7 @@
 @import "tailwindcss";
 
-/* ------------------------------------------------------------------ *
- * Brand tokens. The REAL source of truth for colour is src/config/palette.ts:
- * `applyPalette()` (called in main.tsx before render) overrides every --color-*
- * below on :root, and WebGL reads the same palette via config/tokens.ts. The
- * values here are only Tailwind's required token declarations + a graceful
- * fallback if JS never runs. To change the palette, edit palette.ts — NOT here.
- * ------------------------------------------------------------------ */
+/* Colour source of truth is src/config/palette.ts (applyPalette overrides these
+ * on :root). Values here are Tailwind token declarations + fallback. */
 @theme {
   --color-bg: #0e0e0f;
   --color-surface: #0f0f0f;
@@ -20,9 +15,7 @@
   --accent-a-rgb: 212, 7, 73;
   --accent-b-rgb: 47, 232, 195;
 
-  /* Fonts — REAL source of truth is src/config/typography.ts (applyTypography
-   * overrides these on :root before render; the 3D <Text> reads displayFontUrl).
-   * Values here are Tailwind's token declarations + fallback. Edit typography.ts. */
+  /* Fonts — source of truth is src/config/typography.ts (applyTypography overrides these). */
   --font-display: "Chakra Petch", "Rajdhani", "Arial Narrow", sans-serif;
   --font-sans: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
@@ -278,22 +271,16 @@ body {
 
 .font-display {
   font-family: var(--font-display);
-  /* Ask for the heavy weight; single-weight display faces just use their one
-   * weight (font-synthesis:none avoids faux-bolding them). */
   font-weight: 700;
   font-synthesis: none;
   text-transform: uppercase;
   letter-spacing: -0.02em;
-  /* Tuned for SINGLE-LINE display text (Anton caps span ~0.87em — at 0.86 a
-   * wrapped block collides its lines). This beats any `leading-*` utility in
-   * the cascade: text that can WRAP must set an inline lineHeight ≥1 instead
-   * (Statement h2, Story h3 do). */
+  /* Tuned for SINGLE-LINE display text; it beats leading-* in the cascade —
+   * text that can WRAP must set an inline lineHeight ≥1 instead. */
   line-height: 0.86;
-  /* white-space: nowrap; */
 }
 
-/* Neon glow for the statement / accents. Glow colour tracks the palette via the
- * accent RGB triplets (set by applyPalette). */
+/* Neon glow — colour tracks the palette via the accent RGB triplets. */
 .neon-b {
   color: var(--color-accent-b);
   text-shadow:
@@ -309,23 +296,8 @@ body {
     0 0 0.4em rgba(var(--accent-a-rgb), 0.3);
 }
 
-/* HOVER = LIME, siempre. Regla de color para CUALQUIER texto interactivo, y la
- * razón es el cursor: el disco es accent-B en `difference`, así que
- *   sobre texto lime  → |lime − lime|  = NEGRO  (disco verde, letras negras) ✔
- *   sobre texto blanco→ |blanco − lime| = violeta                            ✘
- * Un hover que se queda en blanco rompe el look. `.hover-neon-b` aplica el
- * glow de .neon-b al pasar por encima — en el propio elemento o en su `group`
- * (fila / link con varios spans), y también en :focus-visible (teclado + tap,
- * que es como se activa la lista en táctil).
- *
- * Los selectores :hover viven DENTRO de `@media (hover: hover)`: en táctil el
- * navegador deja el elemento en :hover pegado tras el tap (no hay puntero que
- * "salga"), y eso encendía en lima cosas que ya no estaban bajo ningún dedo —
- * el caso visible era el toggle de idioma, con AMBOS idiomas en lima tras
- * cambiar. OJO: las variantes `hover:` de Tailwind en este build compilan a
- * `:hover` SIN esta condición (verificado en el CSS de dist) — si algún día un
- * hover de Tailwind molesta en táctil, este es el patrón a aplicar. Los
- * :focus-visible se quedan globales (teclado). */
+/* Hover = lime (the site's hover language). :hover selectors are gated under
+ * @media (hover:hover) for sticky touch — Tailwind hover: variants are NOT gated. */
 .hover-neon-b {
   transition:
     color 300ms ease,
@@ -352,15 +324,7 @@ body {
   }
 }
 
-/* Site-wide CONTENT CAP: past 1440px the content box stops growing and centers,
- * so ultra-wide screens read like a normal desktop instead of pushing items to
- * the extremes. 1440 is deliberate — every WebGL world-unit size is capped "so
- * ≥1440px reproduces the tuned layout exactly", so DOM and canvas stay in the
- * exact tuned relationship at any larger width. Applied to each section's
- * content container (the px-6/px-16 padding stays INSIDE the box); full-bleed
- * backdrops (works hover image, diagonal-stripe) stay full-bleed.
- * MIRRORED on the canvas side as SCENE.contentMaxPx (tokens.ts → useBlock's
- * `layoutWidth`) — change both together. */
+/* Site-wide content cap (1440px). MIRRORS SCENE.contentMaxPx (tokens.ts) — change together. */
 .content-max {
   width: 100%;
   max-width: 1440px;
@@ -374,22 +338,8 @@ body {
       rgba(255, 255, 255, 0.04) 22px 24px);
 }
 
-/* Custom circular cursor (components/Cursor.tsx) — INVERT + TINT, two discs.
- * The goal: the disc is always LIME and any text under it turns BLACK, over
- * ANY content (DOM text, the WebGL canvas, video, photos), with no per-element
- * hover involved:
- *   1. `--invert`: white disc, `difference` → negative of the backdrop
- *      (page ≈ #090711 → near-white; any bright type → near-black).
- *   2. `--tint`: lime disc, `multiply` on top → paints that negative
- *      (near-white → lime, near-black → black).
- * A single lime disc in `difference` (the previous version) only worked over
- * lime type; over WHITE type it read violet — which is the bug this fixes.
- * They must stay SIBLINGS in the root stacking context and in this paint order:
- * the tint blends with the backdrop accumulated below it, so wrapping them (or
- * any transformed/filtered ancestor) isolates the group and breaks it. Same
- * reason they live OUTSIDE #warp-fixed / #warp-main. Palette-driven via var(),
- * so a palette swap re-tints the cursor for free. Above the warp cover (z:100)
- * so the effect rides through route transitions. */
+/* Custom cursor: 3 discs (invert difference + tint multiply + floor lighten) that MUST
+ * stay siblings in the root stacking context, in this paint order — any wrapper breaks it. */
 .site-cursor {
   position: fixed;
   top: 0;
@@ -406,22 +356,8 @@ body {
 .site-cursor--invert {
   background: #fff;
   mix-blend-mode: difference;
-  /* Umbral por LUMINANCIA. Sin él el negativo es un degradado (letra ciruela
-   * sobre texto lima, oliva turbio sobre texto gris). `grayscale` antes del
-   * contraste es imprescindible: umbralar por canal deja vivo el canal que el
-   * texto no tiene — sobre el título lima (azul≈0) el invertido salía azul puro
-   * y el multiply lo dejaba en azul marino en vez de negro. En gris cualquier
-   * texto es "claro" y el fondo "oscuro", así que el corte es limpio:
-   *   fondo → blanco → tintado = LIMA · texto (del color que sea) → negro.
-   * Se aplica al backdrop (la página), no al disco. Sin soporte de
-   * backdrop-filter degrada al negativo sin umbral: sigue siendo lima/negro,
-   * sólo menos puro. */
-  /* SIN `-webkit-backdrop-filter` a mano: el minificador del build trata las dos
-   * declaraciones como la misma propiedad y se queda con la ÚLTIMA, así que la
-   * versión estándar desaparecía del CSS de producción... y Chrome ≥149 ya no
-   * entiende la prefijada (computa `none`). Resultado: en dev el umbral iba y en
-   * el deploy no — el disco caía en ciruela sobre el título lima. Lightning CSS
-   * ya añade los prefijos que hagan falta según browserslist; no los escribas. */
+  /* Luminance threshold — the grayscale is REQUIRED (per-channel thresholding leaves
+   * the missing channel alive). No hand-written -webkit- prefix: the minifier keeps only the last. */
   backdrop-filter: grayscale(1) contrast(3);
 }
 
@@ -430,10 +366,7 @@ body {
   mix-blend-mode: multiply;
 }
 
-/* Suelo de color: `lighten` = max por canal, así que el knockout de las letras
- * deja de ser negro puro y cae en el fondo de la paleta (#090711) — el mismo
- * tono que el resto de la web — mientras el lima (todos sus canales por encima)
- * queda intacto. */
+/* `lighten` floors the knocked-out letters at the palette bg (not pure black); lime passes through. */
 .site-cursor--floor {
   background: var(--color-bg);
   mix-blend-mode: lighten;
@@ -445,9 +378,7 @@ html.custom-cursor * {
   cursor: none !important;
 }
 
-/* Grain + vignette overlay — replaces the postprocessing composer, which is
- * incompatible with the diamond's manual multipass render. Sits above the canvas
- * (z:5), below the DOM text (z:10). pointer-events:none so it never blocks. */
+/* Grain + vignette overlay — replaces the composer (incompatible with the manual multipass). */
 .fx-overlay {
   position: fixed;
   inset: 0;
@@ -472,10 +403,7 @@ html.custom-cursor * {
   background-size: 180px 180px;
 }
 
-/* Warp / liquify route transition. The real content is deformed by an SVG
- * feDisplacementMap applied to #warp-fixed (canvas layer) + #warp-main (DOM) only
- * during a transition; a cover overlay (z:100) hides the swap. Toggled by
- * TransitionProvider. */
+/* Warp / liquify route transition (TransitionProvider). */
 .warp-defs {
   position: absolute;
   width: 0;
@@ -484,8 +412,7 @@ html.custom-cursor * {
   pointer-events: none;
 }
 
-/* Fixed viewport layer for the canvas + grain, so the warp filter can wrap it
- * without breaking the canvas's position:fixed (idle: no filter → normal). */
+/* Fixed viewport layer for the canvas + grain (warp filter target). */
 .warp-fixed {
   position: fixed;
   inset: 0;

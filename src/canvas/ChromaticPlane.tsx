@@ -22,9 +22,8 @@ interface ChromaticPlaneProps {
 }
 
 /**
- * A plane driven by ChromaticPlaneMaterial. Per frame it lerps uShift toward the
- * store's damped velocity → visible RGB-split on fast scroll that decays to rest
- * when scrolling stops (the decay is the lerp, cf. GUSGQ's Plane.jsx).
+ * Plane driven by ChromaticPlaneMaterial: uShift lerps toward the store's damped
+ * velocity — the decay to rest IS this lerp, not the shader.
  */
 export function ChromaticPlane({
   map = null,

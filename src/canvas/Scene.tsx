@@ -1,7 +1,5 @@
-import { Suspense } from "react"
+import { Suspense, lazy } from "react"
 import { Canvas } from "@react-three/fiber"
-import { Perf } from "r3f-perf"
-import { Leva } from "leva"
 import { ScrollBridge } from "./ScrollBridge"
 import { Diamonds } from "./Diamonds"
 import type { SectionConfig } from "../config/sections"
@@ -10,50 +8,39 @@ import { SCENE, BRAND } from "../config/tokens"
 /** Dev tooling behind a flag: append ?debug to the URL in a dev build. */
 const DEBUG = import.meta.env.DEV && new URLSearchParams(window.location.search).has("debug")
 
+// Lazy: leva injects CSS on import (side effect), so a static import survives tree-shaking.
+const Leva = lazy(() => import("leva").then((m) => ({ default: m.Leva })))
+const Perf = lazy(() => import("r3f-perf").then((m) => ({ default: m.Perf })))
+
 interface SceneProps {
   /** The active route's section set — its WebGL modules render here. */
   sections: SectionConfig[]
 }
 
 /**
- * The single, fixed, full-screen orthographic canvas. It is mounted ONCE in the
- * persistent SiteShell and never torn down across routes — only its children
- * (the active set's WebGL modules + the hero diamond) swap.
- *
- * Two render modes, driven purely by whether the hero diamond is present:
- *  - HOME  → <Diamonds> runs a priority-1 useFrame that OWNS the render loop
- *            (manual double-FBO passes; R3F auto-render is off).
- *  - DETAIL→ no diamond → no priority frame → R3F resumes its own auto-render.
- *            (Diamonds restores gl.autoClear + camera.layers on unmount so the
- *            detail route doesn't render black.)
- *
- * frameloop="always" is deliberate — scroll-velocity damping (ScrollBridge) and
- * the chromatic decay must keep advancing while React is idle. NO EffectComposer:
- * it would fight the manual multipass; grain/vignette are a CSS overlay.
+ * The single persistent fixed canvas. frameloop="always": the chromatic decay must
+ * keep advancing while React is idle. Background is a clear color (gl.setClearColor),
+ * NOT scene.background.
  */
 export function Scene({ sections }: SceneProps) {
   const modules = sections.filter((s) => s.Scene)
-  // Mount the diamond render loop wherever an oversized gem sits behind a hero:
-  // the Home (hero lens), the case study (`description` marks it) and /about
-  // (`profile` — gem behind the name, warping the ambient ABOUT word).
   const showDiamonds = sections.some((s) => s.id === "hero" || s.id === "description" || s.id === "profile")
 
   return (
     <>
-      <Leva hidden={!DEBUG} collapsed />
+      {DEBUG && (
+        <Suspense fallback={null}>
+          <Leva collapsed />
+        </Suspense>
+      )}
       <Canvas
         orthographic
         flat
         dpr={SCENE.dpr}
         gl={{ antialias: true, alpha: false, powerPreference: "high-performance" }}
         camera={{ zoom: SCENE.zoom, position: SCENE.cameraPosition, near: SCENE.near, far: SCENE.far }}
-        // offsetSize: measure the canvas by LAYOUT size (offsetWidth), not
-        // getBoundingClientRect — the route-warp scales #warp-fixed with a CSS
-        // transform, and bounding-rect measurement made R3F believe the viewport
-        // grew ~19% during every transition: the whole world (story planes!)
-        // resized oversized, then snapped back when the warp cleared. Layout
-        // size never changes during the warp, so world sizes stay correct (and
-        // the diamond FBOs stop being recreated mid-transition).
+        // offsetSize: measure by layout size — the route-warp's scale transform
+        // inflates the bounding rect and would resize the whole world.
         resize={{ offsetSize: true, scroll: true, debounce: { scroll: 50, resize: 0 } }}
         frameloop="always"
         onCreated={({ gl }) => gl.setClearColor(BRAND.bg, 1)}
