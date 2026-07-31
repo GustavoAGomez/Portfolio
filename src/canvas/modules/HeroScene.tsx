@@ -12,6 +12,14 @@ import { damp } from "../../lib/math"
 
 const FONT = ACTIVE_TYPO.displayFontUrl
 
+/** Ambient word behind the hero. The clear colour is `BRAND.bg` on every route,
+ *  but the detail routes carry one of these (PROJECT / ABOUT / 404) and its dim
+ *  purple fills their whole field — the Home had none and read flat black.
+ *  0.3125 is StatementScene's fraction for 7 letters; normalized by length so
+ *  any word bleeds the same width. Change the word here. */
+const AMBIENT_WORD = "PORTFOLIO"
+const AMBIENT_FRACTION = (0.3125 * 7) / AMBIENT_WORD.length
+
 /** Hero headline as 3D <Text> on layer 0, behind the diamond so its refraction warps it. */
 export function HeroScene({ id }: { id: SectionId }) {
   const { getCenter } = useSection(id)
@@ -30,6 +38,19 @@ export function HeroScene({ id }: { id: SectionId }) {
 
   return (
     <group ref={pointer}>
+      <Block factor={0.45} anchor={getCenter}>
+        <Text
+          font={FONT}
+          fontSize={Math.min(6, layoutWidth * AMBIENT_FRACTION)}
+          color={BRAND.textDim}
+          anchorX="center"
+          anchorY="middle"
+          position={[0, 0, -14]}
+          letterSpacing={-0.04}
+        >
+          {AMBIENT_WORD}
+        </Text>
+      </Block>
       <Block factor={1} anchor={getCenter}>
         <Text
           font={FONT}

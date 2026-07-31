@@ -206,6 +206,15 @@ scale: 20, factor: 0.6, shrinkPastHero: true }` instance. Key points:
 - It warps the ambient 3D word `StatementScene` renders behind the title (currently "PROJECT",
   drawn with its OWN lighter colour `BEYOND_COLOR` in `StatementScene.tsx`, not `BRAND.numberDim` —
   numberDim stays dark for the works numbers / hero stripe).
+- **Every route carries one of these ambient words** (statement PROJECT · profile ABOUT · 404 ·
+  hero PORTFOLIO) and that is what makes the page read dark PURPLE rather than flat black: the
+  clear colour is the same `BRAND.bg` everywhere (measured #090711 in every route's corners), the
+  word is the whole difference. The Home had none and read blacker — hence `AMBIENT_WORD` in
+  `HeroScene`, whose fraction is normalized by letter count so any word bleeds like PROJECT's 7.
+  Do NOT "fix" such a difference by changing a route's background colour: a `meshBasicMaterial`
+  plane behaves differently under the gem's manual multipass (measured #010102 instead of its own
+  hex on the Home, where a gem is always visible) — DescriptionScene's plane only lands 1:1
+  because the case-study gem has collapsed by then.
 - **`shrinkPastHero`** (shared with /about, same timings) collapses the gem via a TRIGGER, not a
   scroll scrub: crossing ~45% of the hero's viewport launches a fixed-time smoothstep collapse to 0
   (`SHRINK_DURATION` 0.7s, delta-based); scrolling back above ~30% re-grows it at the same speed
