@@ -12,6 +12,9 @@ import { useStore } from "../scroll/store"
 import { TransitionProvider, RouteBackButton } from "../transition/TransitionProvider"
 import { Cursor } from "./Cursor"
 import { LangSwitch } from "./LangSwitch"
+// Marca de esquina desactivada: al reactivar <SiteLogo/> hay que reimportarla
+// (tsc corre con noUnusedLocals y el import muerto tumba el build de Netlify).
+// import { SiteLogo } from "./Logo"
 import { playSectionFlip } from "../lib/sectionFlip"
 
 export function SiteShell() {
@@ -76,6 +79,7 @@ export function SiteShell() {
       </main>
 
       <RouteBackButton />
+      {/* <SiteLogo /> */}
 
       <LangSwitch />
 
