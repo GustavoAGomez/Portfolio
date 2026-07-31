@@ -180,7 +180,8 @@ const PROJECT_CONTENT_ES: Record<string, ProjectContent> = {
       client: "Dani Valero · Madrid"
     },
     urlPending: true,
-    nextId: "district-4"
+    // With only two projects the chain is circular: basket loops back to the first.
+    nextId: "tagorodive"
   }
 }
 
@@ -302,7 +303,8 @@ const PROJECT_CONTENT_EN: Record<string, ProjectContent> = {
       client: "Dani Valero · Madrid"
     },
     urlPending: true,
-    nextId: "district-4"
+    // With only two projects the chain is circular: basket loops back to the first.
+    nextId: "tagorodive"
   }
 }
 

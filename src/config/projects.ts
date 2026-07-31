@@ -35,9 +35,10 @@ export interface Project {
 }
 
 /**
- * Real projects first, then placeholders (kept until replaced with real work).
  * A project with an entry in config/projectContent.ts renders the case-study
- * detail; the rest fall back to the generic detail layout.
+ * detail; one without falls back to the generic detail layout (currently every
+ * listed project has content — the generic layout stays as the degradation
+ * path for future entries added before their case study is written).
  */
 export const PROJECTS: Project[] = [
   {
@@ -61,15 +62,5 @@ export const PROJECTS: Project[] = [
     aspect: 1.78,
     category: { es: "Portfolio · React", en: "Portfolio · React" },
     hoverVideo: "/videos/basket/hero.mp4"
-  },
-  {
-    id: "district-4",
-    index: 3,
-    title: "District 4",
-    year: "2024",
-    role: { es: "Creative Dev · WebGL", en: "Creative Dev · WebGL" },
-    image: "/images/work-01.jpg",
-    aspect: 1.5,
-    category: { es: "Interactive", en: "Interactive" }
   }
 ]
