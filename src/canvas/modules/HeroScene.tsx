@@ -20,7 +20,7 @@ const HERO_WORD = "GUSGQ"
  *  troika <Text> inside the Canvas (it has to be, for the gem to refract it), so
  *  <Decode> can't wrap it. GSAP scrambles a DETACHED span and each update is
  *  written straight onto the troika instance — no React state in the loop. */
-const DECODE_DURATION = 0.9
+const DECODE_DURATION = 2
 
 type TroikaText = Mesh & { text: string; sync: (onDone?: () => void) => void }
 
