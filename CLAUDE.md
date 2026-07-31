@@ -204,6 +204,11 @@ scale: 20, factor: 0.6, shrinkPastHero: true }` instance. Key points:
   (asymmetric hysteresis so the boundary never thrashes; reduced-motion snaps). Long gone before the
   first `story` image can appear — **never warps the media**. (It replaced a scroll-scrubbed
   `fadeOutAt: "story"` option, removed with it.)
+- **Landing GROW-IN**: every arrival at a shrinkPastHero route starts the gem at 0 and plays the
+  same 0.7s grow (the scroll-back-up animation). Two reset signals in Diamonds' frame loop — the
+  section's bounds APPEARING (Home→detail, /about, hard load) and a `caseStudyId` CHANGE (case
+  study→case study via "Siguiente proyecto": identical section set, bounds never re-register, so
+  bounds-appearance alone would miss it). reduced-motion lands at full scale instantly.
 
 ### Case-study background plane (`DescriptionScene`)
 Because the manual diamond loop draws the clear colour darker (rgb ~6–7), the case study would look

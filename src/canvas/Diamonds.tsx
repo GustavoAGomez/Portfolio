@@ -83,6 +83,14 @@ export function Diamonds() {
   // isn't).
   const shrunk = useRef<boolean[]>(DIAMONDS.map(() => false))
   const shrinkAnim = useRef<number[]>(DIAMONDS.map(() => 1))
+  // Landing GROW-IN: every time a shrinkPastHero gem's section becomes active
+  // (route landed) its progress resets to 0, so the gem plays the same grow the
+  // hero gets when you scroll back up from the brief. Two entry signals — the
+  // section's bounds appearing (Home→detail, /about, hard load) AND a
+  // caseStudyId change (case study→case study via "Siguiente proyecto", where
+  // the section set is identical and bounds never re-register).
+  const hadBounds = useRef<boolean[]>(DIAMONDS.map(() => false))
+  const prevCaseId = useRef<string | null | undefined>(undefined)
   const ratio = gl.getPixelRatio()
 
   const geometry = useMemo<BufferGeometry | undefined>(() => {
@@ -150,7 +158,9 @@ export function Diamonds() {
   useFrame((_, delta) => {
     const mesh = model.current
     if (!mesh) return
-    const { scroll, sections, reducedMotion } = useStore.getState()
+    const { scroll, sections, reducedMotion, caseStudyId } = useStore.getState()
+    const caseChanged = prevCaseId.current !== caseStudyId
+    prevCaseId.current = caseStudyId
     const t = clock.getElapsedTime()
     // layoutWidth: the gem stops growing past the 1440px content cap too, so an
     // ultra-wide hero reads exactly like the tuned desktop one.
@@ -169,6 +179,14 @@ export function Diamonds() {
       // list). mobile also drops the decorative ones.
       const hidden = !bounds || (mobile && d.mobileHidden)
       let fade = 1
+      if (d.shrinkPastHero) {
+        const has = !!bounds
+        if (has && (!(hadBounds.current[i] ?? false) || (caseChanged && d.section === "statement"))) {
+          shrinkAnim.current[i] = reducedMotion ? 1 : 0
+          shrunk.current[i] = false
+        }
+        hadBounds.current[i] = has
+      }
       if (d.shrinkPastHero && bounds) {
         // TRIGGER, not scrub: crossing ~45% of the hero launches the collapse
         // to 0; scrolling back above ~30% re-grows it. The asymmetric
