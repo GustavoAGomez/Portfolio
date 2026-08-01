@@ -19,7 +19,8 @@ export interface HudLink {
 export const SITE_LINKS: HudLink[] = [
   { label: { es: "Sobre mí", en: "About" }, href: "/about", internal: true },
   { label: { es: "LinkedIn", en: "LinkedIn" }, href: "https://www.linkedin.com/in/gustavoagomez93/", external: true },
-  { label: { es: "Gmail", en: "Gmail" }, href: "mailto:stgustavo.gomez@gmail.com" }
+  { label: { es: "Gmail", en: "Gmail" }, href: "mailto:stgustavo.gomez@gmail.com" },
+  { label: { es: "Legal", en: "Legal" }, href: "/legal", internal: true }
 ]
 
 function formatMadrid(): string {

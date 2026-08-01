@@ -1,6 +1,6 @@
 import { create } from "zustand"
 
-export type SectionId = "hero" | "statement" | "description" | "story" | "works" | "gallery" | "about" | "profile" | "footer" | "notFound"
+export type SectionId = "hero" | "statement" | "description" | "story" | "works" | "gallery" | "about" | "profile" | "footer" | "legal" | "notFound"
 
 /** Site locale. Spanish is the source copy; English is the translation. */
 export type Locale = "es" | "en"

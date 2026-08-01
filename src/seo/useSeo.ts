@@ -38,6 +38,17 @@ const ABOUT = {
   }
 } as const
 
+const LEGAL = {
+  es: {
+    title: "Aviso legal y privacidad — GUSGQ",
+    description: "Aviso legal, política de privacidad y cookies del portfolio de Gustavo Gómez (GUSGQ). Sitio estático, sin cookies ni rastreo."
+  },
+  en: {
+    title: "Legal notice & privacy — GUSGQ",
+    description: "Legal notice, privacy policy and cookies for Gustavo Gómez's portfolio (GUSGQ). Static site, no cookies or tracking."
+  }
+} as const
+
 const NOT_FOUND = {
   es: { title: "Página no encontrada — GUSGQ", description: "Esta URL no existe o se ha movido." },
   en: { title: "Page not found — GUSGQ", description: "This URL doesn't exist or has moved." }
@@ -66,6 +77,8 @@ interface RouteSeo {
 function resolve(pathname: string, locale: Locale): RouteSeo {
   if (pathname === "/") return { ...HOME[locale], type: "website" }
   if (/^\/about\/?$/.test(pathname)) return { ...ABOUT[locale], type: "profile" }
+  // Legal page: real title/description, but kept out of the index (not marketing content).
+  if (/^\/legal\/?$/.test(pathname)) return { ...LEGAL[locale], type: "website", noindex: true }
 
   const id = workIdFromPath(pathname)
   if (id && isValidProject(id)) {
