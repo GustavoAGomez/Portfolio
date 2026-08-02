@@ -202,6 +202,21 @@ function WorkBackdrop({ project, visible, reducedMotion }: WorkBackdropProps) {
     else v.pause()
   }, [visible])
 
+  // Release the element on unmount. Home remounts on every navigation (its sections
+  // are keyed by locale, and every "back" returns here), so a preview left playing
+  // would keep decoding in the background after leaving — those pile up across visits
+  // into progressive main-thread jank. Pausing + detaching the src stops decode and
+  // lets the element be collected.
+  useEffect(() => {
+    const v = videoRef.current
+    return () => {
+      if (!v) return
+      v.pause()
+      v.removeAttribute("src")
+      v.load()
+    }
+  }, [])
+
   const style: CSSProperties = {
     filter: "grayscale(1) contrast(1.15) brightness(0.75)",
     opacity: visible ? 1 : 0,
