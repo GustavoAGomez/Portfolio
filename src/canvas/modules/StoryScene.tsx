@@ -113,6 +113,12 @@ function VideoPlane({ src, args, position, playbackRate, anchor }: PlaneVariantP
   useEffect(() => {
     texture.colorSpace = SRGBColorSpace
   }, [texture])
+  // Pause the underlying <video> on unmount: leaving a case study should stop its
+  // decode/texture-upload, not leave it running in the background across navigations.
+  useEffect(() => {
+    const video = texture.image as HTMLVideoElement | undefined
+    return () => video?.pause()
+  }, [texture])
   // reduced-motion pauses (still frame); otherwise honor the block's playbackRate.
   useEffect(() => {
     const video = texture.image as HTMLVideoElement | undefined
